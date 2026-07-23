@@ -5,7 +5,15 @@ import textAreaSpecImage from '../../../../assets/images/textarea/text-area-all.
 /* ============================================================
    Minimal stand-ins for your ui-helpers
 ============================================================ */
-function PropChip({ active, onClick, children }) {
+function PropChip({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
   return (
     <button
       type="button"
@@ -27,7 +35,7 @@ function PropChip({ active, onClick, children }) {
   );
 }
 
-function SpecBadge({ label }) {
+function SpecBadge({ label }: { label: string }) {
   return (
     <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, color: '#8089A0', marginBottom: 12, fontFamily: "'DM Sans', sans-serif" }}>
       {label.toUpperCase()}
@@ -38,6 +46,15 @@ function SpecBadge({ label }) {
 /* ============================================================
    Base Textarea component
 ============================================================ */
+type TextareaSize = 's' | 'm' | 'l';
+type TextareaStateKey =
+  | 'default'
+  | 'hover'
+  | 'active'
+  | 'filled'
+  | 'readonly'
+  | 'disabled';
+
 function Textarea({
   label = 'Label (Optional)',
   size = 'm',
@@ -51,8 +68,24 @@ function Textarea({
   width,
   rows = 3,
   isReadOnly = false,
+}: {
+  label?: string;
+  size?: TextareaSize;
+  stateKey?: TextareaStateKey;
+  value?: string;
+  placeholder?: string;
+  maxLength?: number;
+  onChange?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  helpText?: string;
+  helpColor?: string;
+  width?: number;
+  rows?: number;
+  isReadOnly?: boolean;
 }) {
-  const TEXTAREA_STATE_STYLES = {
+  const TEXTAREA_STATE_STYLES: Record<
+    TextareaStateKey,
+    { bg: string; border: string; text: string; label: string; opacity?: number }
+  > = {
     default: { bg: '#FFFFFF', border: '#C9CFDA', text: '#151A24', label: '#3D4759' },
     hover: { bg: '#F5F5F4', border: '#C9CFDA', text: '#151A24', label: '#3D4759' },
     active: { bg: '#E9EEFC', border: '#0B1F4D', text: '#151A24', label: '#3D4759' },
@@ -61,7 +94,10 @@ function Textarea({
     disabled: { bg: '#F5F5F4', border: '#E4E2DD', text: '#B5B9C2', label: '#B5B9C2', opacity: 0.7 },
   };
 
-  const TEXTAREA_SIZE_STYLES = {
+  const TEXTAREA_SIZE_STYLES: Record<
+    TextareaSize,
+    { padding: string; fontSize: number; labelSize: number; height: number; width: number }
+  > = {
     s: { padding: '8px 12px', fontSize: 12, labelSize: 12, height: 80, width: 280 },
     m: { padding: '10px 14px', fontSize: 13, labelSize: 12, height: 112, width: 300 },
     l: { padding: '12px 16px', fontSize: 14, labelSize: 13, height: 144, width: 320 },
@@ -72,7 +108,7 @@ function Textarea({
   const isDisabled = stateKey === 'disabled';
   const isActive = stateKey === 'active';
   const isReadOnlyState = stateKey === 'readonly';
-  
+
   const borderWidth = isActive ? 2 : 1.5;
   const borderColor = isActive ? '#0B1F4D' : s.border;
   const charCount = value?.length || 0;
@@ -81,22 +117,22 @@ function Textarea({
   const defaultHelpColor = helpColor || (isDisabled ? '#B5B9C2' : '#8089A0');
 
   return (
-    <div style={{ 
-      display: 'flex', 
-      flexDirection: 'column', 
-      gap: 6, 
-      width: width ?? sz.width, 
-      opacity: s.opacity ?? 1 
+    <div style={{
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 6,
+      width: width ?? sz.width,
+      opacity: s.opacity ?? 1
     }}>
-      <label style={{ 
-        fontSize: sz.labelSize, 
-        fontWeight: 700, 
-        color: s.label, 
-        fontFamily: "'DM Sans', sans-serif" 
+      <label style={{
+        fontSize: sz.labelSize,
+        fontWeight: 700,
+        color: s.label,
+        fontFamily: "'DM Sans', sans-serif"
       }}>
         {isReadOnlyState ? 'Label' : label}
       </label>
-      
+
       <textarea
         value={value}
         onChange={onChange}
@@ -124,11 +160,11 @@ function Textarea({
           cursor: isReadOnlyState ? 'default' : 'text',
         }}
       />
-      
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        fontSize: 12, 
+
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        fontSize: 12,
         color: defaultHelpColor,
         fontFamily: "'DM Sans', sans-serif",
         marginTop: 2,
@@ -144,10 +180,13 @@ function Textarea({
    LIVE DEMO
 ============================================================ */
 export function TextAreaDemo() {
-  const [state, setState] = useState('default');
+  const [state, setState] = useState<TextareaStateKey>('default');
   const [value, setValue] = useState('');
 
-  const STATE_STYLES = {
+  const STATE_STYLES: Record<
+    TextareaStateKey,
+    { bg: string; border: string; label: string; opacity?: number }
+  > = {
     default: { bg: '#FFFFFF', border: '#C9CFDA', label: '#3D4759' },
     hover: { bg: '#F5F5F4', border: '#C9CFDA', label: '#3D4759' },
     active: { bg: '#E9EEFC', border: '#0B1F4D', label: '#3D4759' },
@@ -156,7 +195,7 @@ export function TextAreaDemo() {
     disabled: { bg: '#F5F5F4', border: '#E4E2DD', label: '#B5B9C2', opacity: 0.7 },
   };
 
-  const helpTextMap = {
+  const helpTextMap: Record<TextareaStateKey, string> = {
     default: '',
     hover: '',
     active: '1',
@@ -165,7 +204,7 @@ export function TextAreaDemo() {
     disabled: '',
   };
 
-  const helpColorMap = {
+  const helpColorMap: Record<TextareaStateKey, string> = {
     default: '#8089A0',
     hover: '#8089A0',
     active: '#8089A0',
@@ -215,16 +254,16 @@ export function TextAreaDemo() {
         }}
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6, width: 340 }}>
-          <label style={{ 
-            fontSize: 12, 
-            fontWeight: 700, 
-            color: currentStyle.label, 
+          <label style={{
+            fontSize: 12,
+            fontWeight: 700,
+            color: currentStyle.label,
             fontFamily: "'DM Sans', sans-serif",
             opacity: currentStyle.opacity ?? 1,
           }}>
             {getLabel()}
           </label>
-          
+
           <textarea
             value={getValue()}
             onChange={(e) => setValue(e.target.value)}
@@ -252,11 +291,11 @@ export function TextAreaDemo() {
               opacity: currentStyle.opacity ?? 1,
             }}
           />
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'flex-start', 
+          <div style={{
+            display: 'flex',
+            justifyContent: 'flex-start',
             gap: 16,
-            fontSize: 12, 
+            fontSize: 12,
             color: helpColorMap[state],
             fontFamily: "'DM Sans', sans-serif",
             marginTop: 2,
@@ -271,7 +310,7 @@ export function TextAreaDemo() {
         <div>
           <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, color: '#8089A0', marginBottom: 8, fontFamily: "'DM Sans', sans-serif" }}>STATE</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            {['default', 'hover', 'active', 'filled', 'readonly', 'disabled'].map((s) => (
+            {(['default', 'hover', 'active', 'filled', 'readonly', 'disabled'] as TextareaStateKey[]).map((s) => (
               <PropChip key={s} active={state === s} onClick={() => {
                 setState(s);
               }}>
@@ -290,17 +329,17 @@ export function TextAreaDemo() {
 ============================================================ */
 export function TextAreaSpec() {
   return (
-    <div style={{ 
-      padding: 24, 
-      overflowY: 'auto', 
+    <div style={{
+      padding: 24,
+      overflowY: 'auto',
       height: '100%',
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
     }}>
-      <Image 
-        src={textAreaSpecImage} 
+      <Image
+        src={textAreaSpecImage}
         alt="Text Area Reference Spec"
         width={400}
         height={400}
@@ -318,7 +357,7 @@ export function TextAreaSpec() {
 /* ============================================================
    PAGE — equal-size preview / reference cards
 ============================================================ */
-const CARD_STYLE = {
+const CARD_STYLE: React.CSSProperties = {
   width: '100%',
   maxWidth: 1100,
   height: 560,

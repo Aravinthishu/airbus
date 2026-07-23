@@ -6,7 +6,15 @@ import fabOpenAllImage from "../../../../assets/images/fab/fab-open-all.png";
 /* ============================================================
    Minimal stand-ins for your ui-helpers
 ============================================================ */
-function PropChip({ active, onClick, children }) {
+function PropChip({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
   return (
     <button
       type="button"
@@ -28,7 +36,7 @@ function PropChip({ active, onClick, children }) {
   );
 }
 
-function SpecBadge({ label }) {
+function SpecBadge({ label }: { label: string }) {
   return (
     <div
       style={{
@@ -48,6 +56,15 @@ function SpecBadge({ label }) {
 /* ============================================================
    FAB Component
 ============================================================ */
+type FabSize = "s" | "m";
+type FabDirection = "horizontal" | "vertical-up" | "vertical-down";
+type FabState = "default" | "hover" | "active" | "focus" | "disabled";
+
+interface FabAction {
+  icon: string;
+  label: string;
+}
+
 function Fab({
   size = "m",
   open = false,
@@ -60,8 +77,19 @@ function Fab({
   ],
   disabled = false,
   state = "default",
+}: {
+  size?: FabSize;
+  open?: boolean;
+  onToggle?: () => void;
+  direction?: FabDirection;
+  actions?: FabAction[];
+  disabled?: boolean;
+  state?: FabState;
 }) {
-  const sizeConfig = {
+  const sizeConfig: Record<
+    FabSize,
+    { main: number; mini: number; gap: number; iconSize: number }
+  > = {
     s: { main: 44, mini: 32, gap: 8, iconSize: 12 },
     m: { main: 52, mini: 38, gap: 10, iconSize: 14 },
   };
@@ -122,21 +150,21 @@ function Fab({
   const isDisabled = state === "disabled" || disabled;
 
   // SVG Icons matching your reference image with dynamic colors
-  const IconLink = ({ color }) => (
+  const IconLink = ({ color }: { color: string }) => (
     <svg width={iconSize} height={iconSize} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
       <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
     </svg>
   );
 
-  const IconEmail = ({ color }) => (
+  const IconEmail = ({ color }: { color: string }) => (
     <svg width={iconSize} height={iconSize} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
       <polyline points="22,6 12,13 2,6" />
     </svg>
   );
 
-  const IconPrint = ({ color }) => (
+  const IconPrint = ({ color }: { color: string }) => (
     <svg width={iconSize} height={iconSize} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <polyline points="6 9 6 2 18 2 18 9" />
       <path d="M18 9H6" />
@@ -168,11 +196,11 @@ function Fab({
         style={{
           display: "flex",
           position: "relative",
-          ...(direction === "horizontal" && { flexDirection: "row" }),
+          ...(direction === "horizontal" && { flexDirection: "row" as const }),
           ...(direction === "vertical-up" && {
-            flexDirection: "column-reverse",
+            flexDirection: "column-reverse" as const,
           }),
-          ...(direction === "vertical-down" && { flexDirection: "column" }),
+          ...(direction === "vertical-down" && { flexDirection: "column" as const }),
           alignItems: "center",
           gap: gap,
         }}
@@ -250,12 +278,12 @@ function Fab({
    LIVE DEMO
 ============================================================ */
 export function FabDemo() {
-  const [size, setSize] = useState("m");
+  const [size, setSize] = useState<FabSize>("m");
   const [open, setOpen] = useState(false);
-  const [direction, setDirection] = useState("horizontal");
-  const [state, setState] = useState("default");
+  const [direction, setDirection] = useState<FabDirection>("horizontal");
+  const [state, setState] = useState<FabState>("default");
 
-  const actions = [
+  const actions: FabAction[] = [
     { icon: "✏️", label: "" },
     { icon: "📎", label: "" },
     { icon: "🔍", label: "" },
@@ -306,7 +334,7 @@ export function FabDemo() {
             STATE
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-            {["default", "hover", "active", "focus", "disabled"].map((s) => (
+            {(["default", "hover", "active", "focus", "disabled"] as FabState[]).map((s) => (
               <PropChip
                 key={s}
                 active={state === s}
@@ -331,7 +359,7 @@ export function FabDemo() {
             DIRECTION
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-            {["horizontal", "vertical-up", "vertical-down"].map((d) => (
+            {(["horizontal", "vertical-up", "vertical-down"] as FabDirection[]).map((d) => (
               <PropChip
                 key={d}
                 active={direction === d}
@@ -360,7 +388,7 @@ export function FabDemo() {
             SIZE
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-            {["s", "m"].map((s) => (
+            {(["s", "m"] as FabSize[]).map((s) => (
               <PropChip key={s} active={size === s} onClick={() => setSize(s)}>
                 {s.toUpperCase()}
               </PropChip>
@@ -485,7 +513,7 @@ export function FabSpec() {
 /* ============================================================
    PAGE — equal-size preview / reference cards
 ============================================================ */
-const CARD_STYLE = {
+const CARD_STYLE: React.CSSProperties = {
   width: "100%",
   maxWidth: 900,
   height: 560,

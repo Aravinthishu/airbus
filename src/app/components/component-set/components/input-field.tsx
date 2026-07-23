@@ -6,7 +6,15 @@ import React, { useState } from 'react';
    In your project, swap this back to:
    import { PropChip, SpecBadge, SpecBlock, SpecState } from '../ui-helpers';
 ============================================================ */
-function PropChip({ active, onClick, children }) {
+function PropChip({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
   return (
     <button
       type="button"
@@ -26,14 +34,20 @@ function PropChip({ active, onClick, children }) {
     </button>
   );
 }
-function SpecBadge({ label }) {
+function SpecBadge({ label }: { label: string }) {
   return (
     <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, color: '#8089A0', marginBottom: 12 }}>
       {label.toUpperCase()}
     </div>
   );
 }
-function SpecBlock({ title, children }) {
+function SpecBlock({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
   return (
     <div style={{ marginBottom: 40 }}>
       <div style={{ fontSize: 16, fontWeight: 600, color: '#3D4759', marginBottom: 20 }}>{title}</div>
@@ -41,7 +55,13 @@ function SpecBlock({ title, children }) {
     </div>
   );
 }
-function SpecState({ label, children }) {
+function SpecState({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       <span style={{ fontSize: 12, fontWeight: 600, color: '#8089A0' }}>{label}</span>
@@ -53,7 +73,7 @@ function SpecState({ label, children }) {
 /* ============================================================
    Small inline icons (no external icon dependency)
 ============================================================ */
-function EyeIcon({ color = '#0B1F4D', size = 16 }) {
+function EyeIcon({ color = '#0B1F4D', size = 16 }: { color?: string; size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
@@ -61,7 +81,7 @@ function EyeIcon({ color = '#0B1F4D', size = 16 }) {
     </svg>
   );
 }
-function EyeOffIcon({ color = '#0B1F4D', size = 16 }) {
+function EyeOffIcon({ color = '#0B1F4D', size = 16 }: { color?: string; size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a20.3 20.3 0 0 1 5.06-6.06M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a20.3 20.3 0 0 1-3.22 4.44" />
@@ -74,7 +94,21 @@ function EyeOffIcon({ color = '#0B1F4D', size = 16 }) {
 /* ============================================================
    Style tokens matched to your reference images
 ============================================================ */
-const FIELD_STATE_STYLES = {
+type FieldStateKey = 'default' | 'hover' | 'active' | 'filled' | 'disabled';
+type Appearance = 'default' | 'error' | 'success' | 'information' | 'disabled';
+type SizeKey = 'xs' | 's' | 'm' | 'l' | 'xl';
+
+interface FieldStyle {
+  bg: string;
+  border: string;
+  borderWidth: number;
+  text: string;
+  label: string;
+  opacity?: number;
+  cursor?: boolean;
+}
+
+const FIELD_STATE_STYLES: Record<FieldStateKey, FieldStyle> = {
   default: { bg: '#F0EFED', border: '#C9CFDA', borderWidth: 1.5, text: '#6B7280', label: '#3D4759' },
   hover: { bg: '#E4E3E0', border: '#C9CFDA', borderWidth: 1.5, text: '#6B7280', label: '#3D4759' },
   active: { bg: '#E9EEFC', border: '#0B1F4D', borderWidth: 2, text: '#151A24', label: '#3D4759', cursor: true },
@@ -82,7 +116,10 @@ const FIELD_STATE_STYLES = {
   disabled: { bg: '#F5F5F4', border: '#E4E2DD', borderWidth: 1.5, text: '#B5B9C2', label: '#B5B9C2', opacity: 0.7 },
 };
 
-const SIZE_STYLES = {
+const SIZE_STYLES: Record<
+  SizeKey,
+  { padding: string; fontSize: number; labelSize: number; width: number }
+> = {
   xs: { padding: '6px 10px', fontSize: 11, labelSize: 11, width: 240 },
   s: { padding: '8px 12px', fontSize: 12, labelSize: 11, width: 260 },
   m: { padding: '10px 14px', fontSize: 13, labelSize: 12, width: 280 },
@@ -105,6 +142,17 @@ function Field({
   helpColor,
   width,
   showForgotPassword = false,
+}: {
+  label?: string;
+  size?: SizeKey;
+  stateKey?: FieldStateKey;
+  value?: string;
+  placeholder?: string;
+  suffix?: React.ReactNode;
+  helpText?: string;
+  helpColor?: string;
+  width?: number;
+  showForgotPassword?: boolean;
 }) {
   const s = FIELD_STATE_STYLES[stateKey] ?? FIELD_STATE_STYLES.default;
   const sz = SIZE_STYLES[size] ?? SIZE_STYLES.m;
@@ -165,7 +213,7 @@ function Field({
   );
 }
 
-function ForgotPasswordLink({ color = '#2554D6' }) {
+function ForgotPasswordLink({ color = '#2554D6' }: { color?: string }) {
   return (
     <div style={{ textAlign: 'right' }}>
       <a
@@ -183,28 +231,28 @@ function ForgotPasswordLink({ color = '#2554D6' }) {
    LIVE DEMO — interactive preview
 ============================================================ */
 export function InputFieldDemo() {
-  const [appearance, setAppearance] = useState('default');
-  const [size, setSize] = useState('m');
-  const [state, setState] = useState('default');
+  const [appearance, setAppearance] = useState<Appearance>('default');
+  const [size, setSize] = useState<SizeKey>('m');
+  const [state, setState] = useState<FieldStateKey>('default');
   const [visible, setVisible] = useState(false);
 
-  const APPEARANCE_STYLES = {
+  const APPEARANCE_STYLES: Record<Appearance, FieldStyle> = {
     default: FIELD_STATE_STYLES.default,
     error: { bg: '#F0EFED', border: '#B00020', borderWidth: 2, text: '#151A24', label: '#3D4759' },
     success: { bg: '#F0EFED', border: '#0A7A50', borderWidth: 2, text: '#151A24', label: '#3D4759' },
     information: { bg: '#F0EFED', border: '#2554D6', borderWidth: 2, text: '#151A24', label: '#3D4759' },
     disabled: FIELD_STATE_STYLES.disabled,
   };
-  
-  const helpText = {
+
+  const helpText: Record<Appearance, string> = {
     default: 'Use your company email address.',
     error: 'Enter a valid email address.',
     success: 'Email verified successfully.',
     information: 'This field requires your email address.',
     disabled: 'This field is currently locked.',
   };
-  
-  const helpColor = {
+
+  const helpColor: Record<Appearance, string> = {
     default: '#8089A0',
     error: '#B00020',
     success: '#0A7A50',
@@ -212,7 +260,7 @@ export function InputFieldDemo() {
     disabled: '#B5B9C2',
   };
 
-  const stateStyles = {
+  const stateStyles: Record<FieldStateKey, FieldStyle> = {
     default: FIELD_STATE_STYLES.default,
     hover: FIELD_STATE_STYLES.hover,
     active: FIELD_STATE_STYLES.active,
@@ -220,7 +268,7 @@ export function InputFieldDemo() {
     disabled: FIELD_STATE_STYLES.disabled,
   };
 
-  const stateHelpText = {
+  const stateHelpText: Record<FieldStateKey, string> = {
     default: 'Enter your password',
     hover: 'Hover - enter your password',
     active: 'Active - typing your password',
@@ -228,7 +276,7 @@ export function InputFieldDemo() {
     disabled: 'This field is currently locked.',
   };
 
-  const stateHelpColor = {
+  const stateHelpColor: Record<FieldStateKey, string> = {
     default: '#8089A0',
     hover: '#8089A0',
     active: '#2554D6',
@@ -237,7 +285,7 @@ export function InputFieldDemo() {
   };
 
   // Determine which styles to use based on appearance vs state
-  const getStyles = () => {
+  const getStyles = (): FieldStyle => {
     // If appearance is default, use state styles
     if (appearance === 'default') {
       return stateStyles[state];
@@ -248,16 +296,16 @@ export function InputFieldDemo() {
 
   const currentStyle = getStyles();
   const sz = SIZE_STYLES[size];
-  
+
   // Get the right help text and color
-  const getHelpText = () => {
+  const getHelpText = (): string => {
     if (appearance === 'default') {
       return stateHelpText[state];
     }
     return helpText[appearance];
   };
 
-  const getHelpColor = () => {
+  const getHelpColor = (): string => {
     if (appearance === 'default') {
       return stateHelpColor[state];
     }
@@ -266,7 +314,7 @@ export function InputFieldDemo() {
 
   // Determine if we show cursor (active state)
   const showCursor = appearance === 'default' && state === 'active';
-  
+
   // Password value
   const passwordValue = '4trsi3TjaiUl';
 
@@ -305,13 +353,13 @@ export function InputFieldDemo() {
               <span style={{ flex: 1, fontSize: sz.fontSize, color: visible ? currentStyle.text : '#9AA3B2', fontFamily: "'DM Sans', sans-serif" }}>
                 {visible ? passwordValue : '••••••••••••'}
               </span>
-              <button 
-                type="button" 
+              <button
+                type="button"
                 onClick={() => setVisible(!visible)}
                 style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex' }}
               >
-                {visible ? 
-                  <EyeOffIcon color={currentStyle.label} size={14} /> : 
+                {visible ?
+                  <EyeOffIcon color={currentStyle.label} size={14} /> :
                   <EyeIcon color={currentStyle.label} size={14} />
                 }
               </button>
@@ -336,7 +384,7 @@ export function InputFieldDemo() {
         <div style={{ marginBottom: 12 }}>
           <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, color: '#8089A0', marginBottom: 6 }}>STATE</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-            {['default', 'hover', 'active', 'filled', 'disabled'].map((s) => (
+            {(['default', 'hover', 'active', 'filled', 'disabled'] as FieldStateKey[]).map((s) => (
               <PropChip key={s} active={state === s && appearance === 'default'} onClick={() => {
                 setState(s);
                 setAppearance('default');
@@ -349,7 +397,7 @@ export function InputFieldDemo() {
         <div style={{ marginBottom: 12 }}>
           <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, color: '#8089A0', marginBottom: 6 }}>APPEARANCE</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-            {['default', 'error', 'success', 'information', 'disabled'].map((a) => (
+            {(['default', 'error', 'success', 'information', 'disabled'] as Appearance[]).map((a) => (
               <PropChip key={a} active={appearance === a} onClick={() => setAppearance(a)}>
                 {a.charAt(0).toUpperCase() + a.slice(1)}
               </PropChip>
@@ -359,7 +407,7 @@ export function InputFieldDemo() {
         <div>
           <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, color: '#8089A0', marginBottom: 6 }}>SIZE</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-            {['xs', 's', 'm', 'l', 'xl'].map((s) => (
+            {(['xs', 's', 'm', 'l', 'xl'] as SizeKey[]).map((s) => (
               <PropChip key={s} active={size === s} onClick={() => setSize(s)}>{s.toUpperCase()}</PropChip>
             ))}
           </div>
@@ -375,7 +423,7 @@ export function InputFieldDemo() {
    right, growing padding/font from XS to XL.
 ============================================================ */
 function InputSizesList() {
-  const order = ['xs', 's', 'm', 'l', 'xl'];
+  const order: SizeKey[] = ['xs', 's', 'm', 'l', 'xl'];
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       {order.map((size) => (
@@ -397,12 +445,12 @@ function InputSizesList() {
    state labels sit outside the box on the left.
 ============================================================ */
 function InputStatesGrid() {
-  const rows = ['default', 'hover', 'active', 'filled', 'disabled'];
+  const rows: FieldStateKey[] = ['default', 'hover', 'active', 'filled', 'disabled'];
   const HEADER_H = 32;
   const ROW_H = 100;
   const COL_W = 240;
 
-  const cell = (stateKey, visibility) => {
+  const cell = (stateKey: FieldStateKey, visibility: 'hidden' | 'show') => {
     const isShow = visibility === 'show';
     const value = isShow ? '4trsi3TjaiUI' : '••••••••••••';
     return (
@@ -479,7 +527,7 @@ export function InputFieldSpec() {
    PAGE — equal-size preview / reference cards, same pattern as
    ButtonSpecPage in button.jsx
 ============================================================ */
-const CARD_STYLE = {
+const CARD_STYLE: React.CSSProperties = {
   width: '100%',
   maxWidth: 920,
   height: 480,

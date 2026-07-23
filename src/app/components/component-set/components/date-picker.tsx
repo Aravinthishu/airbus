@@ -9,7 +9,13 @@ import timePickerImage from '../../../../assets/images/date-picker/time-picker.p
 /* ============================================================
    Minimal stand-ins for your ui-helpers
 ============================================================ */
-function PropChip({ active, onClick, children }) {
+interface PropChipProps {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}
+
+function PropChip({ active, onClick, children }: PropChipProps) {
   return (
     <button
       type="button"
@@ -31,7 +37,11 @@ function PropChip({ active, onClick, children }) {
   );
 }
 
-function SpecBadge({ label }) {
+interface SpecBadgeProps {
+  label: string;
+}
+
+function SpecBadge({ label }: SpecBadgeProps) {
   return (
     <div
       style={{
@@ -51,34 +61,40 @@ function SpecBadge({ label }) {
 /* ============================================================
    Calendar Component - Smaller size
 ============================================================ */
-function Calendar({ selectedDate, onSelectDate, onClose }) {
+interface CalendarProps {
+  selectedDate: string;
+  onSelectDate: (date: string) => void;
+  onClose: () => void;
+}
+
+function Calendar({ selectedDate, onSelectDate, onClose }: CalendarProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
-  
+
   const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  
-  const getDaysInMonth = (date) => {
+
+  const getDaysInMonth = (date: Date) => {
     const year = date.getFullYear();
     const month = date.getMonth();
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
     const daysInMonth = lastDay.getDate();
     const startingDay = firstDay.getDay();
-    
+
     return { daysInMonth, startingDay };
   };
 
   const { daysInMonth, startingDay } = getDaysInMonth(currentMonth);
-  
+
   const prevMonth = () => {
     setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1));
   };
-  
+
   const nextMonth = () => {
     setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1));
   };
 
-  const handleDateSelect = (day) => {
+  const handleDateSelect = (day: number) => {
     const year = currentMonth.getFullYear();
     const month = String(currentMonth.getMonth() + 1).padStart(2, '0');
     const dayStr = String(day).padStart(2, '0');
@@ -97,22 +113,22 @@ function Calendar({ selectedDate, onSelectDate, onClose }) {
   const prevMonthStart = prevMonthDaysCount - startingDay + 1;
 
   // Check if today
-  const isToday = (day) => {
+  const isToday = (day: number) => {
     const today = new Date();
-    return day === today.getDate() && 
-           currentMonth.getMonth() === today.getMonth() && 
+    return day === today.getDate() &&
+           currentMonth.getMonth() === today.getMonth() &&
            currentMonth.getFullYear() === today.getFullYear();
   };
 
   // Check if selected
-  const isSelected = (day) => {
+  const isSelected = (day: number) => {
     const dateStr = `${currentMonth.getFullYear()}/${String(currentMonth.getMonth() + 1).padStart(2, '0')}/${String(day).padStart(2, '0')}`;
     return selectedDate === dateStr;
   };
 
   const renderDays = () => {
-    const daysArray = [];
-    
+    const daysArray: React.ReactNode[] = [];
+
     // Previous month days
     for (let i = 0; i < startingDay; i++) {
       const day = prevMonthStart + i;
@@ -122,7 +138,7 @@ function Calendar({ selectedDate, onSelectDate, onClose }) {
         </div>
       );
     }
-    
+
     // Current month days
     for (let i = 1; i <= daysInMonth; i++) {
       const selected = isSelected(i);
@@ -145,12 +161,12 @@ function Calendar({ selectedDate, onSelectDate, onClose }) {
           }}
           onMouseEnter={(e) => {
             if (!selected) {
-              e.target.style.background = '#F5F5F4';
+              (e.target as HTMLDivElement).style.background = '#F5F5F4';
             }
           }}
           onMouseLeave={(e) => {
             if (!selected) {
-              e.target.style.background = 'transparent';
+              (e.target as HTMLDivElement).style.background = 'transparent';
             }
           }}
         >
@@ -158,7 +174,7 @@ function Calendar({ selectedDate, onSelectDate, onClose }) {
         </div>
       );
     }
-    
+
     // Next month days (fill remaining slots)
     const remainingSlots = totalSlots - (startingDay + daysInMonth);
     for (let i = 1; i <= remainingSlots; i++) {
@@ -168,7 +184,7 @@ function Calendar({ selectedDate, onSelectDate, onClose }) {
         </div>
       );
     }
-    
+
     return daysArray;
   };
 
@@ -250,7 +266,7 @@ function Calendar({ selectedDate, onSelectDate, onClose }) {
           ›
         </button>
       </div>
-      
+
       {/* Day names */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 1, marginBottom: 2 }}>
         {days.map((day) => (
@@ -312,6 +328,19 @@ function Calendar({ selectedDate, onSelectDate, onClose }) {
 /* ============================================================
    DatePicker Component
 ============================================================ */
+type PickerType = 'date' | 'time' | 'datetime' | 'calendar';
+type PickerState = 'default' | 'hover' | 'focus' | 'active-focus' | 'filled' | 'disabled' | 'error';
+
+interface DatePickerProps {
+  type?: PickerType;
+  state?: PickerState;
+  value?: string;
+  placeholder?: string;
+  onClick?: () => void;
+  onDateSelect: (date: string) => void;
+  showCalendar?: boolean;
+}
+
 function DatePicker({
   type = 'date',
   state = 'default',
@@ -320,7 +349,7 @@ function DatePicker({
   onClick,
   onDateSelect,
   showCalendar = false,
-}) {
+}: DatePickerProps) {
   const config = { padding: '10px 16px', fontSize: 13, width: 220 };
 
   // State styles
@@ -482,15 +511,15 @@ function DatePicker({
    LIVE DEMO
 ============================================================ */
 export function DatePickerDemo() {
-  const [state, setState] = useState('default');
-  const [pickerType, setPickerType] = useState('date');
+  const [state, setState] = useState<PickerState>('default');
+  const [pickerType, setPickerType] = useState<PickerType>('date');
   const [selectedDate, setSelectedDate] = useState('');
   const [showCalendar, setShowCalendar] = useState(false);
 
-  const stateOptions = ['default', 'hover', 'focus', 'active-focus', 'filled', 'disabled', 'error'];
+  const stateOptions: PickerState[] = ['default', 'hover', 'focus', 'active-focus', 'filled', 'disabled', 'error'];
   const stateLabels = ['Default', 'Hover', 'Focus', 'Active Focus', 'Filled', 'Disabled', 'Error'];
 
-  const pickerTypes = ['date', 'time', 'datetime', 'calendar'];
+  const pickerTypes: PickerType[] = ['date', 'time', 'datetime', 'calendar'];
   const pickerLabels = ['Date Picker', 'Time Picker', 'Date Time Picker', 'Calendar'];
 
   const getValueForState = () => {
@@ -519,7 +548,7 @@ export function DatePickerDemo() {
     }
   };
 
-  const handleDateSelect = (date) => {
+  const handleDateSelect = (date: string) => {
     setSelectedDate(date);
     setShowCalendar(false);
   };
@@ -834,7 +863,7 @@ export function DatePickerSpec() {
 /* ============================================================
    PAGE — equal-size preview / reference cards
 ============================================================ */
-const CARD_STYLE = {
+const CARD_STYLE: React.CSSProperties = {
   width: '100%',
   maxWidth: 900,
   height: 560,
