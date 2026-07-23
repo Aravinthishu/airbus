@@ -6,7 +6,15 @@ import React, { useState } from 'react';
    Swap these back out for your real imports in your project:
    import { PropChip, SpecBadge, SpecBlock } from '../ui-helpers';
 ============================================================ */
-function PropChip({ active, onClick, children }) {
+function PropChip({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
   return (
     <button
       type="button"
@@ -27,7 +35,7 @@ function PropChip({ active, onClick, children }) {
   );
 }
 
-function SpecBadge({ label }) {
+function SpecBadge({ label }: { label: string }) {
   return (
     <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, color: '#8089A0', marginBottom: 12 }}>
       {label.toUpperCase()}
@@ -38,7 +46,31 @@ function SpecBadge({ label }) {
 /* ============================================================
    MANUAL BUTTON STYLES — matched to your reference image
 ============================================================ */
-const VARIANT_STYLES = {
+type Variant =
+  | 'primary'
+  | 'secondary'
+  | 'ghost'
+  | 'ghostNegative'
+  | 'success'
+  | 'warning'
+  | 'error';
+
+type ButtonState = 'default' | 'hover' | 'active' | 'disabled';
+type ButtonSize = 'xl' | 'l' | 'm' | 's' | 'xs';
+
+interface VariantStyle {
+  bg: string;
+  text: string;
+  border: string;
+  hoverBg: string;
+  activeBg: string;
+  disabledBg: string;
+  disabledText: string;
+  disabledBorder: string;
+  onDark?: boolean;
+}
+
+const VARIANT_STYLES: Record<Variant, VariantStyle> = {
   primary: {
     bg: '#0B1F4D', text: '#FFFFFF', border: '#0B1F4D',
     hoverBg: '#14295C', activeBg: '#2554D6',
@@ -77,7 +109,7 @@ const VARIANT_STYLES = {
   },
 };
 
-const BTN_VARIANTS = [
+const BTN_VARIANTS: { key: Variant; label: string }[] = [
   { key: 'primary', label: 'Primary' },
   { key: 'secondary', label: 'Secondary' },
   { key: 'ghost', label: 'Ghost' },
@@ -87,10 +119,10 @@ const BTN_VARIANTS = [
   { key: 'error', label: 'Error' },
 ];
 
-const STATE_ROWS = ['default', 'hover', 'active', 'disabled'];
-const SIZE_ROWS = ['xl', 'l', 'm', 's', 'xs'];
+const STATE_ROWS: ButtonState[] = ['default', 'hover', 'active', 'disabled'];
+const SIZE_ROWS: ButtonSize[] = ['xl', 'l', 'm', 's', 'xs'];
 
-function getSizeStyle(size) {
+function getSizeStyle(size: ButtonSize) {
   switch (size) {
     case 'xl': return { padding: '16px 28px', fontSize: 16 };
     case 'l': return { padding: '14px 24px', fontSize: 14 };
@@ -101,7 +133,15 @@ function getSizeStyle(size) {
   }
 }
 
-function RenderButton({ variant, size, state }) {
+function RenderButton({
+  variant,
+  size,
+  state,
+}: {
+  variant: Variant;
+  size: ButtonSize;
+  state: ButtonState;
+}) {
   const styles = VARIANT_STYLES[variant] ?? VARIANT_STYLES.primary;
   const sizeStyle = getSizeStyle(size);
 
@@ -152,9 +192,9 @@ function RenderButton({ variant, size, state }) {
    LIVE DEMO — interactive preview, sized to match reference cards
 ============================================================ */
 export function ButtonDemo() {
-  const [variant, setVariant] = useState('primary');
-  const [size, setSize] = useState('l');
-  const [state, setState] = useState('default');
+  const [variant, setVariant] = useState<Variant>('primary');
+  const [size, setSize] = useState<ButtonSize>('l');
+  const [state, setState] = useState<ButtonState>('default');
   const onDark = VARIANT_STYLES[variant]?.onDark;
 
   return (
@@ -284,9 +324,8 @@ export function ButtonSpec() {
 
       {/* State Rows */}
       {STATE_ROWS.map((state) => (
-        <>
+        <React.Fragment key={state}>
           <div 
-            key={`${state}-label`} 
             style={{ 
               fontSize: 13, 
               fontWeight: 600, 
@@ -311,7 +350,7 @@ export function ButtonSpec() {
               <RenderButton variant={variant.key} size="s" state={state} />
             </div>
           ))}
-        </>
+        </React.Fragment>
       ))}
     </div>
   </div>
@@ -365,7 +404,7 @@ export function ButtonSpec() {
    so nothing looks mismatched; wide content scrolls horizontally
    inside its own card instead of stretching the layout.
 ============================================================ */
-const CARD_STYLE = {
+const CARD_STYLE: React.CSSProperties = {
   width: '100%',
   maxWidth: 920,
   height: 560,
