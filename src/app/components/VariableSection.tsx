@@ -14,20 +14,7 @@ const DISPLAY = "'DM Sans', sans-serif";
 /* ============================================================
    TYPES & DATA
 ============================================================ */
-type VarGroup =
-  | 'all'
-  | 'color'
-  | 'surface'
-  | 'surface-bg'
-  | 'surface-onbg'
-  | 'surface-elevation'
-  | 'surface-accent'
-  | 'surface-feedback'
-  | 'text'
-  | 'text-neutral'
-  | 'text-neutralneg'
-  | 'text-accent'
-  | 'text-feedback';
+type VarGroup = string; // hierarchical ids, e.g. 'surface-feedback-error', 'text-link-neutral'
 
 interface VarRow {
   group: VarGroup;
@@ -41,61 +28,133 @@ interface GroupDef {
   id: VarGroup;
   label: string;
   count: number;
-  indent?: boolean;
+  level: 0 | 1 | 2; // indentation depth, matches the reference sidebar nesting
 }
 
+/* Sidebar tree — labels/counts match the uploaded reference screenshots exactly */
 const GROUPS: GroupDef[] = [
-  { id: 'all', label: 'All', count: 121 },
-  { id: 'color', label: 'Color', count: 1 },
-  { id: 'surface', label: 'Surface', count: 27 },
-  { id: 'surface-bg', label: 'Component Background', count: 3, indent: true },
-  { id: 'surface-onbg', label: 'Component On Background', count: 3, indent: true },
-  { id: 'surface-elevation', label: 'Elevation', count: 6, indent: true },
-  { id: 'surface-accent', label: 'Accent', count: 5, indent: true },
-  { id: 'surface-feedback', label: 'Feedback', count: 10, indent: true },
-  { id: 'text', label: 'Text & Icon', count: 34 },
-  { id: 'text-neutral', label: 'Neutral', count: 4, indent: true },
-  { id: 'text-neutralneg', label: 'Neutral Negative', count: 3, indent: true },
-  { id: 'text-accent', label: 'Accent', count: 3, indent: true },
-  { id: 'text-feedback', label: 'Feedback', count: 12, indent: true },
+  { id: 'all', label: 'All', count: 121, level: 0 },
+  { id: 'color', label: 'Color', count: 1, level: 0 },
+
+  { id: 'surface', label: 'Surface', count: 27, level: 0 },
+  { id: 'surface-bg', label: 'Component Background', count: 3, level: 1 },
+  { id: 'surface-onbg', label: 'Component On Background', count: 3, level: 1 },
+  { id: 'surface-elevation', label: 'Elevation', count: 6, level: 1 },
+  { id: 'surface-accent', label: 'Accent', count: 5, level: 1 },
+  { id: 'surface-feedback', label: 'Feedback', count: 10, level: 1 },
+  { id: 'surface-feedback-error', label: 'Error', count: 3, level: 2 },
+  { id: 'surface-feedback-success', label: 'Success', count: 3, level: 2 },
+  { id: 'surface-feedback-warning', label: 'Warning', count: 3, level: 2 },
+  { id: 'surface-feedback-info', label: 'Information', count: 1, level: 2 },
+
+  { id: 'text', label: 'Text & Icon', count: 34, level: 0 },
+  { id: 'text-neutral', label: 'Neutral', count: 4, level: 1 },
+  { id: 'text-neutralneg', label: 'Neutral Negative', count: 3, level: 1 },
+  { id: 'text-accent', label: 'Accent', count: 3, level: 1 },
+  { id: 'text-link', label: 'Link', count: 10, level: 1 },
+  { id: 'text-link-neutral', label: 'Neutral', count: 4, level: 2 },
+  { id: 'text-link-negative', label: 'Negative', count: 6, level: 2 },
+  { id: 'text-feedback', label: 'Feedback', count: 12, level: 1 },
 ];
 
 const VAR_ROWS: VarRow[] = [
+  // Color -----------------------------------------------------
   { group: 'color', section: 'Color', name: 'Color', path: 'Color/Base/White', hex: '#FFFFFF' },
+
+  // Surface / Component Background -----------------------------
   { group: 'surface-bg', section: 'Surface / Component Background', name: 'Minimal 2', path: 'Color/Warm Grey/10', hex: '#FAF9F7' },
-  { group: 'surface-bg', section: 'Surface / Component Background', name: 'Moderate 2', path: 'Color/Warm Grey/20', hex: '#EBF8FF' },
+  { group: 'surface-bg', section: 'Surface / Component Background', name: 'Moderate 2', path: 'Color/Warm Grey/20', hex: '#F5F3EF' },
   { group: 'surface-bg', section: 'Surface / Component Background', name: 'Strong 2', path: 'Color/Warm Grey/30', hex: '#EDE9E3' },
+
+  // Surface / Component On Background ---------------------------
   { group: 'surface-onbg', section: 'Surface / Component On Background', name: 'Minimal 2', path: 'Color/Cool Grey/10', hex: '#F7F8FA' },
   { group: 'surface-onbg', section: 'Surface / Component On Background', name: 'Moderate 2', path: 'Color/Cool Grey/20', hex: '#F0F2F5' },
   { group: 'surface-onbg', section: 'Surface / Component On Background', name: 'Strong 2', path: 'Color/Cool Grey/30', hex: '#E2E6ED' },
+
+  // Surface / Elevation -------------------------------------------
   { group: 'surface-elevation', section: 'Surface / Elevation', name: '1 2', path: 'Color/Base/White', hex: '#FFFFFF' },
   { group: 'surface-elevation', section: 'Surface / Elevation', name: '2 2', path: 'Color/Base/White', hex: '#FFFFFF' },
   { group: 'surface-elevation', section: 'Surface / Elevation', name: '3 2', path: 'Color/Base/White', hex: '#FFFFFF' },
-  { group: 'surface-accent', section: 'Surface / Accent', name: 'Red 100', path: 'Color/Airbus Red/100', hex: '#FFE8E8' },
-  { group: 'surface-accent', section: 'Surface / Accent', name: 'Red 300', path: 'Color/Airbus Red/300', hex: '#FF8A8A' },
-  { group: 'surface-accent', section: 'Surface / Accent', name: 'Red 500', path: 'Color/Airbus Red/500', hex: '#E84545' },
-  { group: 'surface-feedback', section: 'Surface / Feedback / Error', name: 'Minimal', path: 'Color/Error/10', hex: '#FDECEC' },
-  { group: 'surface-feedback', section: 'Surface / Feedback / Error', name: 'Strong', path: 'Color/Error/50', hex: '#FF6B6B' },
-  { group: 'surface-feedback', section: 'Surface / Feedback / Success', name: 'Minimal', path: 'Color/Success/10', hex: '#E8F7EF' },
-  { group: 'surface-feedback', section: 'Surface / Feedback / Success', name: 'Strong', path: 'Color/Success/50', hex: '#4ADE80' },
-  { group: 'surface-feedback', section: 'Surface / Feedback / Warning', name: 'Strong', path: 'Color/Warning/50', hex: '#FFD93D' },
-  { group: 'surface-feedback', section: 'Surface / Feedback / Information', name: 'Minimal', path: 'Color/Blue/10', hex: '#EAF2FE' },
-  { group: 'text-neutral', section: 'Text & Icon / Neutral', name: 'Primary', path: 'Color/Neutral/900', hex: '#151A24' },
-  { group: 'text-neutral', section: 'Text & Icon / Neutral', name: 'Secondary', path: 'Color/Neutral/600', hex: '#5B6577' },
-  { group: 'text-neutral', section: 'Text & Icon / Neutral', name: 'Disabled', path: 'Color/Neutral/300', hex: '#93A0AC' },
+
+  // Surface / Accent -------------------------------------------------
+  { group: 'surface-accent', section: 'Surface / Accent', name: 'Default', path: 'Color/Airbus Blue/500', hex: '#00205B' },
+  { group: 'surface-accent', section: 'Surface / Accent', name: 'Subtle', path: 'Color/Airbus Blue/100', hex: '#E8EDF7' },
+  { group: 'surface-accent', section: 'Surface / Accent', name: 'Strong', path: 'Color/Airbus Blue/700', hex: '#001440' },
+  { group: 'surface-accent', section: 'Surface / Accent', name: 'On Accent', path: 'Color/Base/White', hex: '#FFFFFF' },
+  { group: 'surface-accent', section: 'Surface / Accent', name: 'Hover', path: 'Color/Airbus Blue/600', hex: '#001A4A' },
+
+  // Surface / Feedback / Error ----------------------------------------
+  { group: 'surface-feedback-error', section: 'Surface / Feedback / Error', name: 'Default', path: 'Color/Red/500', hex: '#DC2626' },
+  { group: 'surface-feedback-error', section: 'Surface / Feedback / Error', name: 'Subtle', path: 'Color/Red/100', hex: '#FEE2E2' },
+  { group: 'surface-feedback-error', section: 'Surface / Feedback / Error', name: 'On Error', path: 'Color/Base/White', hex: '#FFFFFF' },
+
+  // Surface / Feedback / Success ---------------------------------------
+  { group: 'surface-feedback-success', section: 'Surface / Feedback / Success', name: 'Default', path: 'Color/Green/500', hex: '#059669' },
+  { group: 'surface-feedback-success', section: 'Surface / Feedback / Success', name: 'Subtle', path: 'Color/Green/100', hex: '#D1FAE5' },
+  { group: 'surface-feedback-success', section: 'Surface / Feedback / Success', name: 'On Success', path: 'Color/Base/White', hex: '#FFFFFF' },
+
+  // Surface / Feedback / Warning ----------------------------------------
+  { group: 'surface-feedback-warning', section: 'Surface / Feedback / Warning', name: 'Default', path: 'Color/Amber/500', hex: '#D97706' },
+  { group: 'surface-feedback-warning', section: 'Surface / Feedback / Warning', name: 'Subtle', path: 'Color/Amber/100', hex: '#FEF3C7' },
+  { group: 'surface-feedback-warning', section: 'Surface / Feedback / Warning', name: 'On Warning', path: 'Color/Neutral/900', hex: '#1A2232' },
+
+  // Surface / Feedback / Information -------------------------------------
+  { group: 'surface-feedback-info', section: 'Surface / Feedback / Information', name: 'Default', path: 'Color/Airbus Blue/500', hex: '#00205B' },
+
+  // Text & Icon / Neutral ---------------------------------------------------
+  { group: 'text-neutral', section: 'Text & Icon / Neutral', name: 'Primary', path: 'Color/Neutral/900', hex: '#1A2232' },
+  { group: 'text-neutral', section: 'Text & Icon / Neutral', name: 'Secondary', path: 'Color/Neutral/600', hex: '#4A5568' },
+  { group: 'text-neutral', section: 'Text & Icon / Neutral', name: 'Tertiary', path: 'Color/Neutral/400', hex: '#718096' },
+  { group: 'text-neutral', section: 'Text & Icon / Neutral', name: 'Disabled', path: 'Color/Neutral/300', hex: '#A0AEC0' },
+
+  // Text & Icon / Neutral Negative -------------------------------------------
   { group: 'text-neutralneg', section: 'Text & Icon / Neutral Negative', name: 'Primary', path: 'Color/Base/White', hex: '#FFFFFF' },
-  { group: 'text-neutralneg', section: 'Text & Icon / Neutral Negative', name: 'Secondary', path: 'Color/Neutral/200 (on dark)', hex: '#C7CEDD' },
-  { group: 'text-accent', section: 'Text & Icon / Accent', name: 'Interactive', path: 'Color/Airbus Blue/500', hex: '#2454CC' },
-  { group: 'text-feedback', section: 'Text & Icon / Feedback', name: 'Error', path: 'Color/Error/60', hex: '#B00020' },
-  { group: 'text-feedback', section: 'Text & Icon / Feedback', name: 'Success', path: 'Color/Success/60', hex: '#0A7A50' },
-  { group: 'text-feedback', section: 'Text & Icon / Feedback', name: 'Warning', path: 'Color/Warning/60', hex: '#8C5E08' },
+  { group: 'text-neutralneg', section: 'Text & Icon / Neutral Negative', name: 'Secondary', path: 'Color/Cool Grey/20', hex: '#F0F2F5' },
+  { group: 'text-neutralneg', section: 'Text & Icon / Neutral Negative', name: 'Disabled', path: 'Color/Neutral/500', hex: '#718096' },
+
+  // Text & Icon / Accent -----------------------------------------------------
+  { group: 'text-accent', section: 'Text & Icon / Accent', name: 'Default', path: 'Color/Airbus Blue/500', hex: '#00205B' },
+  { group: 'text-accent', section: 'Text & Icon / Accent', name: 'Hover', path: 'Color/Airbus Blue/700', hex: '#001440' },
+  { group: 'text-accent', section: 'Text & Icon / Accent', name: 'Subtle', path: 'Color/Airbus Blue/300', hex: '#5281C8' },
+
+  // Text & Icon / Link / Neutral -----------------------------------------------
+  { group: 'text-link-neutral', section: 'Text & Icon / Link / Neutral', name: 'Default', path: 'Color/Airbus Blue/500', hex: '#00205B' },
+  { group: 'text-link-neutral', section: 'Text & Icon / Link / Neutral', name: 'Hover', path: 'Color/Airbus Blue/700', hex: '#001440' },
+  { group: 'text-link-neutral', section: 'Text & Icon / Link / Neutral', name: 'Visited', path: 'Color/Purple/600', hex: '#7C3AED' },
+  { group: 'text-link-neutral', section: 'Text & Icon / Link / Neutral', name: 'Disabled', path: 'Color/Neutral/300', hex: '#A0AEC0' },
+
+  // Text & Icon / Link / Negative -----------------------------------------------
+  { group: 'text-link-negative', section: 'Text & Icon / Link / Negative', name: 'Default', path: 'Color/Base/White', hex: '#FFFFFF' },
+  { group: 'text-link-negative', section: 'Text & Icon / Link / Negative', name: 'Hover', path: 'Color/Cool Grey/10', hex: '#F7F8FA' },
+  { group: 'text-link-negative', section: 'Text & Icon / Link / Negative', name: 'Visited', path: 'Color/Purple/200', hex: '#DDD6FE' },
+  { group: 'text-link-negative', section: 'Text & Icon / Link / Negative', name: 'Disabled', path: 'Color/Neutral/500', hex: '#718096' },
+  { group: 'text-link-negative', section: 'Text & Icon / Link / Negative', name: 'Active', path: 'Color/Cool Grey/20', hex: '#F0F2F5' },
+  { group: 'text-link-negative', section: 'Text & Icon / Link / Negative', name: 'Focus', path: 'Color/Base/White', hex: '#FFFFFF' },
+
+  // Text & Icon / Feedback (single section, all 4 categories) --------------------
+  { group: 'text-feedback', section: 'Text & Icon / Feedback', name: 'Error / Default', path: 'Color/Red/600', hex: '#B91C1C' },
+  { group: 'text-feedback', section: 'Text & Icon / Feedback', name: 'Error / Subtle', path: 'Color/Red/400', hex: '#F87171' },
+  { group: 'text-feedback', section: 'Text & Icon / Feedback', name: 'Error / On', path: 'Color/Base/White', hex: '#FFFFFF' },
+  { group: 'text-feedback', section: 'Text & Icon / Feedback', name: 'Success / Default', path: 'Color/Green/700', hex: '#047857' },
+  { group: 'text-feedback', section: 'Text & Icon / Feedback', name: 'Success / Subtle', path: 'Color/Green/400', hex: '#34D399' },
+  { group: 'text-feedback', section: 'Text & Icon / Feedback', name: 'Success / On', path: 'Color/Base/White', hex: '#FFFFFF' },
+  { group: 'text-feedback', section: 'Text & Icon / Feedback', name: 'Warning / Default', path: 'Color/Amber/700', hex: '#B45309' },
+  { group: 'text-feedback', section: 'Text & Icon / Feedback', name: 'Warning / Subtle', path: 'Color/Amber/400', hex: '#FCD34D' },
+  { group: 'text-feedback', section: 'Text & Icon / Feedback', name: 'Warning / On', path: 'Color/Neutral/900', hex: '#1A2232' },
+  { group: 'text-feedback', section: 'Text & Icon / Feedback', name: 'Info / Default', path: 'Color/Airbus Blue/500', hex: '#00205B' },
+  { group: 'text-feedback', section: 'Text & Icon / Feedback', name: 'Info / Subtle', path: 'Color/Airbus Blue/200', hex: '#93B5E5' },
+  { group: 'text-feedback', section: 'Text & Icon / Feedback', name: 'Info / On', path: 'Color/Base/White', hex: '#FFFFFF' },
 ];
 
+/**
+ * Hierarchical match: 'surface-feedback' also matches 'surface-feedback-error',
+ * 'text-link' also matches 'text-link-neutral' / 'text-link-negative', etc.
+ */
 function matchesFilter(row: VarRow, filter: VarGroup) {
   if (filter === 'all') return true;
   if (filter === 'surface') return row.group.startsWith('surface');
   if (filter === 'text') return row.group.startsWith('text');
-  return row.group === filter;
+  return row.group === filter || row.group.startsWith(filter + '-');
 }
 
 /* ============================================================
@@ -110,16 +169,18 @@ function VarSidebarGroup({
   active: boolean;
   onClick: () => void;
 }) {
+  const PADDING_BY_LEVEL = [12, 22, 34];
+  const isTop = group.level === 0;
   return (
     <div
       onClick={onClick}
       className="flex items-center justify-between py-1.5 px-3 rounded-lg text-xs cursor-pointer transition-colors"
       style={{
-        paddingLeft: group.indent ? 22 : 12,
-        opacity: active ? 1 : 0.68,
+        paddingLeft: PADDING_BY_LEVEL[group.level],
+        opacity: active ? 1 : isTop ? 0.85 : 0.62,
         background: active ? 'rgba(10,103,232,0.08)' : 'transparent',
         color: active ? BLUE : INK,
-        fontWeight: active ? 600 : 400,
+        fontWeight: active ? 600 : isTop ? 600 : 400,
         fontFamily: "'DM Sans', sans-serif",
       }}
     >
@@ -264,13 +325,13 @@ export default function VariablesSection() {
         <div className="flex justify-between items-end gap-10 flex-wrap mb-16">
           <h2
             className="leading-[1.05]"
-            style={{ 
-              fontFamily: "'DM Sans', sans-serif", 
-              fontWeight: 700, 
-              fontSize: 'clamp(34px, 4.6vw, 58px)', 
-              letterSpacing: '-0.03em', 
+            style={{
+              fontFamily: "'DM Sans', sans-serif",
+              fontWeight: 700,
+              fontSize: 'clamp(34px, 4.6vw, 58px)',
+              letterSpacing: '-0.03em',
               maxWidth: 680,
-              color: '#0D0D0D'
+              color: '#0D0D0D',
             }}
           >
             All 121 tokens, <span style={{ fontStyle: 'normal', color: BLUE }}>one collection.</span>
@@ -302,11 +363,11 @@ export default function VariablesSection() {
               </div>
               <div
                 className="flex justify-between px-3.5 py-2 rounded-[10px] border text-xs font-semibold mb-4"
-                style={{ 
-                  borderColor: 'rgba(10,103,232,0.25)', 
-                  background: 'rgba(10,103,232,0.08)', 
+                style={{
+                  borderColor: 'rgba(10,103,232,0.25)',
+                  background: 'rgba(10,103,232,0.08)',
                   color: BLUE,
-                  fontFamily: "'DM Sans', sans-serif"
+                  fontFamily: "'DM Sans', sans-serif",
                 }}
               >
                 Collection 1 <span style={{ fontWeight: 400 }}>121</span>
