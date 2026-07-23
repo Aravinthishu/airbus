@@ -7,7 +7,15 @@ import checkboxSizeImage from '../../../../assets/images/checkbox/checkbox-size.
 /* ============================================================
    Minimal stand-ins for your ui-helpers
 ============================================================ */
-function PropChip({ active, onClick, children }) {
+function PropChip({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
   return (
     <button
       type="button"
@@ -29,7 +37,7 @@ function PropChip({ active, onClick, children }) {
   );
 }
 
-function SpecBadge({ label }) {
+function SpecBadge({ label }: { label: string }) {
   return (
     <div
       style={{
@@ -49,21 +57,31 @@ function SpecBadge({ label }) {
 /* ============================================================
    Checkbox Component
 ============================================================ */
+type CheckboxSize = 'm' | 'l';
+type CheckboxState = 'unselected' | 'selected' | 'indeterminate';
+type CheckboxInteraction = 'default' | 'hover' | 'focus' | 'disabled';
+
 function Checkbox({
   size = 'm',
   state = 'unselected',
   interaction = 'default',
   label = 'Label',
   onClick,
+}: {
+  size?: CheckboxSize;
+  state?: CheckboxState;
+  interaction?: CheckboxInteraction;
+  label?: string;
+  onClick?: () => void;
 }) {
   const dim = size === 'l' ? 28 : 22;
   const borderRadius = size === 'l' ? 8 : 6;
   const fontSize = size === 'l' ? 14 : 12;
-  
+
   // Determine if checkbox is checked
   const isChecked = state === 'selected' || state === 'indeterminate';
   const isDisabled = interaction === 'disabled';
-  
+
   // Get border color based on interaction and state
   const getBorderColor = () => {
     if (isChecked) return 'none';
@@ -155,14 +173,14 @@ function Checkbox({
    LIVE DEMO
 ============================================================ */
 export function CheckboxDemo() {
-  const [size, setSize] = useState('m');
-  const [state, setState] = useState('unselected');
-  const [interaction, setInteraction] = useState('default');
+  const [size, setSize] = useState<CheckboxSize>('m');
+  const [state, setState] = useState<CheckboxState>('unselected');
+  const [interaction, setInteraction] = useState<CheckboxInteraction>('default');
 
-  const stateOptions = ['unselected', 'selected', 'indeterminate'];
+  const stateOptions: CheckboxState[] = ['unselected', 'selected', 'indeterminate'];
   const stateLabels = ['Unselected', 'Selected', 'Indeterminate'];
-  
-  const interactionOptions = ['default', 'hover', 'focus', 'disabled'];
+
+  const interactionOptions: CheckboxInteraction[] = ['default', 'hover', 'focus', 'disabled'];
   const interactionLabels = ['Default', 'Hover', 'Focus', 'Disabled'];
 
   return (
@@ -260,7 +278,7 @@ export function CheckboxDemo() {
             SIZE
           </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            {['m', 'l'].map((s) => (
+            {(['m', 'l'] as CheckboxSize[]).map((s) => (
               <PropChip
                 key={s}
                 active={size === s}
@@ -389,7 +407,7 @@ export function CheckboxSpec() {
 /* ============================================================
    PAGE — equal-size preview / reference cards
 ============================================================ */
-const CARD_STYLE = {
+const CARD_STYLE: React.CSSProperties = {
   width: '100%',
   maxWidth: 900,
   height: 560,
