@@ -4,7 +4,15 @@ import React, { useState } from 'react';
 /* ============================================================
    Minimal stand-ins for your ui-helpers
 ============================================================ */
-function PropChip({ active, onClick, children }) {
+function PropChip({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
   return (
     <button
       type="button"
@@ -26,7 +34,7 @@ function PropChip({ active, onClick, children }) {
   );
 }
 
-function SpecBadge({ label }) {
+function SpecBadge({ label }: { label: string }) {
   return (
     <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, color: '#8089A0', marginBottom: 12, fontFamily: "'DM Sans', sans-serif" }}>
       {label.toUpperCase()}
@@ -34,7 +42,13 @@ function SpecBadge({ label }) {
   );
 }
 
-function SpecBlock({ title, children }) {
+function SpecBlock({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
   return (
     <div style={{ marginBottom: 40 }}>
       <div style={{ fontSize: 14, fontWeight: 700, color: '#151A24', marginBottom: 16, fontFamily: "'DM Sans', sans-serif" }}>{title}</div>
@@ -46,7 +60,7 @@ function SpecBlock({ title, children }) {
 /* ============================================================
    SETTINGS ICON — matches the glyph in the reference images
 ============================================================ */
-function SettingsIcon({ size = 16 }) {
+function SettingsIcon({ size = 16 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
@@ -60,7 +74,14 @@ function SettingsIcon({ size = 16 }) {
    NOTE: "default" now matches the uploaded reference exactly —
    white background, navy border, navy text/icon.
 ============================================================ */
-const BUTTON_GROUP_STYLES = {
+type ButtonState = 'default' | 'hover' | 'active' | 'focus' | 'disabled';
+type ButtonSide = 'left' | 'center' | 'right';
+type ButtonSize = 'l' | 'm' | 's';
+
+const BUTTON_GROUP_STYLES: Record<
+  ButtonState,
+  { bg: string; border: string; text: string; boxShadow?: string }
+> = {
   default: {
     bg: '#FFFFFF',
     border: '#0B1F4D',
@@ -97,6 +118,14 @@ function ButtonGroupButton({
   showIcon = false,
   iconOnly = false,
   isLast = false,
+}: {
+  label: string;
+  state?: ButtonState;
+  side?: ButtonSide;
+  size?: ButtonSize;
+  showIcon?: boolean;
+  iconOnly?: boolean;
+  isLast?: boolean;
 }) {
   const getSizeStyle = () => {
     switch (size) {
@@ -156,8 +185,15 @@ function ButtonGroup({
   showIcon = true,
   iconOnly = false,
   label = 'Button',
+}: {
+  itemCount?: number;
+  state?: ButtonState;
+  size?: ButtonSize;
+  showIcon?: boolean;
+  iconOnly?: boolean;
+  label?: string;
 }) {
-  const getSide = (index) => {
+  const getSide = (index: number): ButtonSide => {
     if (index === 0) return 'left';
     if (index === itemCount - 1) return 'right';
     return 'center';
@@ -185,13 +221,13 @@ function ButtonGroup({
    LIVE DEMO
 ============================================================ */
 export function ButtonGroupDemo() {
-  const [status, setStatus] = useState('default');
-  const [size, setSize] = useState('m');
+  const [status, setStatus] = useState<ButtonState>('default');
+  const [size, setSize] = useState<ButtonSize>('m');
   const [itemCount, setItemCount] = useState(3);
   const [hasIcon, setHasIcon] = useState(true);
   const [iconOnly, setIconOnly] = useState(false);
 
-  const statusOptions = ['default', 'hover', 'active', 'focus', 'disabled'];
+  const statusOptions: ButtonState[] = ['default', 'hover', 'active', 'focus', 'disabled'];
   const statusLabels = ['Default', 'Hover', 'Active', 'Focus', 'Disabled'];
 
   return (
@@ -236,7 +272,7 @@ export function ButtonGroupDemo() {
         <div style={{ marginBottom: 16 }}>
           <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, color: '#8089A0', marginBottom: 8, fontFamily: "'DM Sans', sans-serif" }}>SIZE</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            {['s', 'm', 'l'].map((s) => (
+            {(['s', 'm', 'l'] as ButtonSize[]).map((s) => (
               <PropChip key={s} active={size === s} onClick={() => setSize(s)}>
                 {s.toUpperCase()}
               </PropChip>
@@ -271,11 +307,17 @@ export function ButtonGroupDemo() {
    with violet dashed border like Figma
 ============================================================ */
 export function ButtonGroupSpec() {
-  const sizes = ['l', 'm', 's'];
-  const sizeLabels = { l: 'L', m: 'M', s: 'S' };
+  const sizes: ButtonSize[] = ['l', 'm', 's'];
+  const sizeLabels: Record<ButtonSize, string> = { l: 'L', m: 'M', s: 'S' };
   const itemCounts = [3, 6];
 
-  const SizeRows = ({ iconOnly, title }) => (
+  const SizeRows = ({
+    iconOnly,
+    title,
+  }: {
+    iconOnly: boolean;
+    title: string;
+  }) => (
     <div
       style={{
         width: '100%',
@@ -286,10 +328,10 @@ export function ButtonGroupSpec() {
         padding: 20,
       }}
     >
-      <div style={{ 
-        fontSize: 12, 
-        fontWeight: 600, 
-        color: '#7C3AED', 
+      <div style={{
+        fontSize: 12,
+        fontWeight: 600,
+        color: '#7C3AED',
         marginBottom: 16,
         fontFamily: "'DM Sans', sans-serif",
         letterSpacing: '0.5px',
@@ -355,10 +397,10 @@ export function ButtonGroupSpec() {
             padding: 20,
           }}
         >
-          <div style={{ 
-            fontSize: 12, 
-            fontWeight: 600, 
-            color: '#7C3AED', 
+          <div style={{
+            fontSize: 12,
+            fontWeight: 600,
+            color: '#7C3AED',
             marginBottom: 16,
             fontFamily: "'DM Sans', sans-serif",
             letterSpacing: '0.5px',
@@ -384,7 +426,7 @@ export function ButtonGroupSpec() {
 /* ============================================================
    PAGE — equal-size preview / reference cards
 ============================================================ */
-const CARD_STYLE = {
+const CARD_STYLE: React.CSSProperties = {
   width: '100%',
   maxWidth: 1100,
   height: 560,
