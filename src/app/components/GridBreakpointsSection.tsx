@@ -31,31 +31,49 @@ const breakpoints = [
   },
 ];
 
+// Brighter, higher-contrast accent used for every caliper (was #0a67e8 — too
+// close to the background grid color and hard to read against the dark UI).
+const CALIPER_COLOR = '#5EC2FF';
+
 /**
  * Caliper — dimension-line style indicator (two end ticks + connecting bar + value label).
  * `style.left` / `style.width` should be passed in the SAME coordinate system as the
  * grid columns it's annotating (see usage below).
+ *
+ * `labelAlign` controls how the label sits relative to the tick marks:
+ *  - 'center' (default): label centered under the bar — fine when there's
+ *    room on both sides.
+ *  - 'right': label grows to the right of the bar instead of spilling
+ *    left — use this for anything anchored at the true left edge (like
+ *    Margin), so the text doesn't get clipped by the parent's
+ *    overflow-hidden.
  */
 function Caliper({
   style,
   value,
   label,
+  labelAlign = 'center',
 }: {
   style: React.CSSProperties;
   value: string;
   label?: string;
+  labelAlign?: 'left' | 'center' | 'right';
 }) {
+  const alignItems = labelAlign === 'right' ? 'flex-start' : labelAlign === 'left' ? 'flex-end' : 'center';
   return (
     <div
-      className="absolute flex flex-col items-center pointer-events-none z-30"
-      style={style}
+      className="absolute flex flex-col pointer-events-none z-30"
+      style={{ ...style, alignItems }}
     >
       <div className="relative w-full" style={{ height: '8px' }}>
-        <div className="absolute left-0 top-0 w-px h-full bg-[#0a67e8]" />
-        <div className="absolute right-0 top-0 w-px h-full bg-[#0a67e8]" />
-        <div className="absolute left-0 right-0 top-1/2 h-px bg-[#0a67e8]/70" />
+        <div className="absolute left-0 top-0 w-px h-full" style={{ background: CALIPER_COLOR }} />
+        <div className="absolute right-0 top-0 w-px h-full" style={{ background: CALIPER_COLOR }} />
+        <div className="absolute left-0 right-0 top-1/2 h-px" style={{ background: CALIPER_COLOR, opacity: 0.7 }} />
       </div>
-      <span className="text-[11px] leading-none font-mono font-semibold text-[#0a67e8] mt-1.5 whitespace-nowrap bg-dark-bg/90 px-1.5 py-1 rounded-sm">
+      <span
+        className="text-[11px] leading-none font-mono font-semibold mt-1.5 whitespace-nowrap px-1.5 py-1 rounded-sm"
+        style={{ color: CALIPER_COLOR, background: 'rgba(0,0,0,0.85)', border: `1px solid ${CALIPER_COLOR}40` }}
+      >
         {label ? `${label} ${value}` : value}
       </span>
     </div>
@@ -83,28 +101,31 @@ function DesktopMockup({ gridColor }: { gridColor: string }) {
             ))}
           </div>
 
-          {/* Gutter indicator — sits in the SAME px-5 coordinate space as the columns above */}
+          {/* Margin indicator — measured from the true edge, before the px-5 padding kicks in.
+              Label aligns right so it grows inward instead of spilling past the edge. */}
+          <Caliper
+            style={{ left: '0px', top: '4px', width: '20px' }}
+            value="160px"
+            label="Margin"
+            labelAlign="right"
+          />
+
+          {/* Gutter indicator — sits lower than Margin so the two labels never collide.
+              Left offset accounts for the flex `gap` between columns (10px here),
+              so it lands exactly on the first gutter instead of drifting into the next one. */}
           <div className="absolute inset-0 px-5 pointer-events-none z-30">
             <div className="relative w-full h-full">
               <Caliper
                 style={{
-                  left: `${(1 / cols) * 100}%`,
-                  top: '4px',
-                  width: '20px',
-                  transform: 'translateX(-50%)',
+                  left: `calc((100% - 110px) / 12)`,
+                  top: '40px',
+                  width: '10px',
                 }}
                 value="24px"
                 label="Gutter"
               />
             </div>
           </div>
-
-          {/* Margin indicator — measured from the true edge, before the px-5 padding kicks in */}
-          <Caliper
-            style={{ left: '0px', top: '4px', width: '20px' }}
-            value="160px"
-            label="Margin"
-          />
 
           {/* Fake UI content */}
           <div className="relative z-10 p-5 space-y-3">
@@ -144,28 +165,29 @@ function TabletMockup({ gridColor }: { gridColor: string }) {
             ))}
           </div>
 
-          {/* Gutter indicator */}
+          {/* Margin indicator — label right-aligned so it isn't clipped at the edge */}
+          <Caliper
+            style={{ left: '0px', top: '4px', width: '16px' }}
+            value="32px"
+            label="Margin"
+            labelAlign="right"
+          />
+
+          {/* Gutter indicator — pushed down below Margin. Left offset accounts for
+              the flex `gap` between columns (8px here) so it lands on the first gutter. */}
           <div className="absolute inset-0 px-4 pointer-events-none z-30">
             <div className="relative w-full h-full">
               <Caliper
                 style={{
-                  left: `${(1 / cols) * 100}%`,
-                  top: '4px',
-                  width: '16px',
-                  transform: 'translateX(-50%)',
+                  left: `calc((100% - 56px) / 8)`,
+                  top: '36px',
+                  width: '8px',
                 }}
                 value="16px"
                 label="Gutter"
               />
             </div>
           </div>
-
-          {/* Margin indicator */}
-          <Caliper
-            style={{ left: '0px', top: '4px', width: '16px' }}
-            value="32px"
-            label="Margin"
-          />
 
           <div className="relative z-10 p-4 space-y-3">
             <div className="h-3 w-20 rounded bg-white/20" />
@@ -205,28 +227,30 @@ function MobileMockup({ gridColor }: { gridColor: string }) {
             ))}
           </div>
 
-          {/* Gutter indicator */}
+          {/* Margin indicator — label right-aligned so it isn't clipped at the edge */}
+          <Caliper
+            style={{ left: '0px', top: '32px', width: '10px' }}
+            value="16px"
+            label="Margin"
+            labelAlign="right"
+          />
+
+          {/* Gutter indicator — pushed further down so it clears both the notch and Margin.
+              Left offset accounts for the flex `gap` between columns (6px here) so it
+              lands on the first gutter instead of drifting into the next one. */}
           <div className="absolute inset-0 px-2.5 pointer-events-none z-30">
             <div className="relative w-full h-full">
               <Caliper
                 style={{
-                  left: `${(1 / cols) * 100}%`,
-                  top: '4px',
-                  width: '12px',
-                  transform: 'translateX(-50%)',
+                  left: `calc((100% - 18px) / 4)`,
+                  top: '64px',
+                  width: '6px',
                 }}
                 value="16px"
                 label="Gutter"
               />
             </div>
           </div>
-
-          {/* Margin indicator */}
-          <Caliper
-            style={{ left: '0px', top: '4px', width: '10px' }}
-            value="16px"
-            label="Margin"
-          />
 
           <div className="relative z-10 p-3 pt-8 space-y-2">
             <div className="h-2.5 w-14 rounded bg-white/20" />

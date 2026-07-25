@@ -9,15 +9,16 @@ function PropChip({ active, onClick, children }) {
       type="button"
       onClick={onClick}
       style={{
-        padding: '6px 12px',
+        padding: '4px 10px',
         borderRadius: 6,
-        fontSize: 12,
+        fontSize: 11,
         fontWeight: 600,
         border: `1px solid ${active ? '#0B1F4D' : '#D8D4CC'}`,
         background: active ? '#0B1F4D' : '#FFFFFF',
         color: active ? '#FFFFFF' : '#4B5563',
         cursor: 'pointer',
         fontFamily: "'DM Sans', sans-serif",
+        transition: 'all 0.15s ease',
       }}
     >
       {children}
@@ -27,7 +28,7 @@ function PropChip({ active, onClick, children }) {
 
 function SpecBadge({ label }) {
   return (
-    <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, color: '#8089A0', marginBottom: 12, fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, color: '#8089A0', marginBottom: 8, fontFamily: "'DM Sans', sans-serif" }}>
       {label.toUpperCase()}
     </div>
   );
@@ -41,7 +42,7 @@ function FigmaFrame({ children, style }) {
         border: '2px dashed #C084FC',
         borderRadius: 8,
         background: '#FFFFFF',
-        padding: 20,
+        padding: 16,
         ...style,
       }}
     >
@@ -50,20 +51,8 @@ function FigmaFrame({ children, style }) {
   );
 }
 
-/* Row with a text label to the left of a FigmaFrame */
-function LabeledRow({ label, children }) {
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 10 }}>
-      <span style={{ fontSize: 13, color: '#151A24', width: 100, flexShrink: 0, fontFamily: "'DM Sans', sans-serif" }}>
-        {label}
-      </span>
-      <div style={{ flex: 1 }}>{children}</div>
-    </div>
-  );
-}
-
 /* ============================================================
-   Accordion Item component with proper states
+   Accordion Item component with proper states (no avatar)
 ============================================================ */
 function AccordionItem({ 
   title = 'Item', 
@@ -122,7 +111,7 @@ function AccordionItem({
         opacity: 1,
         borderWidth: '1px',
         headerBg: '#FFFFFF',
-        contentBorder: '2px dashed #0B1F4D',
+        contentBorder: '2px dashed #9CA3AF',
       };
     }
     if (state === 'active-hover') {
@@ -134,7 +123,7 @@ function AccordionItem({
         opacity: 1,
         borderWidth: '1px',
         headerBg: '#F5F5F4',
-        contentBorder: '2px dashed #0B1F4D',
+        contentBorder: '2px dashed #9CA3AF',
       };
     }
     // default
@@ -160,7 +149,7 @@ function AccordionItem({
     <div 
       style={{ 
         border: `${styles.borderWidth} solid ${styles.borderColor}`, 
-        borderRadius: 8, 
+        borderRadius: 6,
         overflow: 'hidden',
         background: styles.bg,
         opacity: styles.opacity,
@@ -176,7 +165,7 @@ function AccordionItem({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '12px 16px',
+          padding: '8px 14px',
           background: styles.headerBg,
           border: 'none',
           cursor: isDisabled ? 'not-allowed' : 'pointer',
@@ -186,14 +175,14 @@ function AccordionItem({
         }}
       >
         <span style={{ 
-          fontSize: 13, 
+          fontSize: 12,
           fontWeight: 700, 
           color: styles.textColor,
         }}>
           {title}
         </span>
         <span style={{
-          fontSize: 14,
+          fontSize: 12,
           color: styles.color,
           transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
           transition: 'transform 0.15s ease',
@@ -201,16 +190,16 @@ function AccordionItem({
       </button>
       {isOpen && showContent && (
         <div style={{ 
-          padding: '0 16px 14px', 
-          fontSize: 13, 
+          padding: '0 14px 12px',
+          fontSize: 12,
           color: '#3D4759', 
-          lineHeight: 1.6,
+          lineHeight: 1.5,
           fontFamily: "'DM Sans', sans-serif",
           ...(showDashedContent ? {
             border: styles.contentBorder,
             borderRadius: 4,
-            padding: '12px 16px',
-            margin: '0 16px 16px',
+            padding: '10px 14px',
+            margin: '0 14px 14px',
           } : {})
         }}>
           {showDashedContent ? (
@@ -228,7 +217,7 @@ function AccordionItem({
 }
 
 /* ============================================================
-   Accordion component with multiple items - only first item gets state
+   Accordion component with multiple items (no avatars)
 ============================================================ */
 function Accordion({ 
   items = [], 
@@ -240,10 +229,10 @@ function Accordion({
   return (
     <div style={{ 
       width: '100%', 
-      maxWidth: 420, 
+      maxWidth: 380,
       display: 'flex', 
       flexDirection: 'column', 
-      gap: 8, 
+      gap: 6,
       fontFamily: "'DM Sans', sans-serif" 
     }}>
       {items.map((item, index) => (
@@ -287,22 +276,21 @@ export function AccordionDemo() {
   const currentStateLabel = stateLabels[stateOptions.indexOf(state)];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#FFFFFF' }}>
       <div
         style={{
           flex: '1 1 0',
-          minHeight: 220,
+          minHeight: 430,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          padding: 32,
-          gap: 8,
-          background:
-            'repeating-linear-gradient(0deg, rgba(10,103,232,0.03) 0 1px, transparent 1px 24px), repeating-linear-gradient(90deg, rgba(10,103,232,0.03) 0 1px, transparent 1px 24px)',
+          padding: 24,
+          gap: 6,
+          background: '#FFFFFF',
         }}
       >
-        <div style={{ fontSize: 11, fontWeight: 600, color: '#8089A0', fontFamily: "'DM Sans', sans-serif" }}>
+        <div style={{ fontSize: 10, fontWeight: 600, color: '#8089A0', fontFamily: "'DM Sans', sans-serif" }}>
           State: <span style={{ color: '#0B1F4D' }}>{currentStateLabel}</span>
         </div>
         <Accordion 
@@ -314,12 +302,12 @@ export function AccordionDemo() {
         />
       </div>
 
-      <div style={{ padding: 20, borderTop: '1px solid #EFEDE8', overflowY: 'auto' }}>
+      <div style={{ padding: 16, borderTop: '1px solid #EFEDE8', overflowY: 'auto', background: '#FFFFFF' }}>
         <div>
-          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, color: '#8089A0', marginBottom: 8, fontFamily: "'DM Sans', sans-serif" }}>
+          <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 1, color: '#8089A0', marginBottom: 6, fontFamily: "'DM Sans', sans-serif" }}>
             STATE
           </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
             {stateOptions.map((s, index) => (
               <PropChip key={s} active={state === s} onClick={() => setState(s)}>
                 {stateLabels[index]}
@@ -333,7 +321,7 @@ export function AccordionDemo() {
 }
 
 /* ============================================================
-   REFERENCE SPEC — exact match to your uploaded images
+   REFERENCE SPEC
 ============================================================ */
 export function AccordionSpec() {
   const stateOptions = ['default', 'hover', 'active', 'active-hover', 'disabled'];
@@ -345,17 +333,23 @@ export function AccordionSpec() {
     { id: '3', title: 'Item' },
   ];
 
-  // For accord-open.png - 7 items
-  const sevenItems = Array.from({ length: 7 }, (_, i) => ({ id: String(i + 1), title: 'Item' }));
+  // For accord-open.png - 7 items without avatars
+  const sevenItems = Array.from({ length: 7 }, (_, i) => ({ 
+    id: String(i + 1), 
+    title: 'Item'
+  }));
 
   return (
     <div
       style={{
-        padding: 24,
+        padding: 20,
         overflowY: 'auto',
         height: '100%',
         fontFamily: "'DM Sans', sans-serif",
         background: '#FFFFFF',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
       }}
     >
       <SpecBadge label="Accordion" />
@@ -365,13 +359,13 @@ export function AccordionSpec() {
         style={{
           display: 'flex',
           flexDirection: 'column',
-          gap: 8,
-          marginBottom: 32,
+          gap: 6,
+          marginBottom: 24,
         }}
       >
         <div
           style={{
-            fontSize: 14,
+            fontSize: 13,
             fontWeight: 600,
             color: '#3D4759',
             fontFamily: "'DM Sans', sans-serif",
@@ -380,22 +374,20 @@ export function AccordionSpec() {
         >
           Accordion — Open
         </div>
-        <FigmaFrame>
-          <div style={{ display: 'flex', gap: 40, alignItems: 'flex-start' }}>
-            <div style={{ width: 80, flexShrink: 0, paddingTop: 12 }}>
-              <div style={{ fontSize: 13, color: '#151A24' }}>Item</div>
-            </div>
-            <div style={{ flex: 1 }}>
-              <Accordion 
-                items={sevenItems} 
-                openIds={['1', '2', '3', '4', '5', '6', '7']} 
-                onToggle={() => {}} 
-                state="default"
-                showContent={false}
-              />
-            </div>
+        <div style={{ display: 'flex', gap: 32, alignItems: 'flex-start' }}>
+          <div style={{ width: 60, flexShrink: 0, paddingTop: 10 }}>
+            <div style={{ fontSize: 12, color: '#151A24' }}>Item</div>
           </div>
-        </FigmaFrame>
+          <FigmaFrame style={{ flex: 1 }}>
+            <Accordion 
+              items={sevenItems} 
+              openIds={['1', '2', '3', '4', '5', '6', '7']} 
+              onToggle={() => {}} 
+              state="default"
+              showContent={false}
+            />
+          </FigmaFrame>
+        </div>
       </div>
 
       {/* Accordion - States */}
@@ -403,12 +395,12 @@ export function AccordionSpec() {
         style={{
           display: 'flex',
           flexDirection: 'column',
-          gap: 8,
+          gap: 6,
         }}
       >
         <div
           style={{
-            fontSize: 14,
+            fontSize: 13,
             fontWeight: 600,
             color: '#3D4759',
             fontFamily: "'DM Sans', sans-serif",
@@ -417,46 +409,61 @@ export function AccordionSpec() {
         >
           Accordion — States
         </div>
-        <FigmaFrame>
-          {stateOptions.map((state, index) => (
-            <div key={state} style={{ marginBottom: index < stateOptions.length - 1 ? 20 : 0 }}>
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
-                <span style={{ 
-                  fontSize: 13, 
+        <div style={{ display: 'flex', gap: 32, alignItems: 'flex-start' }}>
+          <div style={{ 
+            width: 60,
+            flexShrink: 0, 
+            display: 'flex', 
+            flexDirection: 'column', 
+            justifyContent: 'space-between',
+          }}>
+            {stateLabels.map((label, index) => (
+              <div 
+                key={label}
+                style={{ 
+                  fontSize: 12,
                   fontWeight: 600, 
                   color: '#6B7280', 
-                  width: 100, 
-                  flexShrink: 0, 
-                  paddingTop: 4,
-                  fontFamily: "'DM Sans', sans-serif" 
-                }}>
-                  {stateLabels[index]}
-                </span>
-                <div style={{ flex: 1 }}>
-                  <Accordion 
-                    items={[{ id: '1', title: 'Item' }]} 
-                    openIds={['1']} 
-                    onToggle={() => {}} 
-                    state={state}
-                    showContent={true}
-                  />
-                </div>
+                  fontFamily: "'DM Sans', sans-serif",
+                  paddingTop: 10,
+                  marginBottom: index < stateLabels.length - 1 ? 16 : 0,
+                  minHeight: (stateOptions[index] === 'active' || stateOptions[index] === 'active-hover') ? 80 : 0,
+                }}
+              >
+                {label}
               </div>
+            ))}
+          </div>
+          <FigmaFrame style={{ flex: 1 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              {stateOptions.map((state) => (
+                <Accordion 
+                  key={state}
+                  items={[{ 
+                    id: '1', 
+                    title: 'Item'
+                  }]} 
+                  openIds={['1']} 
+                  onToggle={() => {}} 
+                  state={state}
+                  showContent={true}
+                />
+              ))}
             </div>
-          ))}
-        </FigmaFrame>
+          </FigmaFrame>
+        </div>
       </div>
     </div>
   );
 }
 
 /* ============================================================
-   PAGE — equal-size preview / reference cards
+   PAGE — equal-size preview / reference cards with same height
 ============================================================ */
 const CARD_STYLE = {
   width: '100%',
-  maxWidth: 1100,
-  height: 560,
+  maxWidth: 1000,
+  height: 480, // Fixed height for both cards
   border: '1px solid #EFEDE8',
   borderRadius: 12,
   background: '#FFFFFF',
@@ -466,10 +473,10 @@ const CARD_STYLE = {
 
 export default function AccordionPage() {
   return (
-    <div style={{ padding: 32, background: '#FAFAF8', minHeight: '100vh', fontFamily: "'DM Sans', sans-serif" }}>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 32, alignItems: 'center' }}>
-        <div style={{ width: '100%', maxWidth: 1100 }}>
-          <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1, color: '#8089A0', marginBottom: 8, fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ padding: 24, background: '#FFFFFF', minHeight: '100vh', fontFamily: "'DM Sans', sans-serif" }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 24, alignItems: 'center' }}>
+        <div style={{ width: '100%', maxWidth: 1000 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, color: '#8089A0', marginBottom: 6, fontFamily: "'DM Sans', sans-serif" }}>
             LIVE PREVIEW
           </div>
           <div style={CARD_STYLE}>
@@ -477,8 +484,8 @@ export default function AccordionPage() {
           </div>
         </div>
 
-        <div style={{ width: '100%', maxWidth: 1100 }}>
-          <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1, color: '#8089A0', marginBottom: 8, fontFamily: "'DM Sans', sans-serif" }}>
+        <div style={{ width: '100%', maxWidth: 1000 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, color: '#8089A0', marginBottom: 6, fontFamily: "'DM Sans', sans-serif" }}>
             REFERENCE SPEC
           </div>
           <div style={CARD_STYLE}>

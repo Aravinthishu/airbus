@@ -335,7 +335,7 @@ export default function TypographySection() {
           <span className="text-xs font-mono text-white/40">/ Tokens</span>
           <span className="text-xs font-mono text-white/40 hidden sm:inline">// Fonts and Colors</span>
         </div>
-        <span className="text-xs font-mono text-white/30">/ 03</span>
+        {/* <span className="text-xs font-mono text-white/30">/ 03</span> */}
       </div>
 
       {/* Desktop: left heading column + right card column */}

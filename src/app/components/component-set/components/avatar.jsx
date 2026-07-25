@@ -125,12 +125,13 @@ const AVATAR_SIZE_STYLES = {
 };
 
 function Avatar({
-  initials = 'AS',
+  initials = 'GV',
   size = 'm',
   state = 'default',
   variant = 'initials',
   photoUrl = PHOTO_URL,
   showStatusDot = false,
+  style,
 }) {
   const sz = AVATAR_SIZE_STYLES[size] ?? AVATAR_SIZE_STYLES.m;
   const isHoverEdit = state === 'hover-edit';
@@ -203,6 +204,7 @@ function Avatar({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
+          border:'3px solid white',
           fontSize: sz.font,
           fontWeight: 700,
           fontFamily: "'DM Sans', sans-serif",
@@ -214,7 +216,7 @@ function Avatar({
   };
 
   return (
-    <div style={{ position: 'relative', width: sz.dim, height: sz.dim, display: 'inline-block' }}>
+    <div style={{ position: 'relative', width: sz.dim, height: sz.dim, display: 'inline-block', ...style }}>
       <div
         style={{
           width: sz.dim,
@@ -278,28 +280,27 @@ export function AvatarDemo() {
   const variantLabels = ['Initials', 'Picture', 'Chatbot', 'Placeholder'];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#FFFFFF' }}>
       <div
         style={{
           flex: '1 1 0',
-          minHeight: 220,
+          minHeight: 345,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
           gap: 12,
           padding: 32,
-          background:
-            'repeating-linear-gradient(0deg, rgba(10,103,232,0.03) 0 1px, transparent 1px 24px), repeating-linear-gradient(90deg, rgba(10,103,232,0.03) 0 1px, transparent 1px 24px)',
+          background: '#FFFFFF',
         }}
       >
         <div style={{ fontSize: 11, fontWeight: 600, color: '#8089A0', fontFamily: "'DM Sans', sans-serif" }}>
           State: <span style={{ color: '#0B1F4D' }}>{stateLabels[stateOptions.indexOf(state)]}</span> • Variant: <span style={{ color: '#0B1F4D' }}>{variantLabels[variantOptions.indexOf(variant)]}</span>
         </div>
-        <Avatar initials="AS" size="xl" state={state} variant={variant} />
+        <Avatar initials="GV" size="xl" state={state} variant={variant} showStatusDot />
       </div>
 
-      <div style={{ padding: 20, borderTop: '1px solid #EFEDE8', overflowY: 'auto' }}>
+      <div style={{ padding: 20, borderTop: '1px solid #EFEDE8', overflowY: 'auto', background: '#FFFFFF' }}>
         <div style={{ marginBottom: 16 }}>
           <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, color: '#8089A0', marginBottom: 8, fontFamily: "'DM Sans', sans-serif" }}>
             VARIANT
@@ -355,63 +356,106 @@ export function AvatarSpec() {
     <div style={{ padding: 20, overflowY: 'auto', height: '100%', fontFamily: "'DM Sans', sans-serif", background: '#FFFFFF' }}>
       <SpecBadge label="Avatar" />
 
-      {/* Sizes — matches avatar-icon.png - DECREASED WIDTH */}
+      {/* Sizes — matches avatar-icon.png */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 28 }}>
         <div style={{ fontSize: 14, fontWeight: 600, color: '#3D4759', fontFamily: "'DM Sans', sans-serif" }}>
           Avatar — Sizes
         </div>
-        <FigmaFrame>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {sizeRows.map((size, i) => (
-              <div key={size} style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                <span style={{ width: 28, fontSize: 10, color: '#6B7280', fontFamily: "'DM Sans', sans-serif", fontWeight: 600 }}>
-                  {sizeLabels[i]}
-                </span>
-                <Avatar size={size} initials="AS" state="default" variant="initials" showStatusDot />
-                <div style={{ display: 'flex', gap: 4 }}>
-                  {Array.from({ length: 5 }).map((_, j) => (
-                    <Avatar key={j} size={size} initials="AS" state="default" variant="initials" />
-                  ))}
-                </div>
+        <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start' }}>
+          <div style={{ width: 28, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {sizeLabels.map((label, i) => (
+              <div
+                key={label}
+                style={{
+                  fontSize: 10,
+                  fontWeight: 600,
+                  color: '#6B7280',
+                  fontFamily: "'DM Sans', sans-serif",
+                  height: AVATAR_SIZE_STYLES[sizeRows[i]].dim,
+                  display: 'flex',
+                  alignItems: 'center',
+                }}
+              >
+                {label}
               </div>
             ))}
           </div>
-        </FigmaFrame>
+          <FigmaFrame style={{ flex: 1 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {sizeRows.map((size) => (
+                <div key={size} style={{ display: 'flex', alignItems: 'center' }}>
+                  {Array.from({ length: 6 }).map((_, j) => (
+                    <Avatar
+                      key={j}
+                      size={size}
+                      initials="GV"
+                      state="default"
+                      variant="initials"
+                      showStatusDot
+                      style={j > 0 ? { marginLeft: -(AVATAR_SIZE_STYLES[size].dim * 0.3) } : {}}
+                    />
+                  ))}
+                </div>
+              ))}
+            </div>
+          </FigmaFrame>
+        </div>
       </div>
 
-      {/* States × Variants — matches avatar.png - DECREASED WIDTH */}
+      {/* States × Variants — matches avatar.png */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         <div style={{ fontSize: 14, fontWeight: 600, color: '#3D4759', fontFamily: "'DM Sans', sans-serif" }}>
           Avatar — States × Variants
         </div>
-        <FigmaFrame>
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: '60px repeat(4, 1fr)', 
-            rowGap: 16, 
-            columnGap: 8, 
-            alignItems: 'center',
-            maxWidth: 440,
-            margin: '0 auto',
-          }}>
-            <div />
-            {variantRows.map((v) => (
-              <div key={v.key} style={{ textAlign: 'center', fontSize: 10, color: '#6B7280', fontFamily: "'DM Sans', sans-serif", fontWeight: 500 }}>
-                {v.label}
+        <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start' }}>
+          <div style={{ width: 70, flexShrink: 0, display: 'flex', flexDirection: 'column', paddingTop: 34 }}>
+            {stateRows.map((state, i) => (
+              <div
+                key={state.key}
+                style={{
+                  fontSize: 10,
+                  fontWeight: 500,
+                  color: '#6B7280',
+                  fontFamily: "'DM Sans', sans-serif",
+                  height: 48,
+                  display: 'flex',
+                  alignItems: 'center',
+                  marginBottom: i < stateRows.length - 1 ? 16 : 0,
+                }}
+              >
+                {state.label}
               </div>
             ))}
-            {stateRows.map((state) => (
-              <React.Fragment key={state.key}>
-                <div style={{ fontSize: 10, color: '#6B7280', fontFamily: "'DM Sans', sans-serif", fontWeight: 500 }}>{state.label}</div>
-                {variantRows.map((v) => (
-                  <div key={v.key} style={{ display: 'flex', justifyContent: 'center' }}>
-                    <Avatar size="l" initials="AS" state={state.key} variant={v.key} />
-                  </div>
-                ))}
-              </React.Fragment>
-            ))}
           </div>
-        </FigmaFrame>
+          <FigmaFrame style={{ flex: 1 }}>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: `repeat(${variantRows.length}, 1fr)`,
+                rowGap: 16,
+                columnGap: 8,
+                alignItems: 'center',
+                maxWidth: 400,
+                margin: '0 auto',
+              }}
+            >
+              {variantRows.map((v) => (
+                <div key={v.key} style={{ textAlign: 'center', fontSize: 10, color: '#6B7280', fontFamily: "'DM Sans', sans-serif", fontWeight: 500 }}>
+                  {v.label}
+                </div>
+              ))}
+              {stateRows.map((state) => (
+                <React.Fragment key={state.key}>
+                  {variantRows.map((v) => (
+                    <div key={v.key} style={{ display: 'flex', justifyContent: 'center' }}>
+                      <Avatar size="l" initials="GV" state={state.key} variant={v.key} showStatusDot />
+                    </div>
+                  ))}
+                </React.Fragment>
+              ))}
+            </div>
+          </FigmaFrame>
+        </div>
       </div>
     </div>
   );
@@ -433,7 +477,7 @@ const CARD_STYLE = {
 
 export default function AvatarPage() {
   return (
-    <div style={{ padding: 32, background: '#FAFAF8', minHeight: '100vh', fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ padding: 32, background: '#FFFFFF', minHeight: '100vh', fontFamily: "'DM Sans', sans-serif" }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 32, alignItems: 'center' }}>
         <div style={{ width: '100%', maxWidth: 1100 }}>
           <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1, color: '#8089A0', marginBottom: 8, fontFamily: "'DM Sans', sans-serif" }}>

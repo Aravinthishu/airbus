@@ -154,12 +154,12 @@ export default function AccessibilitySection() {
       />
 
       {/* Top right indicator */}
-      <div
+      {/* <div
         className="hidden sm:block absolute top-16 right-8"
         style={{ fontFamily: MONO, fontSize: 12, opacity: 0.35, letterSpacing: '1px' }}
       >
         06 / 08
-      </div>
+      </div> */}
 
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         {/* Meta row */}
@@ -168,7 +168,7 @@ export default function AccessibilitySection() {
             <span className="text-xs font-mono text-white/40">/ Accessibility</span>
             <span className="text-xs font-mono text-white/40">// Accessibility Study</span>
           </div>
-          <span className="text-xs font-mono text-white/30">/ 06</span>
+          {/* <span className="text-xs font-mono text-white/30">/ 06</span> */}
         </div>
 
         <div className="flex justify-between items-end gap-10 flex-wrap mb-16">
@@ -239,7 +239,7 @@ export default function AccessibilitySection() {
               <div key={statusKey}>
                 {/* Status pill — colored background with icon */}
                 <div
-                  className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 mb-4"
+                  className="inline-flex items-center gap-2  w-full rounded-sm px-4 py-2.5 mb-4"
                   style={{
                     background: config.bg,
                     border: `1px solid ${config.border}`,

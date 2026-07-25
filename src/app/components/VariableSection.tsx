@@ -303,12 +303,12 @@ export default function VariablesSection() {
         }}
       />
 
-      <div
+      {/* <div
         className="hidden sm:block absolute top-16 right-8"
         style={{ fontFamily: MONO, fontSize: 12, opacity: 0.35, letterSpacing: '1px' }}
       >
         07 / 08
-      </div>
+      </div> */}
 
       <div className="max-w-[1180px] mx-auto px-6 relative z-10">
         <div className="flex items-center gap-3 mb-6">
@@ -343,9 +343,10 @@ export default function VariablesSection() {
 
         <div className="rounded-[18px] border overflow-hidden bg-white" style={{ borderColor: LINE_LIGHT }}>
           <div className="flex items-center gap-2.5 px-5 py-3.5 border-b" style={{ background: PAPER, borderColor: LINE_LIGHT }}>
-            <span className="w-2.5 h-2.5 rounded-full" style={{ background: LINE_LIGHT }} />
-            <span className="w-2.5 h-2.5 rounded-full" style={{ background: LINE_LIGHT }} />
-            <span className="w-2.5 h-2.5 rounded-full" style={{ background: LINE_LIGHT }} />
+            {/* Chrome window controls - colored dots */}
+            <span className="w-3 h-3 rounded-full" style={{ background: '#FF5F57' }} />
+            <span className="w-3 h-3 rounded-full" style={{ background: '#FFBD2E' }} />
+            <span className="w-3 h-3 rounded-full" style={{ background: '#28C840' }} />
             <div className="flex-1 text-center" style={{ fontFamily: MONO, fontSize: 10.5, opacity: 0.55, letterSpacing: '0.5px' }}>
               Airbus Variables · Collection 1
             </div>

@@ -7,7 +7,7 @@ const FONT = "'DM Sans', 'IBM Plex Sans', sans-serif";
 
 const BANNER_STYLES = {
   info: {
-    bg: '#2E58D8',
+    bg: '#2554D6',
     text: '#FFFFFF',
     iconBg: '#FFFFFF',
     iconColor: '#2E58D8',
@@ -48,11 +48,12 @@ const BANNER_STYLES = {
   },
 };
 
+// Shorter messages - max 2 lines
 const DEFAULT_MESSAGES = {
-  info: 'In order to give you a better service, Airbus uses cookies. By continuing to browse the site you are agreeing to use it.',
-  success: 'Your message has been sent. We will come back to you as soon as possible.',
-  warning: 'We are updating the platform. Your experience can be slower during the next hour.',
-  error: 'No internet connection. You need to be online to perform this task.',
+  info: 'In order to give you a better service, Airbus uses cookies.',
+  success: 'Your message has been sent successfully.',
+  warning: 'We are updating the platform. Your experience may be slower.',
+  error: 'No internet connection. Please check your network.',
 };
 
 const DEFAULT_ACTIONS = {
@@ -173,8 +174,14 @@ function Banner({ variant = 'info', message, actionText, onAction, onClose, show
           flex: 1 1 auto;
           font-size: 13.5px;
           font-weight: 700;
-          line-height: 1.45;
+          line-height: 1.4;
           min-width: 0;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          max-height: 3em;
         }
         .banner-controls {
           flex: 0 0 auto;
@@ -182,6 +189,7 @@ function Banner({ variant = 'info', message, actionText, onAction, onClose, show
           align-items: center;
           gap: 18px;
           white-space: nowrap;
+          flex-shrink: 0;
         }
         .banner-action {
           background: transparent;
@@ -192,6 +200,7 @@ function Banner({ variant = 'info', message, actionText, onAction, onClose, show
           text-decoration: underline;
           cursor: pointer;
           padding: 2px 0;
+          white-space: nowrap;
         }
         .banner-close {
           background: transparent;
@@ -200,6 +209,7 @@ function Banner({ variant = 'info', message, actionText, onAction, onClose, show
           display: flex;
           align-items: center;
           padding: 4px;
+          flex-shrink: 0;
         }
 
         /* Tablet (768px - 1024px) */
@@ -213,7 +223,7 @@ function Banner({ variant = 'info', message, actionText, onAction, onClose, show
         /* Small Tablet (600px - 768px) */
         @media (max-width: 768px) {
           .banner-root { padding: 12px 18px; gap: 10px; }
-          .banner-message { font-size: 12.5px; }
+          .banner-message { font-size: 12.5px; max-height: 2.8em; }
           .banner-controls { gap: 14px; }
           .banner-action { font-size: 12.5px; }
           .banner-icon { width: 20px; height: 20px; }
@@ -224,18 +234,19 @@ function Banner({ variant = 'info', message, actionText, onAction, onClose, show
           .banner-root {
             flex-wrap: wrap;
             padding: 12px 14px;
-            gap: 8px;
+            gap: 6px;
           }
           .banner-message {
             flex-basis: calc(100% - 32px);
             font-size: 12px;
-            line-height: 1.4;
+            line-height: 1.3;
+            max-height: 2.6em;
+            -webkit-line-clamp: 2;
           }
           .banner-controls {
             flex-basis: 100%;
             justify-content: flex-end;
-            margin-top: 4px;
-            margin-left: 0;
+            margin-top: 2px;
             gap: 12px;
           }
           .banner-action {
@@ -257,6 +268,7 @@ function Banner({ variant = 'info', message, actionText, onAction, onClose, show
           }
           .banner-message {
             font-size: 11px;
+            max-height: 2.4em;
           }
           .banner-action {
             font-size: 11px;
@@ -310,7 +322,7 @@ export function BannerDemo() {
       <div
         style={{
           flex: '1 1 0',
-          minHeight: 200,
+          minHeight: 340,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',

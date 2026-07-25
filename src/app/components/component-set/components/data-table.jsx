@@ -2,15 +2,14 @@ import React, { useState } from 'react';
 
 /* ============================================================
    Design tokens — sampled from the uploaded reference images
-   (data-table-comp.png / -item.png / -size.png / -example.png)
 ============================================================ */
 const T = {
   headerBg: '#EFF1F4',
   headerBgHover: '#E9EBEE',
   text: '#14171D',
   textMuted: '#5B6474',
-  arrow: '#A9BEDD',       // inactive sort arrow
-  arrowActive: '#2352A9', // active sort arrow + priority badge
+  arrow: '#A9BEDD',
+  arrowActive: '#2352A9',
   focusBorder: '#255FCC',
   resizeBar: '#00205B',
   iconNavy: '#063B9E',
@@ -56,7 +55,8 @@ function SpecBadge({ label }) {
   );
 }
 
-// Figma-inspect-style dashed violet frame, matches the reference screenshots' own annotation border
+const SECTION_LABEL_STYLE = { fontSize: 10, fontWeight: 700, letterSpacing: 1, color: '#8089A0', marginBottom: 8, fontFamily: "'DM Sans', sans-serif" };
+
 function FigmaFrame({ children, style }) {
   return (
     <div
@@ -98,9 +98,10 @@ const Dots = ({ color = T.iconNavy, size = 14 }) => (
     <circle cx="3" cy="13.5" r="1.6" fill={color} />
   </svg>
 );
-const Plane = ({ color = T.iconNavy, size = 15 }) => (
+const Home = ({ color = T.iconNavy, size = 15 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <path d="M21 12l-7-3-2-6-1.5.6L11.8 9 4 11l-1 2 6.6.7L11 20l1.6-.6 1-6.2 5.9 2.2z" fill={color} />
+    <path d="M4 11.5 12 4l8 7.5" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+    <path d="M6 10.2V19a1 1 0 0 0 1 1h4v-6h2v6h4a1 1 0 0 0 1-1v-8.8" fill={color} />
   </svg>
 );
 const CheckboxIcon = ({ checked = false, size = 16 }) => (
@@ -116,10 +117,11 @@ const CheckboxIcon = ({ checked = false, size = 16 }) => (
 function HeaderCell({
   label = 'Label',
   align = 'left',
-  state = 'default',      // default | hover | hover-resize | focus | sorting | non-sorting
-  sortDir = 'down',        // 'down' | 'up'
-  priority = null,         // multi-sort index badge, e.g. 1
+  state = 'default',
+  priority = null,
   height = 42,
+  onMouseEnter,
+  onMouseLeave,
 }) {
   const isHover = state === 'hover' || state === 'hover-resize';
   const isFocus = state === 'focus';
@@ -131,6 +133,8 @@ function HeaderCell({
 
   return (
     <div
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
       style={{
         position: 'relative',
         display: 'flex',
@@ -144,6 +148,7 @@ function HeaderCell({
         borderBottom: isFocus ? `1.5px solid ${T.focusBorder}` : '1px solid #D9DCE1',
         boxSizing: 'border-box',
         fontFamily: "'DM Sans', sans-serif",
+        cursor: 'pointer',
       }}
     >
       {align === 'right' && !isNonSorting && <ArrowDown color={isSorting ? T.arrowActive : T.arrow} />}
@@ -169,30 +174,30 @@ function HeaderCell({
    Cell content types — reproduces data-table-item.png
 ============================================================ */
 function CellText({ text = 'Label', size = 'l' }) {
-  return <span style={{ fontSize: size === 'l' ? 14 : 13, color: T.text, fontFamily: "'DM Sans', sans-serif" }}>{text}</span>;
+  return <span style={{ fontSize: size === 'xl' ? 16 : 14, color: T.text, fontFamily: "'DM Sans', sans-serif" }}>{text}</span>;
 }
 function CellNumeric({ value = '0123456789', size = 'l' }) {
-  return <span style={{ fontSize: size === 'l' ? 14 : 13, color: T.text, fontFamily: "'DM Sans', sans-serif", fontVariantNumeric: 'tabular-nums' }}>{value}</span>;
+  return <span style={{ fontSize: size === 'xl' ? 16 : 14, color: T.text, fontFamily: "'DM Sans', sans-serif", fontVariantNumeric: 'tabular-nums' }}>{value}</span>;
 }
 function CellChip({ label = 'Label', size = 'l' }) {
   return (
     <span style={{
       display: 'inline-flex', alignItems: 'center', gap: 6,
       background: T.chipBg, borderRadius: 999,
-      padding: size === 'l' ? '6px 14px' : '4px 10px',
-      fontSize: size === 'l' ? 13 : 12, fontWeight: 700, color: T.text,
+      padding: size === 'xl' ? '8px 16px' : '6px 14px',
+      fontSize: size === 'xl' ? 14 : 13, fontWeight: 700, color: T.text,
       fontFamily: "'DM Sans', sans-serif",
     }}>
-      <Plane size={size === 'l' ? 14 : 12} />
+      <Home size={size === 'xl' ? 16 : 14} />
       {label}
     </span>
   );
 }
 function CellProgress({ pct = 70, size = 'l' }) {
-  const w = size === 'l' ? 140 : 110;
+  const w = size === 'xl' ? 170 : 140;
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontFamily: "'DM Sans', sans-serif" }}>
-      <span style={{ fontSize: size === 'l' ? 13 : 12, color: T.text, width: 30 }}>{pct}%</span>
+      <span style={{ fontSize: size === 'xl' ? 14 : 13, color: T.text, width: 30 }}>{pct}%</span>
       <div style={{ width: w, height: 6, borderRadius: 999, background: T.progressTrack, overflow: 'hidden' }}>
         <div style={{ width: `${pct}%`, height: '100%', background: T.progressFill, borderRadius: 999 }} />
       </div>
@@ -202,24 +207,24 @@ function CellProgress({ pct = 70, size = 'l' }) {
 function CellActionsMulti({ size = 'l' }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-      <Dots size={size === 'l' ? 15 : 13} />
-      <ChevronDown size={size === 'l' ? 15 : 13} />
+      <Dots size={size === 'xl' ? 17 : 15} />
+      <ChevronDown size={size === 'xl' ? 17 : 15} />
     </div>
   );
 }
 function CellActionsSingle({ size = 'l' }) {
-  return <Dots size={size === 'l' ? 15 : 13} />;
+  return <Dots size={size === 'xl' ? 17 : 15} />;
 }
 function CellTextIcon({ label = 'Label', size = 'l' }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-      <Dots size={size === 'l' ? 15 : 13} />
-      <span style={{ fontSize: size === 'l' ? 14 : 13, color: T.text, fontFamily: "'DM Sans', sans-serif" }}>{label}</span>
+      <Dots size={size === 'xl' ? 17 : 15} />
+      <span style={{ fontSize: size === 'xl' ? 16 : 14, color: T.text, fontFamily: "'DM Sans', sans-serif" }}>{label}</span>
     </div>
   );
 }
 function CellCheckbox({ size = 'l' }) {
-  return <CheckboxIcon size={size === 'l' ? 17 : 15} />;
+  return <CheckboxIcon size={size === 'xl' ? 19 : 17} />;
 }
 
 const CONTENT_TYPES = [
@@ -234,7 +239,7 @@ const CONTENT_TYPES = [
 ];
 
 /* ============================================================
-   Full example table — reproduces data-table-example.png
+   Full example table
 ============================================================ */
 const EXAMPLE_ROWS = [
   { name: 'Label', role: 'Label', dept: 'Label', number: '0123456789', actions: 1 },
@@ -248,6 +253,7 @@ const EXAMPLE_ROWS = [
 
 function FullExampleTable({ striped = true, size = 'l' }) {
   const [checkedAll, setCheckedAll] = useState(false);
+  const [hoverRow, setHoverRow] = useState(null);
   const pad = size === 'l' ? '14px 18px' : '9px 18px';
   const fontSize = size === 'l' ? 14 : 13;
   const th = {
@@ -292,7 +298,12 @@ function FullExampleTable({ striped = true, size = 'l' }) {
       </thead>
       <tbody>
         {EXAMPLE_ROWS.map((row, i) => (
-          <tr key={i} style={{ background: striped && i % 2 === 1 ? T.stripe : '#FFFFFF' }}>
+          <tr
+            key={i}
+            onMouseEnter={() => setHoverRow(i)}
+            onMouseLeave={() => setHoverRow(null)}
+            style={{ background: hoverRow === i ? T.headerBgHover : striped && i % 2 === 1 ? T.stripe : '#FFFFFF' }}
+          >
             <td style={td}><CheckboxIcon /></td>
             <td style={td}>{row.name}</td>
             <td style={td}>{row.role}</td>
@@ -300,8 +311,8 @@ function FullExampleTable({ striped = true, size = 'l' }) {
             <td style={{ ...td, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{row.number}</td>
             <td style={td}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <Plane />
-                {row.actions === 2 ? <Plane /> : <Dots />}
+                <Home />
+                {row.actions === 2 ? <Home /> : <Dots />}
               </div>
             </td>
           </tr>
@@ -312,10 +323,86 @@ function FullExampleTable({ striped = true, size = 'l' }) {
 }
 
 /* ============================================================
+   HEADERS ONLY PREVIEW
+============================================================ */
+function HeadersOnlyPreview({ size, align, forcedState }) {
+  const [hoverCol, setHoverCol] = useState(null);
+  const height = size === 'xl' ? 52 : 42;
+
+  const columns = [
+    { label: 'Name', align },
+    { label: 'Date', align: 'center' },
+    { label: 'Amount', align: 'right' },
+    { label: 'Status', align: 'left', nonSorting: true },
+  ];
+
+  return (
+    <div style={{ width: '100%', maxWidth: 560, border: '1px solid #D9DCE1', borderRadius: 6, overflow: 'hidden' }}>
+      <div style={{ display: 'flex' }}>
+        <div style={{ width: 44, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: T.headerBg, borderBottom: '1px solid #D9DCE1' }}>
+          <CheckboxIcon />
+        </div>
+        {columns.map((col, idx) => {
+          const isDemoCol = idx === 0;
+          const effectiveState = hoverCol === idx ? 'hover' : isDemoCol ? forcedState : col.nonSorting ? 'non-sorting' : 'default';
+          return (
+            <div key={idx} style={{ flex: 1 }}>
+              <HeaderCell
+                label={col.label}
+                align={col.align}
+                state={effectiveState}
+                height={height}
+                onMouseEnter={() => setHoverCol(idx)}
+                onMouseLeave={() => setHoverCol(null)}
+              />
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   CELL CONTENT ONLY PREVIEW - ONE ROW, NO HEADERS
+============================================================ */
+function CellContentOnlyPreview({ size, contentType }) {
+  return (
+    <div style={{ width: '100%', maxWidth: 560, border: '1px solid #D9DCE1', borderRadius: 6, overflow: 'hidden' }}>
+      {/* ONLY ONE row with content, NO header row */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          padding: size === 'xl' ? '16px 16px' : '12px 16px',
+          background: '#FFFFFF',
+        }}
+      >
+        <div style={{ width: 32, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <CheckboxIcon />
+        </div>
+        <div style={{ flex: 1, padding: '0 8px' }}>
+          {CONTENT_TYPES.find(ct => ct.key === contentType).render(size)}
+        </div>
+        <div style={{ flex: 1, padding: '0 8px' }}>
+          {CONTENT_TYPES.find(ct => ct.key === contentType).render(size)}
+        </div>
+        <div style={{ flex: 1, padding: '0 8px', textAlign: 'right' }}>
+          {CONTENT_TYPES.find(ct => ct.key === contentType).render(size)}
+        </div>
+        <div style={{ flex: 1, padding: '0 8px' }}>
+          {CONTENT_TYPES.find(ct => ct.key === contentType).render(size)}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
    LIVE DEMO
 ============================================================ */
 export function DataTableDemo() {
-  const [previewMode, setPreviewMode] = useState('header-states');
+  const [previewMode, setPreviewMode] = useState('headers');
   const [size, setSize] = useState('l');
   const [state, setState] = useState('default');
   const [align, setAlign] = useState('left');
@@ -323,124 +410,89 @@ export function DataTableDemo() {
 
   const stateOptions = ['default', 'hover', 'hover-resize', 'focus', 'sorting', 'non-sorting'];
   const stateLabels = ['Default', 'Hover', 'Hover Resize', 'Focus', 'Sorting', 'Non Sorting'];
-  
+
   const alignOptions = ['left', 'center', 'right'];
   const alignLabels = ['Left', 'Centre', 'Right'];
-  
-  const sizeOptions = ['m', 'l'];
-  const sizeLabels = ['M', 'L'];
-  
-  const contentTypeOptions = CONTENT_TYPES.map(ct => ct.key);
-  const contentTypeLabels = CONTENT_TYPES.map(ct => ct.label);
 
-  const getContentForMode = () => {
-    switch (previewMode) {
-      case 'header-states':
-        return (
-          <div style={{ width: 220 }}>
-            <HeaderCell label="Label" state={state} align={align} />
-          </div>
-        );
-      case 'header-size':
-        return (
-          <div style={{ width: 220 }}>
-            <HeaderCell label="Label" state="default" align={align} height={size === 'l' ? 42 : 32} />
-          </div>
-        );
-      case 'content-types':
-        const content = CONTENT_TYPES.find(ct => ct.key === contentType);
-        return content ? content.render(size) : null;
-      default:
-        return null;
-    }
-  };
+  const sizeOptions = ['l', 'xl'];
+  const sizeLabels = ['L', 'XL'];
 
-  const getPreviewLabel = () => {
-    switch (previewMode) {
-      case 'header-states': return 'Header Cell — States';
-      case 'header-size': return 'Header Cell — Size & Alignment';
-      case 'content-types': return 'Cell — Content Types';
-      default: return '';
-    }
-  };
+  const contentTypeOptions = CONTENT_TYPES.map((ct) => ct.key);
+  const contentTypeLabels = CONTENT_TYPES.map((ct) => ct.label);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <div
         style={{
           flex: '1 1 0',
-          minHeight: 200,
+          minHeight: 235,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          padding: 32,
+          padding: '24px 32px',
           gap: 16,
-          background:
-            'repeating-linear-gradient(0deg, rgba(10,103,232,0.03) 0 1px, transparent 1px 24px), repeating-linear-gradient(90deg, rgba(10,103,232,0.03) 0 1px, transparent 1px 24px)',
+          background: '#FFFFFF',
         }}
       >
         <div style={{ fontSize: 13, fontWeight: 600, color: '#8089A0', fontFamily: "'DM Sans', sans-serif" }}>
-          {getPreviewLabel()}
+          Data Table — Live Preview
         </div>
-        <div style={{ background: '#FFFFFF', padding: 20, borderRadius: 8, border: '1px solid #EFEDE8' }}>
-          {getContentForMode()}
+        
+        {previewMode === 'headers' ? (
+          <HeadersOnlyPreview size={size} align={align} forcedState={state} />
+        ) : (
+          <CellContentOnlyPreview size={size} contentType={contentType} />
+        )}
+        
+        <div style={{ fontSize: 11, color: '#A9AFBC', fontFamily: "'DM Sans', sans-serif" }}>
+          {previewMode === 'headers' 
+            ? 'Hover a column to preview its live hover state' 
+            : 'Preview different cell content types'}
         </div>
       </div>
 
       <div style={{ padding: 20, borderTop: '1px solid #EFEDE8', overflowY: 'auto' }}>
         <div style={{ marginBottom: 16 }}>
-          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, color: '#8089A0', marginBottom: 8, fontFamily: "'DM Sans', sans-serif" }}>
-            PREVIEW MODE
-          </div>
+          <div style={SECTION_LABEL_STYLE}>PREVIEW</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            <PropChip active={previewMode === 'header-states'} onClick={() => setPreviewMode('header-states')}>
-              Header States
+            <PropChip active={previewMode === 'headers'} onClick={() => setPreviewMode('headers')}>
+              Headers
             </PropChip>
-            <PropChip active={previewMode === 'header-size'} onClick={() => setPreviewMode('header-size')}>
-              Header Size
-            </PropChip>
-            <PropChip active={previewMode === 'content-types'} onClick={() => setPreviewMode('content-types')}>
-              Content Types
+            <PropChip active={previewMode === 'cellContent'} onClick={() => setPreviewMode('cellContent')}>
+              Cell Content
             </PropChip>
           </div>
         </div>
 
-        {previewMode === 'header-states' && (
-          <div style={{ marginBottom: 16 }}>
-            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, color: '#8089A0', marginBottom: 8, fontFamily: "'DM Sans', sans-serif" }}>
-              STATE
+        {previewMode === 'headers' && (
+          <>
+            <div style={{ marginBottom: 16 }}>
+              <div style={SECTION_LABEL_STYLE}>STATE</div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                {stateOptions.map((s, index) => (
+                  <PropChip key={s} active={state === s} onClick={() => setState(s)}>
+                    {stateLabels[index]}
+                  </PropChip>
+                ))}
+              </div>
             </div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-              {stateOptions.map((s, index) => (
-                <PropChip key={s} active={state === s} onClick={() => setState(s)}>
-                  {stateLabels[index]}
-                </PropChip>
-              ))}
+            <div style={{ marginBottom: 16 }}>
+              <div style={SECTION_LABEL_STYLE}>ALIGNMENT</div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                {alignOptions.map((a, index) => (
+                  <PropChip key={a} active={align === a} onClick={() => setAlign(a)}>
+                    {alignLabels[index]}
+                  </PropChip>
+                ))}
+              </div>
             </div>
-          </div>
+          </>
         )}
 
-        {previewMode === 'header-size' && (
+        {previewMode === 'cellContent' && (
           <div style={{ marginBottom: 16 }}>
-            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, color: '#8089A0', marginBottom: 8, fontFamily: "'DM Sans', sans-serif" }}>
-              SIZE
-            </div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-              {sizeOptions.map((s, index) => (
-                <PropChip key={s} active={size === s} onClick={() => setSize(s)}>
-                  {sizeLabels[index]}
-                </PropChip>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {previewMode === 'content-types' && (
-          <div style={{ marginBottom: 16 }}>
-            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, color: '#8089A0', marginBottom: 8, fontFamily: "'DM Sans', sans-serif" }}>
-              CONTENT TYPE
-            </div>
+            <div style={SECTION_LABEL_STYLE}>CONTENT TYPE</div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
               {contentTypeOptions.map((ct, index) => (
                 <PropChip key={ct} active={contentType === ct} onClick={() => setContentType(ct)}>
@@ -451,42 +503,23 @@ export function DataTableDemo() {
           </div>
         )}
 
-        {(previewMode === 'header-states' || previewMode === 'header-size') && (
-          <div>
-            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, color: '#8089A0', marginBottom: 8, fontFamily: "'DM Sans', sans-serif" }}>
-              ALIGNMENT
-            </div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-              {alignOptions.map((a, index) => (
-                <PropChip key={a} active={align === a} onClick={() => setAlign(a)}>
-                  {alignLabels[index]}
-                </PropChip>
-              ))}
-            </div>
+        <div>
+          <div style={SECTION_LABEL_STYLE}>SIZE</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            {sizeOptions.map((s, index) => (
+              <PropChip key={s} active={size === s} onClick={() => setSize(s)}>
+                {sizeLabels[index]}
+              </PropChip>
+            ))}
           </div>
-        )}
-
-        {previewMode === 'content-types' && (
-          <div>
-            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, color: '#8089A0', marginBottom: 8, fontFamily: "'DM Sans', sans-serif" }}>
-              SIZE
-            </div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-              {sizeOptions.map((s, index) => (
-                <PropChip key={s} active={size === s} onClick={() => setSize(s)}>
-                  {sizeLabels[index]}
-                </PropChip>
-              ))}
-            </div>
-          </div>
-        )}
+        </div>
       </div>
     </div>
   );
 }
 
 /* ============================================================
-   REFERENCE SPEC — exact match to your 4 uploaded images
+   REFERENCE SPEC
 ============================================================ */
 export function DataTableSpec() {
   const stateRows = [
@@ -510,72 +543,102 @@ export function DataTableSpec() {
     <div style={{ padding: 24, overflowY: 'auto', height: '100%', fontFamily: "'DM Sans', sans-serif", background: '#FFFFFF' }}>
       <SpecBadge label="Data Table" />
 
-      {/* 1. Header cell states — matches data-table-comp.png */}
+      {/* 1. Header cell states */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 40 }}>
         <div style={{ fontSize: 14, fontWeight: 600, color: '#3D4759' }}>Header Cell — States</div>
-        <FigmaFrame>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 26 }}>
+        <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start' }}>
+          <div style={{ width: 130, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 26 }}>
             {stateRows.map((row) => (
-              <div key={row.key} style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
-                <span style={{ width: 130, fontSize: 12, color: '#6B7280', textAlign: 'right' }}>{row.label}</span>
-                <div style={{ width: 220 }}>
-                  <HeaderCell label="Label" {...row.props} />
-                </div>
+              <div key={row.key} style={{ height: 42, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+                <span style={{ fontSize: 12, color: '#6B7280', textAlign: 'right' }}>{row.label}</span>
               </div>
             ))}
           </div>
-        </FigmaFrame>
+          <FigmaFrame style={{ flex: 1 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 26 }}>
+              {stateRows.map((row) => (
+                <div key={row.key} style={{ width: 220 }}>
+                  <HeaderCell label="Label" {...row.props} />
+                </div>
+              ))}
+            </div>
+          </FigmaFrame>
+        </div>
       </div>
 
-      {/* 2. Header size & alignment — matches data-table-size.png */}
+      {/* 2. Header size & alignment */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 40 }}>
         <div style={{ fontSize: 14, fontWeight: 600, color: '#3D4759' }}>Header Cell — Size &amp; Alignment</div>
-        <FigmaFrame>
-          <div style={{ display: 'grid', gridTemplateColumns: '50px repeat(3, 1fr)', rowGap: 20, columnGap: 16, alignItems: 'center' }}>
-            <div />
-            {alignLabels.map((l) => (
-              <div key={l} style={{ fontSize: 12, color: '#6B7280' }}>{l}</div>
-            ))}
-            {sizeRows.map((sz) => (
-              <React.Fragment key={sz}>
-                <div style={{ fontSize: 12, color: '#6B7280' }}>{sizeLabels[sizeRows.indexOf(sz)]}</div>
-                {alignRows.map((al) => (
-                  <div
-                    key={al}
-                    style={{
-                      borderLeft: al === 'left' ? `3px solid ${T.focusBorder}` : '3px solid transparent',
-                      borderRight: al === 'right' ? `3px solid ${T.focusBorder}` : '3px solid transparent',
-                    }}
-                  >
-                    <HeaderCell label="Label" align={al} height={sizeHeights[sz]} />
-                  </div>
-                ))}
-              </React.Fragment>
+        <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start' }}>
+          <div style={{ width: 40, flexShrink: 0, display: 'flex', flexDirection: 'column', paddingTop: 34 }}>
+            {sizeRows.map((sz, i) => (
+              <div
+                key={sz}
+                style={{
+                  fontSize: 12,
+                  color: '#6B7280',
+                  height: sizeHeights[sz],
+                  display: 'flex',
+                  alignItems: 'center',
+                  marginBottom: i < sizeRows.length - 1 ? 20 : 0,
+                }}
+              >
+                {sizeLabels[i]}
+              </div>
             ))}
           </div>
-        </FigmaFrame>
+          <FigmaFrame style={{ flex: 1 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', rowGap: 20, columnGap: 16, alignItems: 'center' }}>
+              {alignLabels.map((l) => (
+                <div key={l} style={{ fontSize: 12, color: '#6B7280' }}>{l}</div>
+              ))}
+              {sizeRows.map((sz) => (
+                <React.Fragment key={sz}>
+                  {alignRows.map((al) => (
+                    <div
+                      key={al}
+                      style={{
+                        borderLeft: al === 'left' ? `3px solid ${T.focusBorder}` : '3px solid transparent',
+                        borderRight: al === 'right' ? `3px solid ${T.focusBorder}` : '3px solid transparent',
+                      }}
+                    >
+                      <HeaderCell label="Label" align={al} height={sizeHeights[sz]} />
+                    </div>
+                  ))}
+                </React.Fragment>
+              ))}
+            </div>
+          </FigmaFrame>
+        </div>
       </div>
 
-      {/* 3. Cell content types — matches data-table-item.png */}
+      {/* 3. Cell content types */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 40 }}>
         <div style={{ fontSize: 14, fontWeight: 600, color: '#3D4759' }}>Cell — Content Types</div>
-        <FigmaFrame>
-          <div style={{ display: 'grid', gridTemplateColumns: '110px 1fr 1fr', rowGap: 22, columnGap: 24, alignItems: 'center' }}>
-            <div />
-            <div style={{ fontSize: 12, color: '#6B7280' }}>Large</div>
-            <div style={{ fontSize: 12, color: '#6B7280' }}>Medium</div>
+        <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start' }}>
+          <div style={{ width: 110, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 22, paddingTop: 34 }}>
             {CONTENT_TYPES.map((ct) => (
-              <React.Fragment key={ct.key}>
-                <div style={{ fontSize: 12, color: '#6B7280' }}>{ct.label}</div>
-                <div>{ct.render('l')}</div>
-                <div>{ct.render('m')}</div>
-              </React.Fragment>
+              <div key={ct.key} style={{ fontSize: 12, color: '#6B7280', height: 24, display: 'flex', alignItems: 'center' }}>
+                {ct.label}
+              </div>
             ))}
           </div>
-        </FigmaFrame>
+          <FigmaFrame style={{ flex: 1 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', rowGap: 22, columnGap: 24, alignItems: 'center' }}>
+              <div style={{ fontSize: 12, color: '#6B7280' }}>L</div>
+              <div style={{ fontSize: 12, color: '#6B7280' }}>XL</div>
+              {CONTENT_TYPES.map((ct) => (
+                <React.Fragment key={ct.key}>
+                  <div>{ct.render('l')}</div>
+                  <div>{ct.render('xl')}</div>
+                </React.Fragment>
+              ))}
+            </div>
+          </FigmaFrame>
+        </div>
       </div>
 
-      {/* 4. Full example — matches data-table-example.png */}
+      {/* 4. Full example */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         <div style={{ fontSize: 14, fontWeight: 600, color: '#3D4759' }}>Full Example</div>
         <FigmaFrame style={{ padding: 0, overflow: 'hidden' }}>

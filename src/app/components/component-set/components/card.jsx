@@ -159,14 +159,9 @@ const QuestionCircle = ({ color = T.iconNavy, size = 16 }) => (
     <circle cx="12" cy="16.3" r="0.9" fill={color} />
   </svg>
 );
-const ArrowRight = ({ color = T.iconNavy, size = 16 }) => (
+const ArrowRight = ({ color = '#FFFFFF', size = 14 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <path d="M4 12h15M13 6l6 6-6 6" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
-const PlaneIcon = ({ color = '#FFFFFF', size = 12 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <path d="M21 12l-7-3-2-6-1.5.6L11.8 9 4 11l-1 2 6.6.7L11 20l1.6-.6 1-6.2 5.9 2.2z" fill={color} />
+    <path d="M4 12h15M13 6l6 6-6 6" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 const SeatIcon = ({ color = T.iconNavy, size = 14 }) => (
@@ -235,7 +230,7 @@ function CardImage({ src, height = 120, dotFade = false, muted = false }) {
 }
 
 /* ============================================================
-   Button used inside cards
+   Button used inside cards - with Arrow icon
 ============================================================ */
 function CardButton({ full = true, muted = false, label = 'Button' }) {
   return (
@@ -257,7 +252,7 @@ function CardButton({ full = true, muted = false, label = 'Button' }) {
         cursor: muted ? 'not-allowed' : 'pointer',
       }}
     >
-      <PlaneIcon /> {label}
+      <ArrowRight size={14} /> {label}
     </button>
   );
 }
@@ -406,7 +401,7 @@ function ImageCard({ imageStyle = 'full', bottom = 'none', imageSrc, width = 240
         {bottom === 'without-button' && (
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
             <span style={{ fontSize: 12, color: T.textMuted }}>Lorem ipsum dolor sit lorem</span>
-            <ArrowRight size={16} />
+            <ArrowRight color={T.iconNavy} size={16} />
           </div>
         )}
 

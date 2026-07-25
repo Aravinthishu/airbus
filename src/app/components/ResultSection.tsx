@@ -84,12 +84,12 @@ export default function ResultsSection() {
       />
 
       {/* Top right indicator */}
-      <div
+      {/* <div
         className="hidden sm:block absolute top-16 right-8"
         style={{ fontFamily: MONO, fontSize: 12, opacity: 0.35, letterSpacing: '1px' }}
       >
         08 / 08
-      </div>
+      </div> */}
 
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         {/* Meta row similar to other sections */}
@@ -98,7 +98,7 @@ export default function ResultsSection() {
             <span className="text-xs font-mono text-white/40">/ Results</span>
             <span className="text-xs font-mono text-white/40">// Impact & Outcomes</span>
           </div>
-          <span className="text-xs font-mono text-white/30">/ 08</span>
+          {/* <span className="text-xs font-mono text-white/30">/ 08</span> */}
         </div>
 
         <div className="flex justify-between items-end gap-10 flex-wrap mb-16">
