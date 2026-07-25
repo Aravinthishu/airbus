@@ -277,7 +277,7 @@ function SpecTextareaRow({
   showCursor,
   showToolbar,
   dim,
-}: Omit<SpecRowConfig, 'key'>) {
+}: Omit<SpecRowConfig, 'key' | 'title'>) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6, width: 320 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
