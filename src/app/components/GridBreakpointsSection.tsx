@@ -31,9 +31,41 @@ const breakpoints = [
   },
 ];
 
-function DesktopMockup({ gridColor }: { gridColor: string }) {
+/**
+ * Caliper — dimension-line style indicator (two end ticks + connecting bar + value label).
+ * `style.left` / `style.width` should be passed in the SAME coordinate system as the
+ * grid columns it's annotating (see usage below).
+ */
+function Caliper({
+  style,
+  value,
+  label,
+}: {
+  style: React.CSSProperties;
+  value: string;
+  label?: string;
+}) {
   return (
-    <div className="relative mx-auto w-full" style={{ maxWidth: '760px' }}>
+    <div
+      className="absolute flex flex-col items-center pointer-events-none z-30"
+      style={style}
+    >
+      <div className="relative w-full" style={{ height: '8px' }}>
+        <div className="absolute left-0 top-0 w-px h-full bg-[#0a67e8]" />
+        <div className="absolute right-0 top-0 w-px h-full bg-[#0a67e8]" />
+        <div className="absolute left-0 right-0 top-1/2 h-px bg-[#0a67e8]/70" />
+      </div>
+      <span className="text-[11px] leading-none font-mono font-semibold text-[#0a67e8] mt-1.5 whitespace-nowrap bg-dark-bg/90 px-1.5 py-1 rounded-sm">
+        {label ? `${label} ${value}` : value}
+      </span>
+    </div>
+  );
+}
+
+function DesktopMockup({ gridColor }: { gridColor: string }) {
+  const cols = 12;
+  return (
+    <div className="relative mx-auto w-full" style={{ maxWidth: '960px' }}>
       {/* Screen */}
       <div
         className="device-screen rounded-t-xl overflow-hidden"
@@ -41,8 +73,8 @@ function DesktopMockup({ gridColor }: { gridColor: string }) {
       >
         {/* Grid columns visualization */}
         <div className="w-full h-full rounded-lg overflow-hidden relative bg-dark-surface">
-          <div className="absolute inset-0 flex gap-px px-5">
-            {Array.from({ length: 12 }).map((_, i) => (
+          <div className="absolute inset-0 flex gap-2.5 px-5">
+            {Array.from({ length: cols }).map((_, i) => (
               <div
                 key={i}
                 className="flex-1 h-full rounded-sm opacity-30"
@@ -50,6 +82,30 @@ function DesktopMockup({ gridColor }: { gridColor: string }) {
               />
             ))}
           </div>
+
+          {/* Gutter indicator — sits in the SAME px-5 coordinate space as the columns above */}
+          <div className="absolute inset-0 px-5 pointer-events-none z-30">
+            <div className="relative w-full h-full">
+              <Caliper
+                style={{
+                  left: `${(1 / cols) * 100}%`,
+                  top: '4px',
+                  width: '20px',
+                  transform: 'translateX(-50%)',
+                }}
+                value="24px"
+                label="Gutter"
+              />
+            </div>
+          </div>
+
+          {/* Margin indicator — measured from the true edge, before the px-5 padding kicks in */}
+          <Caliper
+            style={{ left: '0px', top: '4px', width: '20px' }}
+            value="160px"
+            label="Margin"
+          />
+
           {/* Fake UI content */}
           <div className="relative z-10 p-5 space-y-3">
             <div className="h-3.5 w-28 rounded bg-white/20" />
@@ -70,15 +126,16 @@ function DesktopMockup({ gridColor }: { gridColor: string }) {
 }
 
 function TabletMockup({ gridColor }: { gridColor: string }) {
+  const cols = 8;
   return (
-    <div className="relative mx-auto w-full" style={{ maxWidth: '380px' }}>
+    <div className="relative mx-auto w-full" style={{ maxWidth: '480px' }}>
       <div
         className="device-screen rounded-2xl overflow-hidden border-4 border-dark-muted"
         style={{ aspectRatio: '3/4', padding: '14px' }}
       >
         <div className="w-full h-full rounded-xl overflow-hidden relative bg-dark-surface">
-          <div className="absolute inset-0 flex gap-px px-4">
-            {Array.from({ length: 8 }).map((_, i) => (
+          <div className="absolute inset-0 flex gap-2 px-4">
+            {Array.from({ length: cols }).map((_, i) => (
               <div
                 key={i}
                 className="flex-1 h-full rounded-sm opacity-30"
@@ -86,6 +143,30 @@ function TabletMockup({ gridColor }: { gridColor: string }) {
               />
             ))}
           </div>
+
+          {/* Gutter indicator */}
+          <div className="absolute inset-0 px-4 pointer-events-none z-30">
+            <div className="relative w-full h-full">
+              <Caliper
+                style={{
+                  left: `${(1 / cols) * 100}%`,
+                  top: '4px',
+                  width: '16px',
+                  transform: 'translateX(-50%)',
+                }}
+                value="16px"
+                label="Gutter"
+              />
+            </div>
+          </div>
+
+          {/* Margin indicator */}
+          <Caliper
+            style={{ left: '0px', top: '4px', width: '16px' }}
+            value="32px"
+            label="Margin"
+          />
+
           <div className="relative z-10 p-4 space-y-3">
             <div className="h-3 w-20 rounded bg-white/20" />
             <div className="h-2 w-28 rounded bg-white/10" />
@@ -104,8 +185,9 @@ function TabletMockup({ gridColor }: { gridColor: string }) {
 }
 
 function MobileMockup({ gridColor }: { gridColor: string }) {
+  const cols = 4;
   return (
-    <div className="relative mx-auto w-full" style={{ maxWidth: '230px' }}>
+    <div className="relative mx-auto w-full" style={{ maxWidth: '300px' }}>
       <div
         className="device-screen rounded-3xl overflow-hidden border-4 border-dark-muted relative"
         style={{ aspectRatio: '9/19', padding: '10px' }}
@@ -113,8 +195,8 @@ function MobileMockup({ gridColor }: { gridColor: string }) {
         {/* Notch */}
         <div className="absolute top-2.5 left-1/2 -translate-x-1/2 w-20 h-5 bg-dark-bg rounded-full z-20" />
         <div className="w-full h-full rounded-2xl overflow-hidden relative bg-dark-surface">
-          <div className="absolute inset-0 flex gap-px px-2.5">
-            {Array.from({ length: 4 }).map((_, i) => (
+          <div className="absolute inset-0 flex gap-1.5 px-2.5">
+            {Array.from({ length: cols }).map((_, i) => (
               <div
                 key={i}
                 className="flex-1 h-full rounded-sm opacity-30"
@@ -122,6 +204,30 @@ function MobileMockup({ gridColor }: { gridColor: string }) {
               />
             ))}
           </div>
+
+          {/* Gutter indicator */}
+          <div className="absolute inset-0 px-2.5 pointer-events-none z-30">
+            <div className="relative w-full h-full">
+              <Caliper
+                style={{
+                  left: `${(1 / cols) * 100}%`,
+                  top: '4px',
+                  width: '12px',
+                  transform: 'translateX(-50%)',
+                }}
+                value="16px"
+                label="Gutter"
+              />
+            </div>
+          </div>
+
+          {/* Margin indicator */}
+          <Caliper
+            style={{ left: '0px', top: '4px', width: '10px' }}
+            value="16px"
+            label="Margin"
+          />
+
           <div className="relative z-10 p-3 pt-8 space-y-2">
             <div className="h-2.5 w-14 rounded bg-white/20" />
             <div className="h-2 w-20 rounded bg-white/10" />
@@ -189,7 +295,7 @@ export default function GridBreakpointsSection() {
             <h2
               className="text-white leading-none text-section-title"
               style={{
-    
+
                 fontSize: 'clamp(36px, 5vw, 64px)',
                 fontWeight: 800,
                 letterSpacing: '-0.03em',

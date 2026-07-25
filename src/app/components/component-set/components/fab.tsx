@@ -368,8 +368,8 @@ export function FabDemo() {
                 {d === "horizontal"
                   ? "Horizontal"
                   : d === "vertical-up"
-                    ? "Vertical Up"
-                    : "Vertical Down"}
+                    ? "Vertical Down"
+                    : "Vertical Up"}
               </PropChip>
             ))}
           </div>

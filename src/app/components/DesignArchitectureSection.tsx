@@ -4,7 +4,7 @@ import Icon from '../../components/ui/AppIcon';
 
 const tokens = [
   {
-    type: 'Global Tokens',
+    type: 'primitive Tokens',
     color: 'bg-primary/10 border-primary/20',
     textColor: 'text-primary',
     icon: 'CircleStackIcon' as const,
@@ -150,7 +150,7 @@ export default function DesignArchitectureSection() {
         {/* Architecture diagram */}
         <div className="mt-16 p-8 rounded-2xl bg-foreground/3 border border-border">
           <div className="text-xs font-mono text-muted-foreground mb-6 uppercase tracking-widest">Token Flow Diagram</div>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             {[
               { label: 'Raw Values', sub: 'colors, sizes, radii', bg: 'bg-primary/10', border: 'border-primary/30', text: 'text-primary' },
               { label: '→', sub: '', bg: '', border: '', text: 'text-muted-foreground' },

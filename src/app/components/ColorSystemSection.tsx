@@ -230,36 +230,6 @@ const colorPalette: ColorFamily[] = [
       { hex: '#000000', label: 'Black' },
     ],
   },
-  {
-    name: 'Disco Cockpit Grey',
-    shades: [
-      { hex: '#282828', label: '100' },
-      { hex: '#4D4D4D', label: '40' },
-      { hex: '#6F6F6F', label: '30' },
-      { hex: '#B9B9B9', label: '20' },
-    ],
-  },
-  {
-    name: 'Disco Cockpit',
-    shades: [
-      { hex: '#00FF00', label: 'Green' },
-      { hex: '#FF4D9A', label: 'Pink' },
-      { hex: '#FFDD00', label: 'Yellow' },
-    ],
-  },
-  {
-    name: 'Dark Scale',
-    shades: [
-      { hex: '#0F1318', label: '80' },
-      { hex: '#14171D', label: '60' },
-      { hex: '#181C21', label: '50' },
-      { hex: '#1C1F25', label: '40' },
-      { hex: '#25282E', label: '30' },
-      { hex: '#292D33', label: '20' },
-      { hex: '#32353B', label: '70' },
-      { hex: '#3A3E44', label: '10' },
-    ],
-  },
 ];
 
 /* Values pulled directly from the palette above, mapped to their semantic role. */
@@ -300,6 +270,12 @@ export default function ColorSystemSection() {
     if (sectionRef.current) observer.observe(sectionRef.current);
     return () => observer.disconnect();
   }, []);
+
+  // Helper function to check if a color is white or very light
+  const isWhiteOrLight = (hex: string) => {
+    const lightColors = ['#FFFFFF', '#FFF', '#FAFAFA', '#F1F1F1', '#E6E6E6'];
+    return lightColors.includes(hex.toUpperCase());
+  };
 
   return (
     <section id="color" ref={sectionRef} className="py-16 sm:py-20 lg:py-28 bg-[#fff] relative overflow-hidden">
@@ -380,20 +356,25 @@ export default function ColorSystemSection() {
                     className="flex gap-1.5 w-full overflow-x-auto sm:overflow-visible sm:flex-wrap pb-1 sm:pb-0 [&::-webkit-scrollbar]:hidden"
                     style={{ scrollbarWidth: 'none' }}
                   >
-                    {lightToDark.map((shade, si) => (
-                      <div
-                        key={si}
-                        className="group relative w-11 h-11 sm:w-auto sm:h-12 sm:flex-1 sm:min-w-[42px] flex-shrink-0 sm:flex-shrink rounded-xl cursor-pointer transition-transform duration-200 ease-out hover:scale-110 hover:z-10"
-                        style={{ background: shade.hex }}
-                      >
-                        {/* Hover tooltip */}
-                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 px-2.5 py-1.5 bg-[#0D0D0D] text-[#EBF8FF] text-[10px] font-mono rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-150 whitespace-nowrap pointer-events-none shadow-xl">
-                          {shade.hex}
-                          <span className="opacity-50"> · {shade.label}</span>
-                          <div className="absolute top-full left-1/2 -translate-x-1/2 w-2 h-2 bg-[#0D0D0D] rotate-45 -mt-1" />
+                    {lightToDark.map((shade, si) => {
+                      const isWhite = isWhiteOrLight(shade.hex);
+                      return (
+                        <div
+                          key={si}
+                          className={`group relative w-11 h-11 sm:w-auto sm:h-12 sm:flex-1 sm:min-w-[42px] flex-shrink-0 sm:flex-shrink rounded-xl cursor-pointer transition-transform duration-200 ease-out hover:scale-90 hover:z-10 ${
+                            isWhite ? 'border border-[#D8D4CC]' : ''
+                          }`}
+                          style={{ background: shade.hex }}
+                        >
+                          {/* Hover tooltip */}
+                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 px-2.5 py-1.5 bg-[#0D0D0D] text-[#EBF8FF] text-[10px] font-mono rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-150 whitespace-nowrap pointer-events-none shadow-xl">
+                            {shade.hex}
+                            <span className="opacity-50"> · {shade.label}</span>
+                            <div className="absolute top-full left-1/2 -translate-x-1/2 w-2 h-2 bg-[#0D0D0D] rotate-45 -mt-1" />
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               );
@@ -440,7 +421,7 @@ export default function ColorSystemSection() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
           {[
             {
-              title: 'Base Colors',
+              title: 'Foundation',
               desc: 'Global token values — the foundational palette that maps directly to absolute hex values. These are never used directly in components.',
               tokens: ['--gray-100', '--gray-500', '--orange-500', '--red-500'],
               accent: 'border-[#0a67e8]/20 bg-[#0a67e8]/5',
@@ -477,7 +458,7 @@ export default function ColorSystemSection() {
         </div>
 
         {/* Airbus Design System Link */}
-        <div className="mt-10 sm:mt-12 pt-8 border-t border-[#D8D4CC] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        {/* <div className="mt-10 sm:mt-12 pt-8 border-t border-[#D8D4CC] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <p className="text-sm text-[#6B6B6B]">
             View the full color guidelines at{' '}
             <a
@@ -494,7 +475,7 @@ export default function ColorSystemSection() {
             <div className="w-px h-4 bg-[#D8D4CC]" />
             <span className="text-xs font-mono text-[#6B6B6B]/50">WCAG 2.2 AA</span>
           </div>
-        </div>
+        </div> */}
       </div>
     </section>
   );

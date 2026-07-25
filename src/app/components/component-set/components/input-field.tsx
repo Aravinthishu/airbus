@@ -323,13 +323,12 @@ export function InputFieldDemo() {
       <div
         style={{
           flex: '1 1 0',
-          minHeight: 180,
+          minHeight: 290,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           padding: 24,
-          background:
-            'repeating-linear-gradient(0deg, rgba(10,103,232,0.03) 0 1px, transparent 1px 24px), repeating-linear-gradient(90deg, rgba(10,103,232,0.03) 0 1px, transparent 1px 24px)',
+          background: '#FFFFFF',
         }}
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -425,15 +424,35 @@ export function InputFieldDemo() {
 function InputSizesList() {
   const order: SizeKey[] = ['xs', 's', 'm', 'l', 'xl'];
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      {order.map((size) => (
-        <div key={size} style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <span style={{ width: 24, fontSize: 12, fontWeight: 600, color: '#8089A0', fontFamily: "'DM Sans', sans-serif" }}>
-            {size.toUpperCase()}
-          </span>
-          <Field size={size} stateKey="filled" label="Label" placeholder="Placeholder" />
+    <div style={{ display: 'flex', gap: 16 }}>
+      {/* size labels, outside the dashed box — same pattern as the States grid */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 20, width: 24 }}>
+        {order.map((size) => (
+          <div key={size} style={{ height: 68, display: 'flex', alignItems: 'center' }}>
+            <span style={{ fontSize: 12, fontWeight: 600, color: '#8089A0', fontFamily: "'DM Sans', sans-serif" }}>
+              {size.toUpperCase()}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      {/* dashed violet guide box wrapping just the fields */}
+      <div
+        style={{
+          border: '1.5px dashed #8B5CF6',
+          borderRadius: 4,
+          padding: '20px 24px',
+          flex: 1,
+        }}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+          {order.map((size) => (
+            <div key={size} style={{ height: 68, display: 'flex', alignItems: 'center' }}>
+              <Field size={size} stateKey="filled" label="Label" placeholder="Placeholder" />
+            </div>
+          ))}
         </div>
-      ))}
+      </div>
     </div>
   );
 }
@@ -483,8 +502,17 @@ function InputStatesGrid() {
           ))}
         </div>
 
-        {/* dashed violet guide box wrapping header + grid */}
-        <div style={{ position: 'relative', borderRadius: 4, padding: '0 12px', flex: 1, justifyContent: 'center' }}>
+        {/* dashed violet guide box wrapping header + grid — Figma-style component annotation */}
+        <div
+          style={{
+            position: 'relative',
+            borderRadius: 4,
+            padding: '12px 20px',
+            flex: 1,
+            justifyContent: 'center',
+            border: '1.5px dashed #8B5CF6',
+          }}
+        >
           <div
             style={{
               display: 'grid',
@@ -511,7 +539,7 @@ function InputStatesGrid() {
 
 export function InputFieldSpec() {
   return (
-    <div style={{ padding: 20, overflowY: 'auto', height: '100%' }}>
+    <div style={{ padding: 20, overflowY: 'auto', height: '100%', background: '#FFFFFF' }}>
       <SpecBadge label="Input Field" />
       <SpecBlock title="Sizes">
         <InputSizesList />

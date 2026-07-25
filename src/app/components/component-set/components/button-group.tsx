@@ -58,7 +58,8 @@ function SpecBlock({
 }
 
 /* ============================================================
-   SETTINGS ICON — matches the glyph in the reference images
+   SETTINGS ICON — gear glyph, used everywhere (no plane icon
+   anywhere in this file)
 ============================================================ */
 function SettingsIcon({ size = 16 }: { size?: number }) {
   return (
@@ -71,11 +72,8 @@ function SettingsIcon({ size = 16 }: { size?: number }) {
 
 /* ============================================================
    BUTTON GROUP STYLES
-   NOTE: "default" now matches the uploaded reference exactly —
-   white background, navy border, navy text/icon.
 ============================================================ */
 type ButtonState = 'default' | 'hover' | 'active' | 'focus' | 'disabled';
-type ButtonSide = 'left' | 'center' | 'right';
 type ButtonSize = 'l' | 'm' | 's';
 
 const BUTTON_GROUP_STYLES: Record<
@@ -113,19 +111,15 @@ const BUTTON_GROUP_STYLES: Record<
 function ButtonGroupButton({
   label,
   state = 'default',
-  side = 'center',
   size = 'm',
   showIcon = false,
   iconOnly = false,
-  isLast = false,
 }: {
   label: string;
   state?: ButtonState;
-  side?: ButtonSide;
   size?: ButtonSize;
   showIcon?: boolean;
   iconOnly?: boolean;
-  isLast?: boolean;
 }) {
   const getSizeStyle = () => {
     switch (size) {
@@ -137,12 +131,6 @@ function ButtonGroupButton({
   };
 
   const getIconSize = () => (size === 'l' ? 18 : size === 'm' ? 16 : 14);
-
-  const getBorderRadius = () => {
-    if (side === 'left') return '6px 0 0 6px';
-    if (side === 'right') return '0 6px 6px 0';
-    return '6px';
-  };
 
   const styles = BUTTON_GROUP_STYLES[state] || BUTTON_GROUP_STYLES.default;
   const sizeStyle = getSizeStyle();
@@ -158,16 +146,12 @@ function ButtonGroupButton({
         justifyContent: 'center',
         gap: showIcon && !iconOnly ? 8 : 0,
         whiteSpace: 'nowrap',
-        borderRadius: getBorderRadius(),
         fontWeight: 600,
         outline: 'none',
         transition: 'all 0.15s ease',
         backgroundColor: styles.bg,
         color: styles.text,
-        border: `1.5px solid ${styles.border}`,
-        borderRight: side === 'center' && !isLast ? 'none' : `1.5px solid ${styles.border}`,
-        borderLeft: side === 'center' && !isLast ? 'none' : `1.5px solid ${styles.border}`,
-        boxShadow: styles.boxShadow || 'none',
+        border: 'none',
         cursor: isDisabled ? 'not-allowed' : 'pointer',
         ...sizeStyle,
       }}
@@ -193,25 +177,40 @@ function ButtonGroup({
   iconOnly?: boolean;
   label?: string;
 }) {
-  const getSide = (index: number): ButtonSide => {
-    if (index === 0) return 'left';
-    if (index === itemCount - 1) return 'right';
-    return 'center';
-  };
+  const styles = BUTTON_GROUP_STYLES[state] || BUTTON_GROUP_STYLES.default;
 
   return (
-    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 0 }}>
+    <div
+      style={{
+        display: 'inline-flex',
+        alignItems: 'stretch',
+        border: `1.5px solid ${styles.border}`,
+        borderRadius: 6,
+        overflow: 'hidden',
+        boxShadow: styles.boxShadow || 'none',
+      }}
+    >
       {Array.from({ length: itemCount }).map((_, index) => (
-        <ButtonGroupButton
-          key={index}
-          label={label}
-          state={state}
-          side={getSide(index)}
-          size={size}
-          showIcon={showIcon}
-          iconOnly={iconOnly}
-          isLast={index === itemCount - 1}
-        />
+        <React.Fragment key={index}>
+          {index > 0 && (
+              <div
+                style={{
+                  width: 1.5,
+                  alignSelf: 'stretch',
+                  margin: '8px 0',
+                  flexShrink: 0,
+                  backgroundColor: styles.border,
+                }}
+              />
+            )}
+          <ButtonGroupButton
+            label={label}
+            state={state}
+            size={size}
+            showIcon={showIcon}
+            iconOnly={iconOnly}
+          />
+        </React.Fragment>
       ))}
     </div>
   );
@@ -233,15 +232,16 @@ export function ButtonGroupDemo() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <div
+      className='bg-[#fff]'
         style={{
           flex: '1 1 0',
-          minHeight: 220,
+          minHeight: 200,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           padding: 32,
-          background:
-            'repeating-linear-gradient(0deg, rgba(10,103,232,0.03) 0 1px, transparent 1px 24px), repeating-linear-gradient(90deg, rgba(10,103,232,0.03) 0 1px, transparent 1px 24px)',
+          // background:
+          //   'repeating-linear-gradient(0deg, rgba(10,103,232,0.03) 0 1px, transparent 1px 24px), repeating-linear-gradient(90deg, rgba(10,103,232,0.03) 0 1px, transparent 1px 24px)',
         }}
       >
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
@@ -304,7 +304,8 @@ export function ButtonGroupDemo() {
 
 /* ============================================================
    REFERENCE SPEC — matches btn-group-all.png / btn-group-icon-all.png
-   with violet dashed border like Figma
+   with violet dashed border like Figma. Uses SettingsIcon (gear)
+   everywhere — no plane icon anywhere in this file.
 ============================================================ */
 export function ButtonGroupSpec() {
   const sizes: ButtonSize[] = ['l', 'm', 's'];

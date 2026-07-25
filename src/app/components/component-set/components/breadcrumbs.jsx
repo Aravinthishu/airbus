@@ -1,7 +1,4 @@
 import React, { useState } from 'react';
-import Image from 'next/image';
-import breadcrumbsImage from '../../../../assets/images/breadcrumbs/breadcrumbs.png';
-import breadcrumbsLevelImage from '../../../../assets/images/breadcrumbs/breadcrumbs-level.png';
 
 /* ============================================================
    Minimal stand-ins for your ui-helpers
@@ -37,83 +34,102 @@ function SpecBadge({ label }) {
 }
 
 /* ============================================================
-   Base Breadcrumbs component
+   Design tokens
 ============================================================ */
-function Breadcrumbs({ 
-  items = [], 
-  state = 'default',
-}) {
-  // State styles
-  const getStateStyles = () => {
-    switch (state) {
-      case 'hover':
-        return {
-          currentColor: '#255FCC',
-          linkColor: '#255FCC',
-          linkBg: '#F5F5F4',
-          linkDecoration: 'none',
-          linkPadding: '4px 8px',
-          linkRadius: '4px',
-        };
-      case 'active':
-        return {
-          currentColor: '#255FCC',
-          linkColor: '#255FCC',
-          linkBg: '#E9EEFC',
-          linkDecoration: 'none',
-          linkPadding: '4px 8px',
-          linkRadius: '4px',
-        };
-      case 'focus':
-        return {
-          currentColor: '#255FCC',
-          linkColor: '#255FCC',
-          linkBg: 'transparent',
-          linkDecoration: 'none',
-          linkPadding: '4px 8px',
-          linkRadius: '4px',
-          linkBorder: '2px solid #255FCC',
-        };
-      default:
-        return {
-          currentColor: '#0B1F4D',
-          linkColor: '#6B7280',
-          linkBg: 'transparent',
-          linkDecoration: 'none',
-          linkPadding: '4px 8px',
-          linkRadius: '4px',
-        };
-    }
-  };
+const VIOLET_DASH = '#C084FC';
+const FONT = "'DM Sans', sans-serif";
+const LINK_COLOR = '#255FCC';
+const CURRENT_COLOR = '#6B7280';
+const ELLIPSIS_COLOR = '#0B1F4D';
+const CHEVRON_COLOR = '#B5B9C2';
+const BORDER_RADIUS = 4;
 
-  const styles = getStateStyles();
+/* ============================================================
+   Interactive state → background/border, shared by links + ellipsis
+============================================================ */
+function getInteractiveStyle(state) {
+  switch (state) {
+    case 'hover':
+      return { bg: '#F5F5F4', border: 'none' };
+    case 'active':
+      return { bg: '#E9EEFC', border: 'none' };
+    case 'focus':
+      return { bg: 'transparent', border: `2px solid ${LINK_COLOR}` };
+    default:
+      return { bg: 'transparent', border: 'none' };
+  }
+}
+
+/* ============================================================
+   Ellipsis / collapsed-levels button ("•••")
+============================================================ */
+function EllipsisItem({ state = 'default' }) {
+  const { bg, border } = getInteractiveStyle(state);
+  return (
+    <span
+      style={{
+        fontSize: 13,
+        fontWeight: 700,
+        letterSpacing: 1,
+        color: ELLIPSIS_COLOR,
+        background: bg,
+        border,
+        padding: '4px 10px',
+        borderRadius: BORDER_RADIUS,
+        cursor: 'pointer',
+        fontFamily: FONT,
+        display: 'inline-flex',
+        alignItems: 'center',
+        transition: 'all 0.15s ease',
+      }}
+    >
+      •••
+    </span>
+  );
+}
+
+function Chevron() {
+  return <span style={{ margin: '0 4px', fontSize: 13, color: CHEVRON_COLOR, fontFamily: FONT }}>&gt;</span>;
+}
+
+/* ============================================================
+   Base Breadcrumbs component
+   - non-last items: bold blue links
+   - last item: muted grey "Current", not clickable
+   - an item literally equal to '...' renders as the pill-style
+     EllipsisItem representing collapsed levels
+============================================================ */
+function Breadcrumbs({ items = [], state = 'default' }) {
+  const { bg, border } = getInteractiveStyle(state);
 
   return (
-    <nav style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', fontFamily: "'DM Sans', sans-serif", gap: 4 }}>
+    <nav style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', fontFamily: FONT }}>
       {items.map((item, i) => {
         const isLast = i === items.length - 1;
+        const isEllipsis = item === '...';
         return (
-          <span key={item} style={{ display: 'flex', alignItems: 'center' }}>
-            <span
-              style={{
-                fontSize: 13,
-                fontWeight: isLast ? 700 : 500,
-                color: isLast ? styles.currentColor : styles.linkColor,
-                cursor: isLast ? 'default' : 'pointer',
-                textDecoration: styles.linkDecoration,
-                backgroundColor: isLast ? 'transparent' : styles.linkBg,
-                padding: styles.linkPadding,
-                borderRadius: styles.linkRadius,
-                border: isLast ? 'none' : (styles.linkBorder || 'none'),
-                outline: 'none',
-                transition: 'all 0.15s ease',
-              }}
-            >
-              {item}
-            </span>
-            {!isLast && (
-              <span style={{ margin: '0 4px', fontSize: 13, color: '#B5B9C2' }}>/</span>
+          <span key={`${item}-${i}`} style={{ display: 'flex', alignItems: 'center' }}>
+            {isEllipsis ? (
+              <EllipsisItem state={state} />
+            ) : (
+              <span
+                style={{
+                  fontSize: 13,
+                  fontWeight: isLast ? 500 : 700,
+                  color: isLast ? CURRENT_COLOR : LINK_COLOR,
+                  cursor: isLast ? 'default' : 'pointer',
+                  background: isLast ? 'transparent' : bg,
+                  border: isLast ? 'none' : border,
+                  padding: '4px 8px',
+                  borderRadius: BORDER_RADIUS,
+                  fontFamily: FONT,
+                  transition: 'all 0.15s ease',
+                }}
+              >
+                {item}
+              </span>
             )}
+            {!isLast && <Chevron />}
           </span>
         );
       })}
@@ -129,14 +145,9 @@ export function BreadcrumbsDemo() {
   const [state, setState] = useState('default');
 
   const getItems = () => {
-    if (level === 3) {
-      return ['Level1', 'Level2', 'Comment'];
-    } else if (level === 4) {
-      return ['Level1', 'Level2', 'Level3', 'Comment'];
-    } else if (level === 5) {
-      return ['Level1', '...', 'Level17', 'Comment'];
-    }
-    return ['Level1', 'Level2', 'Level3', 'Level4', 'Comment'];
+    if (level === 3) return ['Level 1', 'Level 2', 'Current'];
+    if (level === 5) return ['Level 1', '...', 'Level 7', 'Current'];
+    return ['Level 1', 'Level 2', 'Level 3', 'Current'];
   };
 
   const items = getItems();
@@ -155,7 +166,7 @@ export function BreadcrumbsDemo() {
       <div
         style={{
           flex: '1 1 0',
-          minHeight: 220,
+          minHeight: 340,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -163,17 +174,12 @@ export function BreadcrumbsDemo() {
           background: '#FFFFFF',
         }}
       >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <Breadcrumbs 
-            items={items} 
-            state={state}
-          />
-        </div>
+        <Breadcrumbs items={items} state={state} />
       </div>
 
       <div style={{ padding: 20, borderTop: '1px solid #EFEDE8', overflowY: 'auto', background: '#FFFFFF' }}>
         <div style={{ marginBottom: 16 }}>
-          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, color: '#8089A0', marginBottom: 8, fontFamily: "'DM Sans', sans-serif" }}>
+          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, color: '#8089A0', marginBottom: 8, fontFamily: FONT }}>
             STATE
           </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -185,7 +191,7 @@ export function BreadcrumbsDemo() {
           </div>
         </div>
         <div>
-          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, color: '#8089A0', marginBottom: 8, fontFamily: "'DM Sans', sans-serif" }}>
+          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, color: '#8089A0', marginBottom: 8, fontFamily: FONT }}>
             LEVELS
           </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -202,113 +208,187 @@ export function BreadcrumbsDemo() {
 }
 
 /* ============================================================
-   REFERENCE SPEC — Using images directly
+   REFERENCE SPEC — 1) States row
+   Default / Hover / Active / Focus headers sit OUTSIDE the
+   violet dashed box; only the ellipsis-button row sits inside.
+============================================================ */
+function BreadcrumbsStatesSpec() {
+  const states = ['default', 'hover', 'active', 'focus'];
+  const labels = ['Default', 'Hover', 'Active', 'Focus'];
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div style={{ fontSize: 14, fontWeight: 600, color: '#3D4759', fontFamily: FONT, marginBottom: 4 }}>
+        Breadcrumbs — States
+      </div>
+      <div style={{ background: '#FFFFFF', padding: '24px 24px 20px 24px', borderRadius: BORDER_RADIUS }}>
+        <div
+          style={{
+            position: 'relative',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 12,
+          }}
+        >
+          {/* Headers row */}
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(4, 1fr)',
+              gap: 8,
+              paddingBottom: 8,
+            }}
+          >
+            {labels.map((label) => (
+              <div
+                key={label}
+                style={{
+                  fontSize: 13,
+                  fontWeight: 600,
+                  color: '#3D4759',
+                  fontFamily: FONT,
+                  textAlign: 'center',
+                }}
+              >
+                {label}
+              </div>
+            ))}
+          </div>
+
+          {/* Content row with ellipsis items */}
+          <div
+            style={{
+              position: 'relative',
+              display: 'grid',
+              gridTemplateColumns: 'repeat(4, 1fr)',
+              gap: 8,
+              padding: '12px 8px',
+            }}
+          >
+            {states.map((s, i) => (
+              <div
+                key={`c-${s}`}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <EllipsisItem state={s} />
+              </div>
+            ))}
+
+            {/* violet dashed reference box — spans only the content row */}
+            <div
+              style={{
+                position: 'absolute',
+                top: -4,
+                left: -8,
+                right: -8,
+                bottom: -4,
+                border: `1.5px dashed ${VIOLET_DASH}`,
+                borderRadius: BORDER_RADIUS,
+                pointerEvents: 'none',
+              }}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   REFERENCE SPEC — 2) Levels
+   3/4/+4 levels labels sit OUTSIDE the box; the breadcrumb
+   trail itself sits inside.
+============================================================ */
+function BreadcrumbsLevelsSpec() {
+  const rows = [
+    { label: '3 levels', items: ['Level 1', 'Level 2', 'Current'] },
+    { label: '4 levels', items: ['Level 1', 'Level 2', 'Level 3', 'Current'] },
+    { label: '+4 levels', items: ['Level 1', '...', 'Level 7', 'Current'] },
+  ];
+
+  const ROW_LABEL_WIDTH = 88;
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div style={{ fontSize: 14, fontWeight: 600, color: '#3D4759', fontFamily: FONT, marginBottom: 4 }}>
+        Breadcrumbs — Levels
+      </div>
+      <div style={{ background: '#FFFFFF', padding: '24px 24px 20px 24px', borderRadius: BORDER_RADIUS }}>
+        <div
+          style={{
+            position: 'relative',
+            display: 'grid',
+            gridTemplateColumns: `${ROW_LABEL_WIDTH}px 1fr`,
+            gridTemplateRows: `repeat(${rows.length}, auto)`,
+            rowGap: 24,
+            columnGap: 20,
+          }}
+        >
+          {rows.map((row, rIdx) => (
+            <React.Fragment key={row.label}>
+              <div
+                style={{
+                  gridColumn: 1,
+                  gridRow: rIdx + 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  fontSize: 13,
+                  fontWeight: 500,
+                  color: '#8089A0',
+                  fontFamily: FONT,
+                  paddingRight: 4,
+                }}
+              >
+                {row.label}
+              </div>
+              <div style={{ gridColumn: 2, gridRow: rIdx + 1, display: 'flex', alignItems: 'center', paddingLeft: 4 }}>
+                <Breadcrumbs items={row.items} state="default" />
+              </div>
+            </React.Fragment>
+          ))}
+
+          {/* violet dashed reference box — spans only the trail column with proper padding */}
+          <div
+            style={{
+              gridColumn: '2 / 3',
+              gridRow: `1 / ${rows.length + 1}`,
+              margin: '-10px -12px',
+              border: `1.5px dashed ${VIOLET_DASH}`,
+              borderRadius: BORDER_RADIUS,
+              pointerEvents: 'none',
+              padding: '10px 8px',
+            }}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   REFERENCE SPEC — composed
 ============================================================ */
 export function BreadcrumbsSpec() {
   return (
     <div
       style={{
-        padding: 24,
+        padding: '20px 24px',
         overflowY: 'auto',
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        gap: 24,
-        fontFamily: "'DM Sans', sans-serif",
+        gap: 28,
+        fontFamily: FONT,
         background: '#FFFFFF',
       }}
     >
       <SpecBadge label="Breadcrumbs" />
-
-      {/* Breadcrumbs States Image */}
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 8,
-        }}
-      >
-        <div
-          style={{
-            fontSize: 14,
-            fontWeight: 600,
-            color: '#3D4759',
-            fontFamily: "'DM Sans', sans-serif",
-            marginBottom: 4,
-          }}
-        >
-          Breadcrumbs — States
-        </div>
-        <div
-          style={{
-            width: '100%',
-            height: 250,
-            position: 'relative',
-            border: '1px solid #EFEDE8',
-            borderRadius: 8,
-            overflow: 'hidden',
-            background: '#FFFFFF',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
-          <Image
-            src={breadcrumbsImage}
-            alt="Breadcrumbs States"
-            width={500}
-            style={{
-              objectFit: 'contain',
-            }}
-            priority
-          />
-        </div>
-      </div>
-
-      {/* Breadcrumbs Levels Image */}
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 8,
-        }}
-      >
-        <div
-          style={{
-            fontSize: 14,
-            fontWeight: 600,
-            color: '#3D4759',
-            fontFamily: "'DM Sans', sans-serif",
-            marginBottom: 4,
-          }}
-        >
-          Breadcrumbs — Levels
-        </div>
-        <div
-          style={{
-            width: '100%',
-            height: 200,
-            position: 'relative',
-            border: '1px solid #EFEDE8',
-            borderRadius: 8,
-            overflow: 'hidden',
-            background: '#FFFFFF',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
-          <Image
-            src={breadcrumbsLevelImage}
-            alt="Breadcrumbs Levels"
-            width={500}
-            style={{
-              objectFit: 'contain',
-            }}
-            priority
-          />
-        </div>
-      </div>
+      <BreadcrumbsStatesSpec />
+      <BreadcrumbsLevelsSpec />
     </div>
   );
 }
@@ -329,10 +409,10 @@ const CARD_STYLE = {
 
 export default function BreadcrumbsPage() {
   return (
-    <div style={{ padding: 32, background: '#FAFAF8', minHeight: '100vh', fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ padding: 32, background: '#FAFAF8', minHeight: '100vh', fontFamily: FONT }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 32, alignItems: 'center' }}>
         <div style={{ width: '100%', maxWidth: 1100 }}>
-          <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1, color: '#8089A0', marginBottom: 8, fontFamily: "'DM Sans', sans-serif" }}>
+          <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1, color: '#8089A0', marginBottom: 8, fontFamily: FONT }}>
             LIVE PREVIEW
           </div>
           <div style={CARD_STYLE}>
@@ -341,7 +421,7 @@ export default function BreadcrumbsPage() {
         </div>
 
         <div style={{ width: '100%', maxWidth: 1100 }}>
-          <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1, color: '#8089A0', marginBottom: 8, fontFamily: "'DM Sans', sans-serif" }}>
+          <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1, color: '#8089A0', marginBottom: 8, fontFamily: FONT }}>
             REFERENCE SPEC
           </div>
           <div style={CARD_STYLE}>

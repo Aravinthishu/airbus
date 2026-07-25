@@ -52,12 +52,11 @@ export default function Header() {
               Airbus
             </span>
             <span
-              className="hidden sm:block text-xs font-mono px-2 py-0.5"
+              className="hidden sm:block text-xs font-mono px-2 py-0.5 bg-[#cfdff7] border-blue-200"
               style={{
-                background: 'rgba(232,71,10,0.10)',
-                color: '#E8470A',
-                border: '1px solid rgba(232,71,10,0.22)',
+                color: '#0A67E8',
                 borderRadius: '4px',
+                border:'1px solid'
               }}
             >
               Design System

@@ -112,7 +112,7 @@ export default function HeroSection() {
             {/* Annotation label */}
             <div className="flex items-center gap-2 mb-4">
               <span className="text-xs font-mono text-[#0D0D0D]/40 border border-[#0D0D0D]/15 px-2 py-0.5 rounded">
-                Figma + Photoshop
+                Figma
               </span>
               <span className="text-xs font-mono text-[#0D0D0D]/30">/ 2026</span>
             </div>
@@ -210,7 +210,7 @@ export default function HeroSection() {
               { value: '8 Months', label: 'Duration' },
               { value: '44+', label: 'Components' },
               { value: '20+', label: 'Screens' },
-              { value: 'WCAG 1.2', label: 'Compliance' }]?.
+              { value: 'WCAG 2.2', label: 'Compliance' }]?.
               map((stat) =>
               <div key={stat?.label} className="flex flex-col">
                   <span className="text-xl font-bold text-[#0D0D0D]">{stat?.value}</span>
@@ -221,13 +221,12 @@ export default function HeroSection() {
 
             <div className="flex items-center gap-4">
               <a
-                href="https://behance.net"
-                target="_blank"
+                href="#components"
                 rel="noopener noreferrer"
                 className="px-7 py-3 bg-[#0a67e8] text-white text-sm font-semibold hover:bg-[#c93d08] transition-all"
                 style={{ borderRadius: '0' }}>
                 
-                View Project →
+                View components →
               </a>
               <span className="text-xs font-mono text-[#0D0D0D]/40 border border-[#0D0D0D]/15 px-3 py-3">
                 v2.4.0

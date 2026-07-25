@@ -1,8 +1,5 @@
 'use client';
 import React, { useState } from 'react';
-import Image from 'next/image';
-import checkboxAllImage from '../../../../assets/images/checkbox/checkbox-all.png';
-import checkboxSizeImage from '../../../../assets/images/checkbox/checkbox-size.png';
 
 /* ============================================================
    Minimal stand-ins for your ui-helpers
@@ -55,6 +52,11 @@ function SpecBadge({ label }: { label: string }) {
 }
 
 /* ============================================================
+   Design tokens
+============================================================ */
+const VIOLET_DASH = '#C084FC'; // dashed reference-border color
+
+/* ============================================================
    Checkbox Component
 ============================================================ */
 type CheckboxSize = 'm' | 'l';
@@ -78,41 +80,33 @@ function Checkbox({
   const borderRadius = size === 'l' ? 8 : 6;
   const fontSize = size === 'l' ? 14 : 12;
 
-  // Determine if checkbox is checked
   const isChecked = state === 'selected' || state === 'indeterminate';
   const isDisabled = interaction === 'disabled';
 
-  // Get border color based on interaction and state
   const getBorderColor = () => {
     if (isChecked) return 'none';
     if (isDisabled) return '#D8D4CC';
     if (interaction === 'hover') return '#002F7B';
     if (interaction === 'focus') return '#0B1F4D';
-    return '#D8D4CC'; // default
+    return '#D8D4CC';
   };
 
-  // Get background color
   const getBackground = () => {
     if (isChecked) return '#0B1F4D';
     if (isDisabled && !isChecked) return '#F5F5F4';
     return 'transparent';
   };
 
-  // Get box shadow for focus
   const getBoxShadow = () => {
     if (interaction === 'focus') {
-      return '0 0 0 3px rgba(11,31,77,0.25)';
+      // This creates the double border effect with a gap
+      return `0 0 0 2px #FFFFFF, 0 0 0 4px #2554D6`;
     }
     return 'none';
   };
 
-  // Get opacity for disabled
-  const getOpacity = () => {
-    if (isDisabled) return 0.6;
-    return 1;
-  };
+  const getOpacity = () => (isDisabled ? 0.6 : 1);
 
-  // Determine what to show inside checkbox
   const getContent = () => {
     if (state === 'selected') return '✓';
     if (state === 'indeterminate') return '–';
@@ -132,23 +126,23 @@ function Checkbox({
         alignItems: 'center',
         gap: 12,
         cursor: isDisabled ? 'not-allowed' : 'pointer',
-        opacity: opacity,
+        opacity,
       }}
     >
       <div
         style={{
           width: dim,
           height: dim,
-          borderRadius: borderRadius,
+          borderRadius,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           flexShrink: 0,
           border: borderColor !== 'none' ? `2px solid ${borderColor}` : 'none',
-          background: background,
-          boxShadow: boxShadow,
+          background,
+          boxShadow,
           color: isChecked ? '#FFFFFF' : 'transparent',
-          fontSize: fontSize,
+          fontSize,
           fontFamily: "'DM Sans', sans-serif",
           fontWeight: 700,
           transition: 'all 0.15s ease',
@@ -184,25 +178,20 @@ export function CheckboxDemo() {
   const interactionLabels = ['Default', 'Hover', 'Focus', 'Disabled'];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#FFFFFF' }}>
       <div
         style={{
           flex: '1 1 0',
-          minHeight: 220,
+          minHeight: 275,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           padding: 32,
           background:
-            'repeating-linear-gradient(0deg, rgba(11,31,77,0.03) 0 1px, transparent 1px 24px), repeating-linear-gradient(90deg, rgba(11,31,77,0.03) 0 1px, transparent 1px 24px)',
+            'repeating-linear-gradient(0deg, rgba(11,31,77,0.03) 0 1px, transparent 1px 24px), repeating-linear-gradient(90deg, rgba(11,31,77,0.03) 0 1px, transparent 1px 24px), #FFFFFF',
         }}
       >
-        <Checkbox
-          size={size}
-          state={state}
-          interaction={interaction}
-          label="Label"
-        />
+        <Checkbox size={size} state={state} interaction={interaction} label="Label" />
       </div>
 
       <div
@@ -210,6 +199,7 @@ export function CheckboxDemo() {
           padding: 20,
           borderTop: '1px solid #EFEDE8',
           overflowY: 'auto',
+          background: '#FFFFFF',
         }}
       >
         <div style={{ marginBottom: 16 }}>
@@ -227,11 +217,7 @@ export function CheckboxDemo() {
           </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
             {stateOptions.map((s, index) => (
-              <PropChip
-                key={s}
-                active={state === s}
-                onClick={() => setState(s)}
-              >
+              <PropChip key={s} active={state === s} onClick={() => setState(s)}>
                 {stateLabels[index]}
               </PropChip>
             ))}
@@ -253,11 +239,7 @@ export function CheckboxDemo() {
           </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
             {interactionOptions.map((s, index) => (
-              <PropChip
-                key={s}
-                active={interaction === s}
-                onClick={() => setInteraction(s)}
-              >
+              <PropChip key={s} active={interaction === s} onClick={() => setInteraction(s)}>
                 {interactionLabels[index]}
               </PropChip>
             ))}
@@ -279,11 +261,7 @@ export function CheckboxDemo() {
           </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
             {(['m', 'l'] as CheckboxSize[]).map((s) => (
-              <PropChip
-                key={s}
-                active={size === s}
-                onClick={() => setSize(s)}
-              >
+              <PropChip key={s} active={size === s} onClick={() => setSize(s)}>
                 {s.toUpperCase()}
               </PropChip>
             ))}
@@ -295,7 +273,219 @@ export function CheckboxDemo() {
 }
 
 /* ============================================================
-   REFERENCE SPEC - Using images directly
+   REFERENCE SPEC — States grid
+   Replicates checkbox-all.png: column headers (Unselected /
+   Selected / Indeterminate) + row headers (Default / Hover /
+   Focus / Disabled) sit OUTSIDE the violet dashed box; only the
+   checkbox cells themselves are enclosed.
+============================================================ */
+function CheckboxStatesSpec() {
+  const states: CheckboxState[] = ['unselected', 'selected', 'indeterminate'];
+  const stateLabels = ['Unselected', 'Selected', 'Indeterminate'];
+
+  const interactions: CheckboxInteraction[] = ['default', 'hover', 'focus', 'disabled'];
+  const interactionLabels = ['Default', 'Hover', 'Focus', 'Disabled'];
+
+  const ROW_LABEL_WIDTH = 64;
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div
+        style={{
+          fontSize: 14,
+          fontWeight: 600,
+          color: '#3D4759',
+          fontFamily: "'DM Sans', sans-serif",
+          marginBottom: 4,
+        }}
+      >
+        States
+      </div>
+
+      <div
+        style={{
+          background: '#FFFFFF',
+          padding: 24,
+          borderRadius: 8,
+        }}
+      >
+        <div
+          style={{
+            position: 'relative',
+            display: 'grid',
+            gridTemplateColumns: `${ROW_LABEL_WIDTH}px repeat(3, 1fr)`,
+            gridTemplateRows: 'auto repeat(4, auto)',
+            rowGap: 26,
+            columnGap: 20,
+          }}
+        >
+          {/* top-left empty cell */}
+          <div style={{ gridColumn: 1, gridRow: 1 }} />
+
+          {/* column headers */}
+          {stateLabels.map((label, cIdx) => (
+            <div
+              key={label}
+              style={{
+                gridColumn: cIdx + 2,
+                gridRow: 1,
+                textAlign: 'left',
+                fontSize: 13,
+                fontWeight: 600,
+                color: '#3D4759',
+                fontFamily: "'DM Sans', sans-serif",
+              }}
+            >
+              {label}
+            </div>
+          ))}
+
+          {/* row headers */}
+          {interactionLabels.map((label, rIdx) => (
+            <div
+              key={label}
+              style={{
+                gridColumn: 1,
+                gridRow: rIdx + 2,
+                display: 'flex',
+                alignItems: 'center',
+                fontSize: 13,
+                fontWeight: 500,
+                color: '#8089A0',
+                fontFamily: "'DM Sans', sans-serif",
+              }}
+            >
+              {label}
+            </div>
+          ))}
+
+          {/* checkbox cells */}
+          {interactions.map((interaction, rIdx) =>
+            states.map((state, cIdx) => (
+              <div
+                key={`${interaction}-${state}`}
+                style={{
+                  gridColumn: cIdx + 2,
+                  gridRow: rIdx + 2,
+                  display: 'flex',
+                  alignItems: 'center',
+                }}
+              >
+                <Checkbox size="m" state={state} interaction={interaction} label="Label" />
+              </div>
+            ))
+          )}
+
+          {/* violet dashed reference box — spans only the checkbox grid area */}
+          <div
+            style={{
+              gridColumn: `2 / 5`,
+              gridRow: `1 / 6`,
+              margin: '-14px -18px -14px -18px',
+              border: `1.5px dashed ${VIOLET_DASH}`,
+              borderRadius: 16,
+              pointerEvents: 'none',
+            }}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   REFERENCE SPEC — Sizes grid
+   Replicates checkbox-size.png: M / L labels sit OUTSIDE the
+   violet dashed box; the checkbox + "Label" text sit inside it.
+============================================================ */
+function CheckboxSizeSpec() {
+  const sizes: { key: CheckboxSize; label: string }[] = [
+    { key: 'm', label: 'M' },
+    { key: 'l', label: 'L' },
+  ];
+
+  const ROW_LABEL_WIDTH = 24;
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div
+        style={{
+          fontSize: 14,
+          fontWeight: 600,
+          color: '#3D4759',
+          fontFamily: "'DM Sans', sans-serif",
+          marginBottom: 4,
+        }}
+      >
+        Sizes
+      </div>
+
+      <div
+        style={{
+          background: '#FFFFFF',
+          padding: 24,
+          borderRadius: 8,
+        }}
+      >
+        <div
+          style={{
+            position: 'relative',
+            display: 'grid',
+            gridTemplateColumns: `${ROW_LABEL_WIDTH}px 1fr`,
+            gridTemplateRows: `repeat(${sizes.length}, auto)`,
+            rowGap: 28,
+            columnGap: 20,
+            maxWidth: 220,
+          }}
+        >
+          {sizes.map((s, rIdx) => (
+            <React.Fragment key={s.key}>
+              <div
+                style={{
+                  gridColumn: 1,
+                  gridRow: rIdx + 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  fontSize: 13,
+                  fontWeight: 500,
+                  color: '#8089A0',
+                  fontFamily: "'DM Sans', sans-serif",
+                }}
+              >
+                {s.label}
+              </div>
+              <div
+                style={{
+                  gridColumn: 2,
+                  gridRow: rIdx + 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                }}
+              >
+                <Checkbox size={s.key} state="selected" interaction="default" label="Label" />
+              </div>
+            </React.Fragment>
+          ))}
+
+          {/* violet dashed reference box — spans only the checkbox+label column */}
+          <div
+            style={{
+              gridColumn: '2 / 3',
+              gridRow: `1 / ${sizes.length + 1}`,
+              margin: '-16px -20px',
+              border: `1.5px dashed ${VIOLET_DASH}`,
+              borderRadius: 16,
+              pointerEvents: 'none',
+            }}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   REFERENCE SPEC — composed
 ============================================================ */
 export function CheckboxSpec() {
   return (
@@ -307,99 +497,12 @@ export function CheckboxSpec() {
         display: 'flex',
         flexDirection: 'column',
         gap: 24,
+        background: '#FFFFFF',
       }}
     >
       <SpecBadge label="Checkbox" />
-
-      {/* Checkbox All States Image */}
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 8,
-        }}
-      >
-        <div
-          style={{
-            fontSize: 14,
-            fontWeight: 600,
-            color: '#3D4759',
-            fontFamily: "'DM Sans', sans-serif",
-            marginBottom: 4,
-          }}
-        >
-          States
-        </div>
-        <div
-          style={{
-            width: '100%',
-            height: 300,
-            position: 'relative',
-            border: '1px solid #EFEDE8',
-            borderRadius: 8,
-            overflow: 'hidden',
-            background: '#FFFFFF',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
-          <Image
-            src={checkboxAllImage}
-            alt="Checkbox States"
-            width={400}
-            style={{
-              objectFit: 'contain',
-            }}
-            priority
-          />
-        </div>
-      </div>
-
-      {/* Checkbox Sizes Image */}
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 8,
-        }}
-      >
-        <div
-          style={{
-            fontSize: 14,
-            fontWeight: 600,
-            color: '#3D4759',
-            fontFamily: "'DM Sans', sans-serif",
-            marginBottom: 4,
-          }}
-        >
-          Sizes
-        </div>
-        <div
-          style={{
-            width: '100%',
-            height: 200,
-            position: 'relative',
-            border: '1px solid #EFEDE8',
-            borderRadius: 8,
-            overflow: 'hidden',
-            background: '#FFFFFF',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
-          <Image
-            src={checkboxSizeImage}
-            alt="Checkbox Sizes"
-            width={250}
-            style={{
-              objectFit: 'contain',
-            }}
-            priority
-          />
-        </div>
-      </div>
+      <CheckboxStatesSpec />
+      <CheckboxSizeSpec />
     </div>
   );
 }

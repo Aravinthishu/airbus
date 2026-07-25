@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 /* ============================================================
-   Minimal stand-ins for your ui-helpers (PropChip, SpecBadge,
+   Minimal stand-ins for your ui-helpers (PropChip, SpecBadge, 
    SpecBlock) so this file is self-contained for preview.
    Swap these back out for your real imports in your project:
    import { PropChip, SpecBadge, SpecBlock } from '../ui-helpers';
@@ -28,6 +28,7 @@ function PropChip({
         background: active ? '#0B1F4D' : '#FFFFFF',
         color: active ? '#FFFFFF' : '#4B5563',
         cursor: 'pointer',
+        transition: 'all 150ms',
       }}
     >
       {children}
@@ -202,14 +203,15 @@ export function ButtonDemo() {
       <div
         style={{
           flex: '1 1 0',
-          minHeight: 220,
+          minHeight: 240,
+          background:'white',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          padding: 32,
-          background: onDark
-            ? '#0B1F4D'
-            : 'repeating-linear-gradient(0deg, rgba(10,103,232,0.03) 0 1px, transparent 1px 24px), repeating-linear-gradient(90deg, rgba(10,103,232,0.03) 0 1px, transparent 1px 24px)',
+          padding: '32px 20px',
+          // background: onDark
+          //   ? '#0B1F4D'
+          //   : 'repeating-linear-gradient(0deg, rgba(10,103,232,0.03) 0 1px, transparent 1px 24px), repeating-linear-gradient(90deg, rgba(10,103,232,0.03) 0 1px, transparent 1px 24px)',
         }}
       >
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
@@ -221,7 +223,7 @@ export function ButtonDemo() {
         </div>
       </div>
 
-      <div style={{ padding: 20, borderTop: '1px solid #EFEDE8', overflowY: 'auto' }}>
+      <div style={{ padding: '16px 20px', borderTop: '1px solid #EFEDE8', overflowY: 'auto' }}>
         <div style={{ marginBottom: 16 }}>
           <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, color: '#8089A0', marginBottom: 8 }}>VARIANT</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -254,12 +256,13 @@ export function ButtonDemo() {
 
 /* ============================================================
    REFERENCE SPEC - Manual code matching your images exactly
+   WITH VIOLET DASHED BORDERS for both tables
 ============================================================ */
 export function ButtonSpec() {
   return (
     <div
       style={{
-        padding: 24,
+        padding: '20px 16px',
         overflowY: 'auto',
         height: '100%',
         fontFamily: "'DM Sans', sans-serif",
@@ -267,96 +270,110 @@ export function ButtonSpec() {
     >
       <SpecBadge label="Button" />
 
-{/* Button All States - Manual Grid */}
-<div
-  style={{
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 8,
-    marginBottom: 32,
-  }}
->
-  <div
-    style={{
-      fontSize: 14,
-      fontWeight: 600,
-      color: '#3D4759',
-      fontFamily: "'DM Sans', sans-serif",
-      marginBottom: 4,
-    }}
-  >
-    Button — All States
-  </div>
-  <div
-    style={{
-      width: '100%',
-      border: '1px solid #EFEDE8',
-      borderRadius: 8,
-      overflow: 'auto',
-      background: '#FFFFFF',
-      padding: 26,
-    }}
-  >
-    {/* Single Grid Container for both header and body */}
-    <div style={{ display: 'grid', gridTemplateColumns: '90px repeat(7, 1fr)', gap: 12, padding:10, }}>
-      {/* Header Row */}
-      <div style={{ fontSize: 12, fontWeight: 600, color: '#6B7280', display: 'flex', alignItems: 'center', paddingBottom: 12, borderBottom: '1px solid #EFEDE8' }}>
-        State
-      </div>
-      {BTN_VARIANTS.map((variant) => (
-        <div 
-          key={variant.key} 
-          style={{ 
-            fontSize: 12, 
-            fontWeight: 600, 
-            color: '#6B7280', 
-            textAlign: 'center', 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center',
-            paddingBottom: 12,
-            borderBottom: '1px solid #EFEDE8'
+      {/* Button All States - WITH VIOLET DASHED BORDER */}
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 8,
+          marginBottom: 32,
+        }}
+      >
+        <div
+          style={{
+            fontSize: 14,
+            fontWeight: 600,
+            color: '#3D4759',
+            fontFamily: "'DM Sans', sans-serif",
+            marginBottom: 4,
           }}
         >
-          {variant.label}
+          Button — All States
         </div>
-      ))}
-
-      {/* State Rows */}
-      {STATE_ROWS.map((state) => (
-        <React.Fragment key={state}>
-          <div 
-            style={{ 
-              fontSize: 13, 
-              fontWeight: 600, 
-              color: '#3D4759', 
-              display: 'flex', 
-              alignItems: 'center',
-              paddingTop: 12
-            }}
-          >
-            {state.charAt(0).toUpperCase() + state.slice(1)}
-          </div>
-          {BTN_VARIANTS.map((variant) => (
-            <div 
-              key={`${state}-${variant.key}`} 
-              style={{ 
-                display: 'flex', 
-                justifyContent: 'center', 
-                alignItems: 'center',
-                paddingTop: 12
-              }}
-            >
-              <RenderButton variant={variant.key} size="s" state={state} />
+        <div
+          style={{
+            width: '100%',
+            border: '2px dashed #8B5CF6',
+            borderRadius: 8,
+            overflow: 'auto',
+            background: '#FFFFFF',
+            padding: '20px 16px',
+          }}
+        >
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: '70px repeat(7, 1fr)', 
+            gap: 8,
+            minWidth: '700px',
+          }}>
+            {/* Header Row */}
+            <div style={{ fontSize: 12, fontWeight: 600, color: '#6B7280', display: 'flex', alignItems: 'center', paddingBottom: 12, borderBottom: '1px solid #EFEDE8' }}>
+              State
             </div>
-          ))}
-        </React.Fragment>
-      ))}
-    </div>
-  </div>
-</div>
+            {BTN_VARIANTS.map((variant) => (
+              <div 
+                key={variant.key} 
+                style={{ 
+                  fontSize: 12, 
+                  fontWeight: 600, 
+                  color: '#6B7280', 
+                  textAlign: 'center', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center',
+                  paddingBottom: 12,
+                  borderBottom: '1px solid #EFEDE8'
+                }}
+              >
+                {variant.label}
+              </div>
+            ))}
 
-      {/* Button Variants - Manual Sizes */}
+            {/* State Rows */}
+            {STATE_ROWS.map((state) => (
+              <React.Fragment key={state}>
+                <div 
+                  style={{ 
+                    fontSize: 13, 
+                    fontWeight: 600, 
+                    color: '#3D4759', 
+                    display: 'flex', 
+                    alignItems: 'center',
+                    paddingTop: 12
+                  }}
+                >
+                  {state.charAt(0).toUpperCase() + state.slice(1)}
+                </div>
+                {BTN_VARIANTS.map((variant) => {
+                  const isGhostNegative = variant.key === 'ghostNegative';
+                  return (
+                    <div 
+                      key={`${state}-${variant.key}`} 
+                      style={{ 
+                        display: 'flex', 
+                        justifyContent: 'center', 
+                        alignItems: 'center',
+                        paddingTop: 12,
+                        paddingBottom: 12,
+                        ...(isGhostNegative && {
+                          background: '#002F7B',
+                          borderRadius: '6px',
+                          padding: '12px 4px',
+                          margin: '-4px -2px',
+                        })
+                      }}
+                    >
+                      <RenderButton variant={variant.key} size="s" state={state} />
+                    </div>
+                  );
+                })}
+              </React.Fragment>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Button Variants - WITH VIOLET DASHED BORDER */}
       <div
         style={{
           display: 'flex',
@@ -378,16 +395,26 @@ export function ButtonSpec() {
         <div
           style={{
             width: '100%',
-            border: '1px solid #EFEDE8',
+            border: '2px dashed #8B5CF6',
             borderRadius: 8,
             overflow: 'hidden',
             background: '#FFFFFF',
-            padding: 16,
+            padding: '16px',
           }}
         >
-          {SIZE_ROWS.map((size) => (
-            <div key={size} style={{ display: 'flex', alignItems: 'center', gap: 20, padding: '8px 0', borderBottom: size !== 'xs' ? '1px solid #EFEDE8' : 'none' }}>
-              <span style={{ fontSize: 14, fontWeight: 700, color: '#0B1F4D', width: 32 }}>
+          {SIZE_ROWS.map((size, index) => (
+            <div 
+              key={size} 
+              style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: 20, 
+                padding: '8px 0', 
+                borderBottom: index < SIZE_ROWS.length - 1 ? '1px solid #EFEDE8' : 'none',
+                flexWrap: 'wrap',
+              }}
+            >
+              <span style={{ fontSize: 14, fontWeight: 700, color: '#0B1F4D', minWidth: 32 }}>
                 {size.toUpperCase()}
               </span>
               <RenderButton variant="primary" size={size} state="default" />
@@ -400,14 +427,15 @@ export function ButtonSpec() {
 }
 
 /* ============================================================
-   PAGE — preview and reference cards share identical width/height
-   so nothing looks mismatched; wide content scrolls horizontally
-   inside its own card instead of stretching the layout.
+   PAGE — preview and reference cards with SAME HEIGHT
+   and FULL MOBILE RESPONSIVENESS
 ============================================================ */
+const CARD_HEIGHT = 560;
+
 const CARD_STYLE: React.CSSProperties = {
   width: '100%',
   maxWidth: 920,
-  height: 560,
+  height: CARD_HEIGHT,
   border: '1px solid #EFEDE8',
   borderRadius: 12,
   background: '#FFFFFF',
@@ -417,8 +445,20 @@ const CARD_STYLE: React.CSSProperties = {
 
 export default function ButtonSpecPage() {
   return (
-    <div style={{ padding: 32, background: '#FAFAF8', minHeight: '100vh', fontFamily: "'DM Sans', sans-serif" }}>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 32, alignItems: 'center' }}>
+    <div style={{ 
+      padding: '20px 16px', 
+      background: '#FAFAF8', 
+      minHeight: '100vh', 
+      fontFamily: "'DM Sans', sans-serif",
+    }}>
+      <div style={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        gap: 32, 
+        alignItems: 'center',
+        maxWidth: '100%',
+      }}>
+        {/* LIVE PREVIEW CARD */}
         <div style={{ width: '100%', maxWidth: 920 }}>
           <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1, color: '#8089A0', marginBottom: 8 }}>
             LIVE PREVIEW
@@ -428,6 +468,7 @@ export default function ButtonSpecPage() {
           </div>
         </div>
 
+        {/* REFERENCE SPEC CARD */}
         <div style={{ width: '100%', maxWidth: 920 }}>
           <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1, color: '#8089A0', marginBottom: 8 }}>
             REFERENCE SPEC
@@ -440,3 +481,87 @@ export default function ButtonSpecPage() {
     </div>
   );
 }
+
+/* ============================================================
+   MOBILE RESPONSIVE BREAKPOINTS
+   ============================================================ */
+// Add this CSS to your global styles or as a styled-component:
+/*
+@media (max-width: 768px) {
+  .button-spec-page {
+    padding: 12px !important;
+  }
+  
+  .button-spec-page .card {
+    height: auto !important;
+    min-height: 420px !important;
+  }
+  
+  .button-spec-page .prop-chip {
+    padding: 4px 8px !important;
+    font-size: 10px !important;
+  }
+  
+  .button-spec-page .grid-table {
+    min-width: auto !important;
+    grid-template-columns: 50px repeat(7, 1fr) !important;
+    gap: 4px !important;
+  }
+  
+  .button-spec-page .size-row {
+    gap: 12px !important;
+    flex-wrap: wrap !important;
+  }
+  
+  .button-spec-page .size-label {
+    font-size: 12px !important;
+    min-width: 24px !important;
+  }
+  
+  .button-spec-page .preview-area {
+    padding: 20px 12px !important;
+    min-height: 160px !important;
+  }
+  
+  .button-spec-page .control-area {
+    padding: 12px !important;
+  }
+  
+  .button-spec-page .spec-container {
+    padding: 12px !important;
+  }
+  
+  .button-spec-page .spec-grid {
+    padding: 12px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .button-spec-page .grid-table {
+    grid-template-columns: 40px repeat(7, 1fr) !important;
+    gap: 2px !important;
+    font-size: 10px !important;
+  }
+  
+  .button-spec-page .grid-table .header-text {
+    font-size: 9px !important;
+  }
+  
+  .button-spec-page .grid-table .state-label {
+    font-size: 10px !important;
+  }
+  
+  .button-spec-page .prop-chip-group {
+    gap: 4px !important;
+  }
+  
+  .button-spec-page .prop-chip {
+    padding: 2px 6px !important;
+    font-size: 9px !important;
+  }
+  
+  .button-spec-page .violet-border {
+    padding: 12px 8px !important;
+  }
+}
+*/

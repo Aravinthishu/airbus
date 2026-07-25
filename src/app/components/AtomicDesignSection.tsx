@@ -215,7 +215,7 @@ export default function AtomicDesignSection() {
               sub-atomic level, component-level raw values, to atoms, molecules,
               organisms, templates, and pages.
             </p>
-            <div
+            {/* <div
               className="inline-flex items-center gap-2 px-3 py-1.5 w-fit"
               style={{
                 border: "1px solid rgba(10,103,232,0.3)",
@@ -226,7 +226,7 @@ export default function AtomicDesignSection() {
               <span className="text-xs font-bold text-[#0a67e8] uppercase tracking-[0.3em]">
                 Beta
               </span>
-            </div>
+            </div> */}
           </div>
 
           {/* Right column — atom illustration only, centered in the available space */}
@@ -325,7 +325,7 @@ export default function AtomicDesignSection() {
           <div className="flex items-center gap-3 px-4 py-2 shrink-0" style={{ border: "1px solid rgba(255,255,255,0.08)" }}>
             <div className="w-2 h-2 rounded-full bg-[#0a67e8] animate-pulse" />
             <span className="text-xs font-mono text-white/30 uppercase tracking-widest">
-              82 Components Built
+              44+ Components Built
             </span>
           </div>
         </div>
