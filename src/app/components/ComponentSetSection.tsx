@@ -4,7 +4,11 @@ import React, { useState } from 'react';
 /* ============================================================
    TYPES & DATA
 ============================================================ */
-type ComponentId = 'button' | 'buttongroup' | 'fab' | 'inputfield' | 'textarea' | 'checkbox' | 'datepicker';
+type ComponentId =
+  | 'button' | 'buttongroup' | 'fab'
+  | 'inputfield' | 'textarea' | 'checkbox' | 'datepicker'
+  | 'breadcrumbs' | 'tabs' | 'sidenav'
+  | 'accordion' | 'avatar' | 'datatable' | 'card' | 'banner';
 type Status = 'pass' | 'warn' | 'fail';
 
 interface CategoryDef {
@@ -60,7 +64,7 @@ const CATEGORIES: CategoryDef[] = [
     color: '#c2600a',
     tint: 'rgba(194,96,10,0.08)',
     desc: 'Wayfinding components — breadcrumbs, tabs, and side navigation.',
-    items: [],
+    items: ['breadcrumbs', 'tabs', 'sidenav'],
   },
   {
     id: 'data',
@@ -69,7 +73,7 @@ const CATEGORIES: CategoryDef[] = [
     color: '#0a7a50',
     tint: 'rgba(10,122,80,0.08)',
     desc: 'Components for presenting structured information — tables, cards, and accordions.',
-    items: [],
+    items: ['accordion', 'avatar', 'datatable', 'card', 'banner'],
   },
 ];
 
@@ -81,6 +85,16 @@ const COMPONENTS: Record<ComponentId, ComponentDef> = {
   textarea: { name: 'Text Area', cat: 'inputs', pass: 2, total: 4, status: 'fail', desc: 'Multi-line input for longer form content, with live character count and validation states.' },
   checkbox: { name: 'Checkbox', cat: 'inputs', pass: 3, total: 4, status: 'fail', desc: 'Binary or indeterminate selection control, available in two sizes.' },
   datepicker: { name: 'Date & Time Picker', cat: 'inputs', pass: 3, total: 5, status: 'fail', desc: 'Simple date entry paired with a calendar overlay for precise selection.' },
+
+  breadcrumbs: { name: 'Breadcrumbs', cat: 'navigation', pass: 3, total: 3, status: 'pass', desc: 'Shows current location within a hierarchy, with a configurable separator.' },
+  tabs: { name: 'Tabs', cat: 'navigation', pass: 3, total: 3, status: 'pass', desc: 'Switches between related views, underline or pill style.' },
+  sidenav: { name: 'Side Navigation', cat: 'navigation', pass: 4, total: 4, status: 'pass', desc: 'Vertical primary navigation, expandable or collapsed to icons only.' },
+
+  accordion: { name: 'Accordion', cat: 'data', pass: 4, total: 4, status: 'pass', desc: 'Expandable sections that can allow single or multiple panels open.' },
+  avatar: { name: 'Avatar', cat: 'data', pass: 3, total: 3, status: 'pass', desc: 'User representation with initials, size, shape, and status indicator.' },
+  datatable: { name: 'Data Table', cat: 'data', pass: 2, total: 4, status: 'warn', desc: 'Tabular data display with sizing and striped-row options.' },
+  card: { name: 'Card', cat: 'data', pass: 3, total: 3, status: 'pass', desc: 'Contained content block with image, title, description, and action.' },
+  banner: { name: 'Banner', cat: 'data', pass: 2, total: 3, status: 'fail', desc: 'Inline alert message in info, success, warning, and error variants.' },
 };
 
 const A11Y_CHECKS: Record<ComponentId, A11yCheck[]> = {
@@ -126,6 +140,51 @@ const A11Y_CHECKS: Record<ComponentId, A11yCheck[]> = {
     { code: '1.4.3', name: 'Disabled date contrast', status: 'fail', value: '2.0:1', note: 'Faded out-of-range days fall well under legibility thresholds.' },
     { code: '3.3.1', name: 'Error identification', status: 'pass', value: 'Pass', note: 'Invalid dates surface icon + colour + inline text.' },
     { code: '2.4.3', name: 'Focus order on open', status: 'fail', value: 'Fail', note: 'Focus doesn\u2019t move into the calendar automatically when it opens.' },
+  ],
+
+  breadcrumbs: [
+    { code: '1.4.3', name: 'Link item contrast', status: 'pass', value: '7.1:1', note: 'All linked breadcrumb items use #255FCC on white — passes AA.' },
+    { code: '2.4.8', name: 'aria-current="page"', status: 'pass', value: 'Pass', note: 'Last item (current page) has aria-current="page".' },
+    { code: '4.1.2', name: '<nav> landmark + list', status: 'pass', value: 'Pass', note: '<nav aria-label="Breadcrumb"> wraps <ol> with aria-label on each <li>.' },
+  ],
+  tabs: [
+    { code: '1.4.3', name: 'Active tab label contrast', status: 'pass', value: '7.1:1', note: 'Active tab uses #00205B on white — passes AAA.' },
+    { code: '2.1.1', name: 'Arrow key switching', status: 'pass', value: 'Pass', note: 'Left/Right arrows move between tabs; Enter/Space activates.' },
+    { code: '4.1.2', name: 'ARIA tablist / tab / tabpanel', status: 'pass', value: 'Pass', note: 'role="tablist", role="tab" aria-selected, role="tabpanel" aria-labelledby.' },
+  ],
+  sidenav: [
+    { code: '1.4.3', name: 'Active item on sidebar background', status: 'pass', value: '7.1:1', note: 'Active item text meets AA on the sidebar surface colour.' },
+    { code: '1.4.13', name: 'Rail tooltip persistence', status: 'pass', value: 'Pass', note: 'Tooltips on Rail icons persist on pointer-hover; keyboard accessible on focus.' },
+    { code: '2.4.3', name: 'Focus Order — top to bottom', status: 'pass', value: 'Pass', note: 'Focus follows visual order; sub-items trail parent in tab order.' },
+    { code: '4.1.2', name: 'nav landmark + aria-current', status: 'pass', value: 'Pass', note: '<nav aria-label="Main"> with aria-current="page" on active item.' },
+  ],
+
+  accordion: [
+    { code: '1.4.3', name: 'Header text on all themes', status: 'pass', value: '7.1:1', note: 'All 4 theme combinations meet AA text contrast.' },
+    { code: '2.1.1', name: 'Enter/Space toggle + arrow keys', status: 'pass', value: 'Pass', note: 'Enter/Space expands panel; arrow keys navigate between headers.' },
+    { code: '2.4.7', name: 'Focus Visible', status: 'pass', value: 'Pass', note: '2px focus ring visible and high-contrast on all 4 themes.' },
+    { code: '4.1.2', name: 'aria-expanded state', status: 'pass', value: 'Pass', note: 'aria-expanded: true / false on each accordion trigger button.' },
+  ],
+  avatar: [
+    { code: '1.1.1', name: 'Alt text / aria-label', status: 'pass', value: 'Pass', note: 'aria-label with user full name on all avatar instances.' },
+    { code: '1.4.3', name: 'Initials contrast on background', status: 'pass', value: 'AA', note: 'Initials colour is always chosen to contrast its background colour.' },
+    { code: '4.1.2', name: 'Status dot beyond colour', status: 'pass', value: 'Pass', note: 'Status dot includes aria-label "Online", "Away", "Busy", "Offline".' },
+  ],
+  datatable: [
+    { code: '1.4.3', name: 'Header text contrast', status: 'pass', value: '7.1:1', note: 'Column headers use high-contrast text on header background.' },
+    { code: '1.3.1', name: 'th scope attributes', status: 'pass', value: 'Pass', note: '<th scope="col"> on column headers; <th scope="row"> on row headers.' },
+    { code: '1.4.1', name: 'Sort direction by colour only', status: 'warn', value: 'Warn', note: 'Sort direction communicated only by icon colour change — not by icon shape.' },
+    { code: '4.1.2', name: 'Table caption / aria-label', status: 'pass', value: 'Pass', note: 'aria-label on <table> describes the data set for screen readers.' },
+  ],
+  card: [
+    { code: '1.4.3', name: 'Card title and body text', status: 'pass', value: '7.1:1', note: 'All text meets AA on white card surface.' },
+    { code: '2.4.7', name: 'Focus ring on clickable card', status: 'pass', value: 'Pass', note: 'Full-perimeter 2px focus ring on the card link element.' },
+    { code: '4.1.2', name: 'Clickable card semantic role', status: 'pass', value: 'Pass', note: '<article> with a single <a> covering the content — correct structure.' },
+  ],
+  banner: [
+    { code: '1.4.1', name: 'Status not by colour alone', status: 'fail', value: 'Icon missing in some uses', note: 'Deployments without the default icon rely on colour only to convey type.' },
+    { code: '1.4.3', name: 'Banner text on tinted bg', status: 'pass', value: '7.1:1', note: 'Text on all 5 banner background tints meets AA.' },
+    { code: '4.1.3', name: 'Status message live region', status: 'pass', value: 'Pass', note: 'Banner injected into DOM triggers aria-live="polite" announcement.' },
   ],
 };
 
@@ -810,6 +869,31 @@ function DatePickerSpec() {
   );
 }
 
+/* ============================================================
+   PLACEHOLDER DEMO / SPEC — for components without a built
+   live preview or reference sheet yet (navigation + data set)
+============================================================ */
+function PlaceholderDemo({ name }: { name: string }) {
+  return (
+    <div className="p-10 flex items-center justify-center min-h-[220px] text-center">
+      <p className="text-xs max-w-xs" style={{ color: '#8089A0', fontFamily: "'DM Sans', sans-serif" }}>
+        Live preview for {name} coming soon.
+      </p>
+    </div>
+  );
+}
+
+function PlaceholderSpec({ name }: { name: string }) {
+  return (
+    <div className="p-6">
+      <SpecBadge label={name} />
+      <p className="text-xs" style={{ color: '#8089A0', fontFamily: "'DM Sans', sans-serif" }}>
+        Design reference coming soon.
+      </p>
+    </div>
+  );
+}
+
 function LiveDemo({ id }: { id: ComponentId }) {
   switch (id) {
     case 'button': return <ButtonDemo />;
@@ -819,7 +903,7 @@ function LiveDemo({ id }: { id: ComponentId }) {
     case 'textarea': return <TextAreaDemo />;
     case 'checkbox': return <CheckboxDemo />;
     case 'datepicker': return <DatePickerDemo />;
-    default: return null;
+    default: return <PlaceholderDemo name={COMPONENTS[id].name} />;
   }
 }
 
@@ -832,7 +916,7 @@ function SpecSheet({ id }: { id: ComponentId }) {
     case 'textarea': return <TextAreaSpec />;
     case 'checkbox': return <CheckboxSpec />;
     case 'datepicker': return <DatePickerSpec />;
-    default: return null;
+    default: return <PlaceholderSpec name={COMPONENTS[id].name} />;
   }
 }
 
