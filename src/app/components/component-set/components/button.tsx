@@ -253,17 +253,27 @@ export function ButtonDemo() {
 
 /* ============================================================
    REFERENCE SPEC — violet dashed border wraps ONLY the button
-   cells. Everything (empty corner, column headings, row
-   headings, and button cells) lives in ONE shared CSS Grid, so
-   the header columns and the button columns are literally the
-   same grid tracks — they can't drift out of alignment the way
-   two separate flex containers with manual margins can.
-   The border itself is an absolutely-positioned overlay that
-   starts right after row 1 / column 1 of that same grid.
+   cells.
+
+   Previously the border was a separate absolutely-positioned
+   overlay computed with `right: 0`. That pins to the CONTAINING
+   BLOCK'S OWN box width — but the button grid was wider than that
+   box (button text forces each column past its 1fr share), so the
+   grid content overflowed to the right of the border instead of
+   staying inside it (visible as buttons spilling past the dashed
+   line).
+
+   Fix: the border is now a real `border` on a div that directly
+   wraps the button grid, and every column (header row, label
+   column, and button grid) uses the SAME fixed pixel width. A real
+   border always matches its own content's rendered size — there's
+   no separate box to fall out of sync with.
 ============================================================ */
 const LABEL_COL_WIDTH = 88;
+const VARIANT_COL_WIDTH = 150;
 const CELL_GAP = 10;
 const HEADER_ROW_HEIGHT = 36;
+const STATE_ROW_HEIGHT = 64;
 
 export function ButtonSpec() {
   return (
@@ -287,37 +297,19 @@ export function ButtonSpec() {
         </div>
 
         <div style={{ overflowX: 'auto' }}>
-          <div style={{ minWidth: 760, position: 'relative' }}>
-            {/* Violet dashed border — an overlay sized to start exactly at
-                the top-left corner of the button-cell region (row 2, col 2)
-                and extend to the grid's own right/bottom edge. Because it
-                references the SAME grid below, it can never drift. */}
-            <div
-              style={{
-                position: 'absolute',
-                top: HEADER_ROW_HEIGHT + CELL_GAP / 2,
-                left: LABEL_COL_WIDTH + CELL_GAP / 2,
-                right: 0,
-                bottom: 0,
-                border: '2px dashed #8B5CF6',
-                borderRadius: 8,
-                pointerEvents: 'none',
-              }}
-            />
-
+          {/* inline-flex so this wrapper's own width shrinks/grows to fit its
+              content exactly — the scrollbar (not a mis-sized overlay) handles overflow */}
+          <div style={{ display: 'inline-flex', flexDirection: 'column' }}>
+            {/* header row — label spacer + variant names, same fixed column widths as below */}
             <div
               style={{
                 display: 'grid',
-                gridTemplateColumns: `${LABEL_COL_WIDTH}px repeat(${BTN_VARIANTS.length}, 1fr)`,
+                gridTemplateColumns: `${LABEL_COL_WIDTH}px repeat(${BTN_VARIANTS.length}, ${VARIANT_COL_WIDTH}px)`,
                 columnGap: CELL_GAP,
-                rowGap: CELL_GAP,
-                boxSizing: 'border-box',
+                marginBottom: CELL_GAP,
               }}
             >
-              {/* Row 1, Col 1 — empty corner */}
-              <div style={{ height: HEADER_ROW_HEIGHT }} />
-
-              {/* Row 1, Col 2..8 — column headings (variant names) */}
+              <div />
               {BTN_VARIANTS.map((variant) => (
                 <div
                   key={variant.key}
@@ -335,42 +327,60 @@ export function ButtonSpec() {
                   {variant.label}
                 </div>
               ))}
+            </div>
 
-              {/* Row 2..5 — row heading (Col 1) + button cells (Col 2..8) */}
-              {STATE_ROWS.map((state) => (
-                <React.Fragment key={state}>
+            {/* body row — label column (outside the frame) + violet-bordered button grid */}
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: CELL_GAP }}>
+              <div style={{ width: LABEL_COL_WIDTH, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: CELL_GAP }}>
+                {STATE_ROWS.map((state) => (
                   <div
+                    key={state}
                     style={{
+                      height: STATE_ROW_HEIGHT,
                       display: 'flex',
                       alignItems: 'center',
                       fontSize: 13,
                       fontWeight: 600,
                       color: '#3D4759',
-                      padding: '10px 0',
                     }}
                   >
                     {state.charAt(0).toUpperCase() + state.slice(1)}
                   </div>
-                  {BTN_VARIANTS.map((variant) => {
-                    const isGhostNegative = variant.key === 'ghostNegative';
-                    return (
-                      <div
-                        key={`${state}-${variant.key}`}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          padding: '10px 6px',
-                          borderRadius: 6,
-                          ...(isGhostNegative && { background: '#002F7B' }),
-                        }}
-                      >
-                        <RenderButton variant={variant.key} size="s" state={state} />
-                      </div>
-                    );
-                  })}
-                </React.Fragment>
-              ))}
+                ))}
+              </div>
+
+              {/* real border, sized to its own content — can't drift */}
+              <div style={{ border: '2px dashed #8B5CF6', borderRadius: 8, padding: CELL_GAP }}>
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: `repeat(${BTN_VARIANTS.length}, ${VARIANT_COL_WIDTH}px)`,
+                    columnGap: CELL_GAP,
+                    rowGap: CELL_GAP,
+                  }}
+                >
+                  {STATE_ROWS.map((state) =>
+                    BTN_VARIANTS.map((variant) => {
+                      const isGhostNegative = variant.key === 'ghostNegative';
+                      return (
+                        <div
+                          key={`${state}-${variant.key}`}
+                          style={{
+                            height: STATE_ROW_HEIGHT,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            borderRadius: 6,
+                            ...(isGhostNegative && { background: '#002F7B' }),
+                          }}
+                        >
+                          <RenderButton variant={variant.key} size="s" state={state} />
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -384,50 +394,33 @@ export function ButtonSpec() {
           Button — Sizes
         </div>
 
-        <div style={{ position: 'relative' }}>
-          {/* Violet dashed border — no header row here, so it starts at
-              the top of the grid, immediately right of the label column. */}
-          <div
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: LABEL_COL_WIDTH + CELL_GAP / 2,
-              right: 0,
-              bottom: 0,
-              border: '2px dashed #8B5CF6',
-              borderRadius: 8,
-              pointerEvents: 'none',
-            }}
-          />
-
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: `${LABEL_COL_WIDTH}px 1fr`,
-              columnGap: CELL_GAP,
-              rowGap: CELL_GAP,
-              boxSizing: 'border-box',
-            }}
-          >
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: CELL_GAP }}>
+          <div style={{ width: LABEL_COL_WIDTH, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: CELL_GAP }}>
             {SIZE_ROWS.map((size) => (
-              <React.Fragment key={size}>
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    fontSize: 14,
-                    fontWeight: 700,
-                    color: '#0B1F4D',
-                    padding: '10px 0',
-                  }}
-                >
-                  {size.toUpperCase()}
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', padding: '10px 12px' }}>
+              <div
+                key={size}
+                style={{
+                  height: 56,
+                  display: 'flex',
+                  alignItems: 'center',
+                  fontSize: 14,
+                  fontWeight: 700,
+                  color: '#0B1F4D',
+                }}
+              >
+                {size.toUpperCase()}
+              </div>
+            ))}
+          </div>
+
+          <div style={{ border: '2px dashed #8B5CF6', borderRadius: 8, padding: CELL_GAP }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: CELL_GAP }}>
+              {SIZE_ROWS.map((size) => (
+                <div key={size} style={{ height: 56, display: 'flex', alignItems: 'center' }}>
                   <RenderButton variant="primary" size={size} state="default" />
                 </div>
-              </React.Fragment>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -490,67 +483,3 @@ export default function ButtonSpecPage() {
     </div>
   );
 }
-
-/* ============================================================
-   MOBILE RESPONSIVE BREAKPOINTS
-   ============================================================ */
-// Add this CSS to your global styles or as a styled-component:
-/*
-@media (max-width: 768px) {
-  .button-spec-page {
-    padding: 12px !important;
-  }
-  
-  .button-spec-page .card {
-    height: auto !important;
-    min-height: 420px !important;
-  }
-  
-  .button-spec-page .prop-chip {
-    padding: 4px 8px !important;
-    font-size: 10px !important;
-  }
-  
-  .button-spec-page .size-row {
-    gap: 12px !important;
-    flex-wrap: wrap !important;
-  }
-  
-  .button-spec-page .size-label {
-    font-size: 12px !important;
-    min-width: 24px !important;
-  }
-  
-  .button-spec-page .preview-area {
-    padding: 20px 12px !important;
-    min-height: 160px !important;
-  }
-  
-  .button-spec-page .control-area {
-    padding: 12px !important;
-  }
-  
-  .button-spec-page .spec-container {
-    padding: 12px !important;
-  }
-  
-  .button-spec-page .spec-grid {
-    padding: 12px !important;
-  }
-}
-
-@media (max-width: 480px) {
-  .button-spec-page .prop-chip-group {
-    gap: 4px !important;
-  }
-  
-  .button-spec-page .prop-chip {
-    padding: 2px 6px !important;
-    font-size: 9px !important;
-  }
-  
-  .button-spec-page .violet-border {
-    padding: 12px 8px !important;
-  }
-}
-*/

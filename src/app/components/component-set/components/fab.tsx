@@ -1,7 +1,4 @@
 import React, { useState } from "react";
-import Image from "next/image";
-import fabAllImage from "../../../../assets/images/fab/fab-all.png";
-import fabOpenAllImage from "../../../../assets/images/fab/fab-open-all.png";
 
 /* ============================================================
    Minimal stand-ins for your ui-helpers
@@ -53,6 +50,71 @@ function SpecBadge({ label }: { label: string }) {
   );
 }
 
+// Figma-inspect-style dashed violet frame — wraps only the components being
+// annotated, never the row/column labels around them.
+function FigmaFrame({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
+  return (
+    <div
+      style={{
+        border: "2px dashed #C084FC",
+        borderRadius: 8,
+        background: "#FFFFFF",
+        padding: 20,
+        ...style,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+/* ============================================================
+   Icons used on the action buttons — matches fab-open-all.png
+   (print, email, share, copy)
+============================================================ */
+function IconPrint({ color, size = 12 }: { color: string; size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="6 9 6 2 18 2 18 9" />
+      <path d="M18 9H6" />
+      <path d="M18 9v4H6V9" />
+      <rect x="6" y="13" width="12" height="8" />
+      <circle cx="8" cy="17" r="1" />
+      <circle cx="16" cy="17" r="1" />
+    </svg>
+  );
+}
+
+function IconEmail({ color, size = 12 }: { color: string; size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+      <polyline points="22,6 12,13 2,6" />
+    </svg>
+  );
+}
+
+function IconShare({ color, size = 12 }: { color: string; size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="18" cy="5" r="3" />
+      <circle cx="6" cy="12" r="3" />
+      <circle cx="18" cy="19" r="3" />
+      <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+      <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+    </svg>
+  );
+}
+
+function IconCopy({ color, size = 12 }: { color: string; size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="9" y="9" width="13" height="13" rx="2" />
+      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+    </svg>
+  );
+}
+
 /* ============================================================
    FAB Component
 ============================================================ */
@@ -61,8 +123,7 @@ type FabDirection = "horizontal" | "vertical-up" | "vertical-down";
 type FabState = "default" | "hover" | "active" | "focus" | "disabled";
 
 interface FabAction {
-  icon: string;
-  label: string;
+  render: (color: string) => React.ReactNode;
 }
 
 function Fab({
@@ -71,9 +132,10 @@ function Fab({
   onToggle,
   direction = "horizontal",
   actions = [
-    { icon: "✏️", label: "Label" },
-    { icon: "📎", label: "Label" },
-    { icon: "🔍", label: "Label" },
+    { render: (c: string) => <IconPrint color={c} /> },
+    { render: (c: string) => <IconEmail color={c} /> },
+    { render: (c: string) => <IconShare color={c} /> },
+    { render: (c: string) => <IconCopy color={c} /> },
   ],
   disabled = false,
   state = "default",
@@ -90,42 +152,41 @@ function Fab({
     FabSize,
     { main: number; mini: number; gap: number; iconSize: number }
   > = {
-    s: { main: 44, mini: 32, gap: 8, iconSize: 12 },
-    m: { main: 52, mini: 38, gap: 10, iconSize: 14 },
+    s: { main: 32, mini: 24, gap: 6, iconSize: 10 },
+    m: { main: 40, mini: 30, gap: 8, iconSize: 12 },
   };
 
   const config = sizeConfig[size] || sizeConfig.m;
   const mainSize = config.main;
   const miniSize = config.mini;
   const gap = config.gap;
-  const iconSize = config.iconSize;
 
-  // State styles with correct colors
   const getStateStyles = () => {
     switch (state) {
       case "hover":
         return {
-          mainBg: "#002F7B",
-          mainShadow: "0 6px 16px rgba(0,47,123,0.4)",
+          mainBg: "#123B82",
+          mainShadow: "0 6px 16px rgba(18,59,130,0.4)",
           miniBg: "#F5F5F4",
-          iconColor: "#002F7B",
+          iconColor: "#123B82",
           borderColor: "#D8D4CC",
         };
       case "active":
         return {
-          mainBg: "#063D9F",
-          mainShadow: "0 4px 12px rgba(6,61,159,0.3)",
+          mainBg: "#1E56B0",
+          mainShadow: "0 4px 12px rgba(30,86,176,0.3)",
           miniBg: "#FFFFFF",
-          iconColor: "#063D9F",
-          borderColor: "#063D9F",
+          iconColor: "#1E56B0",
+          borderColor: "#1E56B0",
         };
       case "focus":
         return {
           mainBg: "#0B1F4D",
-          mainShadow: "0 0 0 3px rgba(11,31,77,0.3)",
+          mainShadow: "0 4px 12px rgba(11,31,77,0.3)",
           miniBg: "#FFFFFF",
           iconColor: "#0B1F4D",
           borderColor: "#0B1F4D",
+          focusRing: "#053E9F",
         };
       case "disabled":
         return {
@@ -149,37 +210,17 @@ function Fab({
   const stateStyles = getStateStyles();
   const isDisabled = state === "disabled" || disabled;
 
-  // SVG Icons matching your reference image with dynamic colors
-  const IconLink = ({ color }: { color: string }) => (
-    <svg width={iconSize} height={iconSize} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-    </svg>
-  );
-
-  const IconEmail = ({ color }: { color: string }) => (
-    <svg width={iconSize} height={iconSize} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-      <polyline points="22,6 12,13 2,6" />
-    </svg>
-  );
-
-  const IconPrint = ({ color }: { color: string }) => (
-    <svg width={iconSize} height={iconSize} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="6 9 6 2 18 2 18 9" />
-      <path d="M18 9H6" />
-      <path d="M18 9v4H6V9" />
-      <rect x="6" y="13" width="12" height="8" />
-      <circle cx="8" cy="17" r="1" />
-      <circle cx="16" cy="17" r="1" />
-    </svg>
-  );
-
-  const actionIcons = [
-    <IconLink key="link" color={stateStyles.iconColor} />,
-    <IconEmail key="email" color={stateStyles.iconColor} />,
-    <IconPrint key="print" color={stateStyles.iconColor} />
-  ];
+  // Calculate focus ring styles with proper gap
+  const getFocusStyles = () => {
+    if (state === "focus") {
+      return {
+        boxShadow: `0 0 0 2px #FFFFFF, 0 0 0 4px ${stateStyles.focusRing || "#053E9F"}, ${stateStyles.mainShadow}`,
+      };
+    }
+    return {
+      boxShadow: stateStyles.mainShadow,
+    };
+  };
 
   return (
     <div
@@ -188,8 +229,9 @@ function Fab({
         display: "inline-flex",
         alignItems: "center",
         justifyContent: "center",
-        minHeight: 200,
-        minWidth: 200,
+        minHeight: 120,
+        minWidth: 120,
+        paddingBottom: direction === "vertical-down" ? 60 : 0,
       }}
     >
       <div
@@ -205,7 +247,7 @@ function Fab({
           gap: gap,
         }}
       >
-        {/* Action buttons - no labels */}
+        {/* Action buttons */}
         {actions.map((action, index) => (
           <div
             key={index}
@@ -237,7 +279,7 @@ function Fab({
                 padding: 0,
               }}
             >
-              {actionIcons[index]}
+              {action.render(stateStyles.iconColor)}
             </button>
           </div>
         ))}
@@ -254,7 +296,6 @@ function Fab({
             color: "#FFFFFF",
             fontSize: mainSize * 0.45,
             border: "none",
-            boxShadow: isDisabled ? "0 4px 12px rgba(0,0,0,0.1)" : stateStyles.mainShadow,
             cursor: isDisabled ? "not-allowed" : "pointer",
             transition: "all 0.2s ease",
             display: "flex",
@@ -265,6 +306,7 @@ function Fab({
             transform: open ? "rotate(45deg)" : "rotate(0deg)",
             position: "relative",
             zIndex: 10,
+            ...getFocusStyles(),
           }}
         >
           {open ? "×" : "+"}
@@ -283,39 +325,27 @@ export function FabDemo() {
   const [direction, setDirection] = useState<FabDirection>("horizontal");
   const [state, setState] = useState<FabState>("default");
 
-  const actions: FabAction[] = [
-    { icon: "✏️", label: "" },
-    { icon: "📎", label: "" },
-    { icon: "🔍", label: "" },
-  ];
-
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
       <div
         style={{
           flex: "1 1 0",
-          minHeight: 220,
+          minHeight: 260,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          padding: 32,
+          padding: "40px 32px 32px 32px",
+          paddingBottom: direction === "vertical-down" ? 20 : 32,
           background:
             "repeating-linear-gradient(0deg, rgba(10,103,232,0.03) 0 1px, transparent 1px 24px), repeating-linear-gradient(90deg, rgba(10,103,232,0.03) 0 1px, transparent 1px 24px)",
         }}
       >
-        <Fab
-          size={size}
-          open={open}
-          onToggle={() => setOpen(!open)}
-          direction={direction}
-          state={state}
-          actions={actions}
-        />
+        <Fab size={size} open={open} onToggle={() => setOpen(!open)} direction={direction} state={state} />
       </div>
 
       <div
         style={{
-          padding: 20,
+          padding: 24,
           borderTop: "1px solid #EFEDE8",
           overflowY: "auto",
         }}
@@ -335,11 +365,7 @@ export function FabDemo() {
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
             {(["default", "hover", "active", "focus", "disabled"] as FabState[]).map((s) => (
-              <PropChip
-                key={s}
-                active={state === s}
-                onClick={() => setState(s)}
-              >
+              <PropChip key={s} active={state === s} onClick={() => setState(s)}>
                 {s.charAt(0).toUpperCase() + s.slice(1)}
               </PropChip>
             ))}
@@ -360,16 +386,8 @@ export function FabDemo() {
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
             {(["horizontal", "vertical-up", "vertical-down"] as FabDirection[]).map((d) => (
-              <PropChip
-                key={d}
-                active={direction === d}
-                onClick={() => setDirection(d)}
-              >
-                {d === "horizontal"
-                  ? "Horizontal"
-                  : d === "vertical-up"
-                    ? "Vertical Down"
-                    : "Vertical Up"}
+              <PropChip key={d} active={direction === d} onClick={() => setDirection(d)}>
+                {d === "horizontal" ? "Horizontal" : d === "vertical-up" ? "Vertical Up" : "Vertical Down"}
               </PropChip>
             ))}
           </div>
@@ -401,8 +419,309 @@ export function FabDemo() {
 }
 
 /* ============================================================
-   REFERENCE SPEC - Using images directly
+   REFERENCE SPEC — manual code recreation of fab-all.png and
+   fab-open-all.png (no external image assets)
 ============================================================ */
+
+// Color / icon tokens per state — drives BOTH the filled ("M") and
+// outline ("S") visual styles used throughout the states & sizes grid.
+const FAB_STATE_TOKENS: Record<
+  FabState,
+  {
+    fillBg: string;
+    fillIcon: string;
+    fillRing?: string;
+    outlineBg: string;
+    outlineBorder: string;
+    outlineIcon: string;
+    outlineRing?: string;
+    icon: "plus" | "close";
+  }
+> = {
+  default: {
+    fillBg: "#0B1F4D",
+    fillIcon: "#FFFFFF",
+    outlineBg: "#FFFFFF",
+    outlineBorder: "#0B1F4D",
+    outlineIcon: "#0B1F4D",
+    icon: "plus",
+  },
+  hover: {
+    fillBg: "#123B82",
+    fillIcon: "#FFFFFF",
+    outlineBg: "#F1F5FE",
+    outlineBorder: "#0B1F4D",
+    outlineIcon: "#0B1F4D",
+    icon: "plus",
+  },
+  active: {
+    fillBg: "#1E56B0",
+    fillIcon: "#FFFFFF",
+    outlineBg: "#DCE8FB",
+    outlineBorder: "#4C7CC9",
+    outlineIcon: "#5D7CAE",
+    icon: "close",
+  },
+  focus: {
+    fillBg: "#0B1F4D",
+    fillIcon: "#FFFFFF",
+    fillRing: "#053E9F",
+    outlineBg: "#FFFFFF",
+    outlineBorder: "#0B1F4D",
+    outlineIcon: "#0B1F4D",
+    outlineRing: "#053E9F",
+    icon: "plus",
+  },
+  disabled: {
+    fillBg: "#B5B9C2",
+    fillIcon: "#FFFFFF",
+    outlineBg: "#FFFFFF",
+    outlineBorder: "#E4E2DD",
+    outlineIcon: "#C9CDD6",
+    icon: "plus",
+  },
+};
+
+function FabCircle({ variant, state, size }: { variant: "fill" | "outline"; state: FabState; size: "m" | "s" }) {
+  const dim = size === "m" ? 32 : 24;
+  const t = FAB_STATE_TOKENS[state];
+  const isFill = variant === "fill";
+  const isFocus = state === "focus";
+  const glyph = t.icon === "close" ? "×" : "+";
+  return (
+    <div
+      style={{
+        width: dim,
+        height: dim,
+        borderRadius: "50%",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: isFill ? t.fillBg : t.outlineBg,
+        border: isFill ? "none" : `1.5px solid ${t.outlineBorder}`,
+        boxShadow: isFocus
+          ? `0 0 0 2px #FFFFFF, 0 0 0 4px ${(isFill ? t.fillRing : t.outlineRing) ?? "#053E9F"}`
+          : isFill
+          ? "0 4px 10px rgba(11,31,77,0.25)"
+          : "none",
+        fontFamily: "'DM Sans', sans-serif",
+      }}
+    >
+      <span style={{ fontSize: dim * 0.42, fontWeight: 700, lineHeight: 1, color: isFill ? t.fillIcon : t.outlineIcon }}>
+        {glyph}
+      </span>
+    </div>
+  );
+}
+
+function FabPill({ variant, state, size }: { variant: "fill" | "outline"; state: FabState; size: "m" | "s" }) {
+  const height = size === "m" ? 28 : 22;
+  const badgeDim = size === "m" ? 14 : 11;
+  const t = FAB_STATE_TOKENS[state];
+  const isFill = variant === "fill";
+  const isFocus = state === "focus";
+  return (
+    <div
+      style={{
+        height,
+        padding: size === "m" ? "0 12px 0 4px" : "0 8px 0 3px",
+        borderRadius: 999,
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 6,
+        background: isFill ? t.fillBg : t.outlineBg,
+        border: isFill ? "none" : `1.5px solid ${t.outlineBorder}`,
+        boxShadow: isFocus
+          ? `0 0 0 2px #FFFFFF, 0 0 0 4px ${(isFill ? t.fillRing : t.outlineRing) ?? "#053E9F"}`
+          : isFill
+          ? "0 4px 10px rgba(11,31,77,0.25)"
+          : "none",
+        fontFamily: "'DM Sans', sans-serif",
+      }}
+    >
+      <span
+        style={{
+          width: badgeDim,
+          height: badgeDim,
+          borderRadius: "50%",
+          background: "#FFFFFF",
+          border: isFill ? "none" : `1.5px solid ${t.outlineBorder}`,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: badgeDim * 0.55,
+          fontWeight: 700,
+          color: t.outlineBorder,
+          flexShrink: 0,
+        }}
+      >
+        ?
+      </span>
+      <span style={{ fontSize: size === "m" ? 10 : 9, fontWeight: 700, color: isFill ? "#FFFFFF" : t.outlineIcon }}>Label</span>
+    </div>
+  );
+}
+
+// Matches fab-all.png — States × (Size M circle / Size S circle / Size M pill / Size S pill)
+function FabStatesSizesGrid() {
+  const states: { key: FabState; label: string }[] = [
+    { key: "default", label: "Default" },
+    { key: "hover", label: "Hover" },
+    { key: "active", label: "Active" },
+    { key: "focus", label: "Focus" },
+    { key: "disabled", label: "Disabled" },
+  ];
+
+  return (
+    <div style={{ maxWidth: 420 }}>
+      <div style={{ display: "flex", marginBottom: 8 }}>
+        <div style={{ width: 60, flexShrink: 0 }} />
+        {["Size M", "Size S", "Size M", "Size S"].map((l, i) => (
+          <div key={i} style={{ flex: 1, textAlign: "center", fontSize: 10, color: "#6B7280", fontFamily: "'DM Sans', sans-serif" }}>
+            {l}
+          </div>
+        ))}
+      </div>
+      <div style={{ display: "flex", alignItems: "flex-start" }}>
+        <div style={{ width: 60, flexShrink: 0, display: "flex", flexDirection: "column" }}>
+          {states.map((s) => (
+            <div
+              key={s.key}
+              style={{
+                height: 44,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "flex-end",
+                paddingRight: 8,
+                fontSize: 10,
+                color: "#6B7280",
+                fontFamily: "'DM Sans', sans-serif",
+              }}
+            >
+              {s.label}
+            </div>
+          ))}
+        </div>
+        <FigmaFrame style={{ flex: 1, padding: "10px 6px" }}>
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            {states.map((s) => (
+              <div key={s.key} style={{ display: "flex", alignItems: "center", height: 44 }}>
+                <div style={{ flex: 1, display: "flex", justifyContent: "center" }}>
+                  <FabCircle variant="fill" state={s.key} size="m" />
+                </div>
+                <div style={{ flex: 1, display: "flex", justifyContent: "center" }}>
+                  <FabCircle variant="outline" state={s.key} size="s" />
+                </div>
+                <div style={{ flex: 1, display: "flex", justifyContent: "center" }}>
+                  <FabPill variant="fill" state={s.key} size="m" />
+                </div>
+                <div style={{ flex: 1, display: "flex", justifyContent: "center" }}>
+                  <FabPill variant="outline" state={s.key} size="s" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </FigmaFrame>
+      </div>
+    </div>
+  );
+}
+
+function FabTriggerCircle({ bg, size = 32 }: { bg: string; size?: number }) {
+  return (
+    <div
+      style={{
+        width: size,
+        height: size,
+        borderRadius: "50%",
+        background: bg,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        boxShadow: "0 4px 10px rgba(11,31,77,0.25)",
+        flexShrink: 0,
+      }}
+    >
+      <span style={{ color: "#FFFFFF", fontSize: size * 0.42, fontWeight: 700, lineHeight: 1 }}>×</span>
+    </div>
+  );
+}
+
+function FabMiniButton({ icon, size = 24 }: { icon: React.ReactNode; size?: number }) {
+  return (
+    <div
+      style={{
+        width: size,
+        height: size,
+        borderRadius: "50%",
+        background: "#FFFFFF",
+        border: "1.5px solid #0B1F4D",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
+        flexShrink: 0,
+      }}
+    >
+      {icon}
+    </div>
+  );
+}
+
+// Matches fab-open-all.png — Horizontal / Vertical Up / Vertical Down
+function FabOpenStates() {
+  const actionIcons = [
+    <IconPrint key="print" color="#0B1F4D" size={11} />,
+    <IconEmail key="email" color="#0B1F4D" size={11} />,
+    <IconShare key="share" color="#0B1F4D" size={10} />,
+    <IconCopy key="copy" color="#0B1F4D" size={10} />,
+  ];
+
+  return (
+    <div style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
+      <div style={{ width: 72, flexShrink: 0, display: "flex", flexDirection: "column", justifyContent: "space-between", paddingTop: 10, minHeight: 360 }}>
+        <div style={{ fontSize: 10, color: "#6B7280", fontFamily: "'DM Sans', sans-serif" }}>Horizontal</div>
+        <div style={{ fontSize: 10, color: "#6B7280", fontFamily: "'DM Sans', sans-serif" }}>Vertical Up</div>
+        <div style={{ fontSize: 10, color: "#6B7280", fontFamily: "'DM Sans', sans-serif" }}>Vertical Down</div>
+      </div>
+      <FigmaFrame style={{ padding: 12, maxWidth: 260 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+          {/* Horizontal — closed trigger, then open trigger + actions in a row */}
+          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+            <FabTriggerCircle bg="#0B1F4D" size={32} />
+            <FabTriggerCircle bg="#1E56B0" size={32} />
+            {actionIcons.map((icon, i) => (
+              <FabMiniButton key={i} icon={icon} size={24} />
+            ))}
+          </div>
+
+          {/* Vertical Up — closed trigger beside a stack where actions sit above the open trigger */}
+          <div style={{ display: "flex", alignItems: "flex-start", gap: 16 }}>
+            <FabTriggerCircle bg="#0B1F4D" size={32} />
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
+              {actionIcons.map((icon, i) => (
+                <FabMiniButton key={i} icon={icon} size={24} />
+              ))}
+              <FabTriggerCircle bg="#1E56B0" size={32} />
+            </div>
+          </div>
+
+          {/* Vertical Down — closed trigger beside a stack where actions sit below the open trigger */}
+          <div style={{ display: "flex", alignItems: "flex-start", gap: 16 }}>
+            <FabTriggerCircle bg="#0B1F4D" size={32} />
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
+              <FabTriggerCircle bg="#1E56B0" size={32} />
+              {actionIcons.map((icon, i) => (
+                <FabMiniButton key={i} icon={icon} size={24} />
+              ))}
+            </div>
+          </div>
+        </div>
+      </FigmaFrame>
+    </div>
+  );
+}
+
 export function FabSpec() {
   return (
     <div
@@ -412,99 +731,21 @@ export function FabSpec() {
         height: "100%",
         display: "flex",
         flexDirection: "column",
-        gap: 24,
+        gap: 32,
+        background: "#FFFFFF",
+        fontFamily: "'DM Sans', sans-serif",
       }}
     >
       <SpecBadge label="Float Action Button" />
 
-      {/* FAB All States Image */}
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 8,
-        }}
-      >
-        <div
-          style={{
-            fontSize: 14,
-            fontWeight: 600,
-            color: "#3D4759",
-            fontFamily: "'DM Sans', sans-serif",
-            marginBottom: 4,
-          }}
-        >
-          States & Sizes
-        </div>
-        <div
-          style={{
-            width: "100%",
-            height: 300,
-            position: "relative",
-            border: "1px solid #EFEDE8",
-            borderRadius: 8,
-            overflow: "hidden",
-            background: "#FFFFFF",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <Image
-            src={fabAllImage}
-            alt="FAB States and Sizes"
-            width={350}
-            style={{
-              objectFit: "contain",
-            }}
-            priority
-          />
-        </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        <div style={{ fontSize: 14, fontWeight: 600, color: "#3D4759" }}>States &amp; Sizes</div>
+        <FabStatesSizesGrid />
       </div>
 
-      {/* FAB Open All Image */}
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 8,
-        }}
-      >
-        <div
-          style={{
-            fontSize: 14,
-            fontWeight: 600,
-            color: "#3D4759",
-            fontFamily: "'DM Sans', sans-serif",
-            marginBottom: 4,
-          }}
-        >
-          Open States
-        </div>
-        <div
-          style={{
-            width: "100%",
-            height: 580,
-            border: "1px solid #EFEDE8",
-            borderRadius: 8,
-            overflow: "hidden",
-            background: "#FFFFFF",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <Image
-            src={fabOpenAllImage}
-            alt="FAB Open States"
-            width={350}
-            height={450}
-            style={{
-              objectFit: "contain",
-            }}
-            priority
-          />
-        </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        <div style={{ fontSize: 14, fontWeight: 600, color: "#3D4759" }}>Open States</div>
+        <FabOpenStates />
       </div>
     </div>
   );
@@ -516,7 +757,7 @@ export function FabSpec() {
 const CARD_STYLE: React.CSSProperties = {
   width: "100%",
   maxWidth: 900,
-  height: 560,
+  height: 620,
   border: "1px solid #EFEDE8",
   borderRadius: 12,
   background: "#FFFFFF",
@@ -571,9 +812,9 @@ export default function FabPage() {
               fontFamily: "'DM Sans', sans-serif",
             }}
           >
-            REFERENCE SPEC
+            DESIGN REFERENCE
           </div>
-          <div style={CARD_STYLE}>
+          <div style={{ ...CARD_STYLE, height: 960 }}>
             <FabSpec />
           </div>
         </div>
