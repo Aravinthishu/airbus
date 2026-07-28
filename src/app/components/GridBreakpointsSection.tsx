@@ -31,50 +31,61 @@ const breakpoints = [
   },
 ];
 
-// Brighter, higher-contrast accent used for every caliper (was #0a67e8 — too
-// close to the background grid color and hard to read against the dark UI).
-const CALIPER_COLOR = '#5EC2FF';
+// Red bracket/chip annotation color (matches the reference "Column width /
+// Gutter / Margin" tag style exactly).
+const CALIPER_COLOR = '#FF3B3B';
 
 /**
- * Caliper — dimension-line style indicator (two end ticks + connecting bar + value label).
- * `style.left` / `style.width` should be passed in the SAME coordinate system as the
- * grid columns it's annotating (see usage below).
+ * ZoneMarker — reference-style annotation: a thin, unfilled outline bracket
+ * that spans the FULL height of the grid content (marking exactly one
+ * column's width or one gutter's width), with a bold red label chip
+ * floating OUTSIDE the device frame — above it (edge="top") or below it
+ * (edge="bottom") — connected visually by the bracket's own edge.
  *
- * `labelAlign` controls how the label sits relative to the tick marks:
- *  - 'center' (default): label centered under the bar — fine when there's
- *    room on both sides.
- *  - 'right': label grows to the right of the bar instead of spilling
- *    left — use this for anything anchored at the true left edge (like
- *    Margin), so the text doesn't get clipped by the parent's
- *    overflow-hidden.
+ * IMPORTANT: this component must be rendered inside an overlay that has NO
+ * overflow-hidden (see the "Marker overlay" block in each Mockup below) or
+ * the floating label will get clipped by the device frame's rounded corners.
+ *
+ * `style.left` / `style.width` are in the SAME coordinate system as the grid
+ * columns (unchanged math from before).
+ *
+ * `labelAlign` controls how the chip sits horizontally when the zone itself
+ * is too narrow to hold the text:
+ *  - 'center' (default): chip centered over the bracket.
+ *  - 'right': chip's left edge locks to the bracket's left edge, growing
+ *    rightward — used for Margin, which sits at the true left screen edge.
+ *  - 'left': chip's right edge locks to the bracket's right edge, growing
+ *    leftward.
  */
-function Caliper({
+function ZoneMarker({
   style,
   value,
   label,
+  edge = 'top',
   labelAlign = 'center',
 }: {
   style: React.CSSProperties;
   value: string;
-  label?: string;
+  label: string;
+  edge?: 'top' | 'bottom';
   labelAlign?: 'left' | 'center' | 'right';
 }) {
-  const alignItems = labelAlign === 'right' ? 'flex-start' : labelAlign === 'left' ? 'flex-end' : 'center';
+  const chipPosClass =
+    labelAlign === 'right' ? 'left-0' : labelAlign === 'left' ? 'right-0' : 'left-1/2 -translate-x-1/2';
+
   return (
-    <div
-      className="absolute flex flex-col pointer-events-none z-30"
-      style={{ ...style, alignItems }}
-    >
-      <div className="relative w-full" style={{ height: '8px' }}>
-        <div className="absolute left-0 top-0 w-px h-full" style={{ background: CALIPER_COLOR }} />
-        <div className="absolute right-0 top-0 w-px h-full" style={{ background: CALIPER_COLOR }} />
-        <div className="absolute left-0 right-0 top-1/2 h-px" style={{ background: CALIPER_COLOR, opacity: 0.7 }} />
-      </div>
+    <div className="absolute inset-y-0 pointer-events-none z-40" style={style}>
+      {/* Thin outline bracket - NO fill, spans the full column/gutter height exactly */}
+      <div
+        className="absolute inset-0"
+        style={{ border: `1.5px solid ${CALIPER_COLOR}` }}
+      />
+      {/* Label chip - floats OUTSIDE the device frame, above or below */}
       <span
-        className="text-[11px] leading-none font-mono font-semibold mt-1.5 whitespace-nowrap px-1.5 py-1 rounded-sm"
-        style={{ color: CALIPER_COLOR, background: 'rgba(0,0,0,0.85)', border: `1px solid ${CALIPER_COLOR}40` }}
+        className={`absolute ${edge === 'top' ? 'bottom-full mb-2' : 'top-full mt-2'} ${chipPosClass} text-sm font-bold whitespace-nowrap px-2.5 py-1.5 rounded shadow-lg`}
+        style={{ color: '#fff', background: CALIPER_COLOR }}
       >
-        {label ? `${label} ${value}` : value}
+        {label}: {value}
       </span>
     </div>
   );
@@ -82,8 +93,11 @@ function Caliper({
 
 function DesktopMockup({ gridColor }: { gridColor: string }) {
   const cols = 12;
+  const totalGap = 16 * 11; // 11 gaps between 12 columns
+  const gap = 16;
+  
   return (
-    <div className="relative mx-auto w-full" style={{ maxWidth: '960px' }}>
+    <div className="relative mx-auto w-full" style={{ maxWidth: '1140px' }}>
       {/* Screen */}
       <div
         className="device-screen rounded-t-xl overflow-hidden"
@@ -91,7 +105,7 @@ function DesktopMockup({ gridColor }: { gridColor: string }) {
       >
         {/* Grid columns visualization */}
         <div className="w-full h-full rounded-lg overflow-hidden relative bg-dark-surface">
-          <div className="absolute inset-0 flex gap-2.5 px-5">
+          <div className="absolute inset-0 flex gap-4 px-5">
             {Array.from({ length: cols }).map((_, i) => (
               <div
                 key={i}
@@ -99,32 +113,6 @@ function DesktopMockup({ gridColor }: { gridColor: string }) {
                 style={{ background: gridColor }}
               />
             ))}
-          </div>
-
-          {/* Margin indicator — measured from the true edge, before the px-5 padding kicks in.
-              Label aligns right so it grows inward instead of spilling past the edge. */}
-          <Caliper
-            style={{ left: '0px', top: '4px', width: '20px' }}
-            value="160px"
-            label="Margin"
-            labelAlign="right"
-          />
-
-          {/* Gutter indicator — sits lower than Margin so the two labels never collide.
-              Left offset accounts for the flex `gap` between columns (10px here),
-              so it lands exactly on the first gutter instead of drifting into the next one. */}
-          <div className="absolute inset-0 px-5 pointer-events-none z-30">
-            <div className="relative w-full h-full">
-              <Caliper
-                style={{
-                  left: `calc((100% - 110px) / 12)`,
-                  top: '40px',
-                  width: '10px',
-                }}
-                value="24px"
-                label="Gutter"
-              />
-            </div>
           </div>
 
           {/* Fake UI content */}
@@ -142,20 +130,58 @@ function DesktopMockup({ gridColor }: { gridColor: string }) {
       {/* Stand */}
       <div className="h-2.5 bg-dark-muted rounded-b-sm" />
       <div className="h-2 w-1/3 mx-auto bg-dark-muted rounded-b-lg" />
+
+      {/* Marker overlay - mirrors the screen's exact box (same aspect-ratio + padding)
+          but has NO overflow-hidden, so both labels can float ABOVE the device
+          frame, matching the reference exactly. */}
+      <div
+        className="absolute inset-x-0 top-0 pointer-events-none z-40"
+        style={{ aspectRatio: '16/10', padding: '14px' }}
+      >
+        <div className="relative w-full h-full">
+          {/* Margin marker - at top, label floats above */}
+          <ZoneMarker
+            style={{ left: '0px', width: '20px' }}
+            value="160px"
+            label="Margin"
+            edge="top"
+            labelAlign="right"
+          />
+
+          {/* Gutter marker - at bottom, shifted to the SECOND gap (2 layers over) */}
+          <div className="absolute inset-0 px-5">
+            <div className="relative w-full h-full">
+              <ZoneMarker
+                style={{ 
+                  left: `calc((100% - ${totalGap}px) / 12 + ${gap}px + (100% - ${totalGap}px) / 12)`, 
+                  width: `${gap}px` 
+                }}
+                value="24px"
+                label="Gutter"
+                edge="bottom"
+                labelAlign="center"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
 
 function TabletMockup({ gridColor }: { gridColor: string }) {
   const cols = 8;
+  const totalGap = 12 * 7; // 7 gaps between 8 columns
+  const gap = 12;
+  
   return (
-    <div className="relative mx-auto w-full" style={{ maxWidth: '480px' }}>
+    <div className="relative mx-auto w-full" style={{ maxWidth: '560px' }}>
       <div
         className="device-screen rounded-2xl overflow-hidden border-4 border-dark-muted"
         style={{ aspectRatio: '3/4', padding: '14px' }}
       >
         <div className="w-full h-full rounded-xl overflow-hidden relative bg-dark-surface">
-          <div className="absolute inset-0 flex gap-2 px-4">
+          <div className="absolute inset-0 flex gap-3 px-4">
             {Array.from({ length: cols }).map((_, i) => (
               <div
                 key={i}
@@ -163,30 +189,6 @@ function TabletMockup({ gridColor }: { gridColor: string }) {
                 style={{ background: gridColor }}
               />
             ))}
-          </div>
-
-          {/* Margin indicator — label right-aligned so it isn't clipped at the edge */}
-          <Caliper
-            style={{ left: '0px', top: '4px', width: '16px' }}
-            value="32px"
-            label="Margin"
-            labelAlign="right"
-          />
-
-          {/* Gutter indicator — pushed down below Margin. Left offset accounts for
-              the flex `gap` between columns (8px here) so it lands on the first gutter. */}
-          <div className="absolute inset-0 px-4 pointer-events-none z-30">
-            <div className="relative w-full h-full">
-              <Caliper
-                style={{
-                  left: `calc((100% - 56px) / 8)`,
-                  top: '36px',
-                  width: '8px',
-                }}
-                value="16px"
-                label="Gutter"
-              />
-            </div>
           </div>
 
           <div className="relative z-10 p-4 space-y-3">
@@ -202,14 +204,51 @@ function TabletMockup({ gridColor }: { gridColor: string }) {
       </div>
       {/* Home bar */}
       <div className="h-1 w-16 mx-auto mt-3 bg-dark-muted rounded-full" />
+
+      {/* Marker overlay - mirrors the screen's exact box, no clipping, so both
+          labels float BELOW the device frame (matching the reference). */}
+      <div
+        className="absolute inset-x-0 top-0 pointer-events-none z-40"
+        style={{ aspectRatio: '3/4', padding: '14px' }}
+      >
+        <div className="relative w-full h-full">
+          {/* Margin marker - at top, label floats above */}
+          <ZoneMarker
+            style={{ left: '0px', width: '16px' }}
+            value="32px"
+            label="Margin"
+            edge="top"
+            labelAlign="right"
+          />
+
+          {/* Gutter marker - at bottom, shifted to the SECOND gap (2 layers over) */}
+          <div className="absolute inset-0 px-4">
+            <div className="relative w-full h-full">
+              <ZoneMarker
+                style={{ 
+                  left: `calc((100% - ${totalGap}px) / 8 + ${gap}px + (100% - ${totalGap}px) / 8)`, 
+                  width: `${gap}px` 
+                }}
+                value="16px"
+                label="Gutter"
+                edge="bottom"
+                labelAlign="center"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
 
 function MobileMockup({ gridColor }: { gridColor: string }) {
   const cols = 4;
+  const totalGap = 8 * 3; // 3 gaps between 4 columns
+  const gap = 8;
+  
   return (
-    <div className="relative mx-auto w-full" style={{ maxWidth: '300px' }}>
+    <div className="relative mx-auto w-full" style={{ maxWidth: '340px' }}>
       <div
         className="device-screen rounded-3xl overflow-hidden border-4 border-dark-muted relative"
         style={{ aspectRatio: '9/19', padding: '10px' }}
@@ -217,7 +256,7 @@ function MobileMockup({ gridColor }: { gridColor: string }) {
         {/* Notch */}
         <div className="absolute top-2.5 left-1/2 -translate-x-1/2 w-20 h-5 bg-dark-bg rounded-full z-20" />
         <div className="w-full h-full rounded-2xl overflow-hidden relative bg-dark-surface">
-          <div className="absolute inset-0 flex gap-1.5 px-2.5">
+          <div className="absolute inset-0 flex gap-2 px-2.5">
             {Array.from({ length: cols }).map((_, i) => (
               <div
                 key={i}
@@ -225,31 +264,6 @@ function MobileMockup({ gridColor }: { gridColor: string }) {
                 style={{ background: gridColor }}
               />
             ))}
-          </div>
-
-          {/* Margin indicator — label right-aligned so it isn't clipped at the edge */}
-          <Caliper
-            style={{ left: '0px', top: '32px', width: '10px' }}
-            value="16px"
-            label="Margin"
-            labelAlign="right"
-          />
-
-          {/* Gutter indicator — pushed further down so it clears both the notch and Margin.
-              Left offset accounts for the flex `gap` between columns (6px here) so it
-              lands on the first gutter instead of drifting into the next one. */}
-          <div className="absolute inset-0 px-2.5 pointer-events-none z-30">
-            <div className="relative w-full h-full">
-              <Caliper
-                style={{
-                  left: `calc((100% - 18px) / 4)`,
-                  top: '64px',
-                  width: '6px',
-                }}
-                value="16px"
-                label="Gutter"
-              />
-            </div>
           </div>
 
           <div className="relative z-10 p-3 pt-8 space-y-2">
@@ -265,6 +279,40 @@ function MobileMockup({ gridColor }: { gridColor: string }) {
       </div>
       {/* Home indicator */}
       <div className="h-1 w-12 mx-auto mt-3 bg-dark-muted rounded-full" />
+
+      {/* Marker overlay - mirrors the screen's exact box, no clipping, so both
+          labels float BELOW the device frame (matching the reference). */}
+      <div
+        className="absolute inset-x-0 top-0 pointer-events-none z-40"
+        style={{ aspectRatio: '9/19', padding: '10px' }}
+      >
+        <div className="relative w-full h-full">
+          {/* Margin marker - at top, label floats above */}
+          <ZoneMarker
+            style={{ left: '0px', width: '10px' }}
+            value="16px"
+            label="Margin"
+            edge="top"
+            labelAlign="right"
+          />
+
+          {/* Gutter marker - at bottom, shifted to the SECOND gap (2 layers over) */}
+          <div className="absolute inset-0 px-2.5">
+            <div className="relative w-full h-full">
+              <ZoneMarker
+                style={{ 
+                  left: `calc((100% - ${totalGap}px) / 4 + ${gap}px + (100% - ${totalGap}px) / 4)`, 
+                  width: `${gap}px` 
+                }}
+                value="16px"
+                label="Gutter"
+                edge="bottom"
+                labelAlign="center"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -342,7 +390,7 @@ export default function GridBreakpointsSection() {
           <div
             ref={(el) => { if (el) devicesRef.current[0] = el; }}
             style={{ opacity: 0, transform: 'translateY(40px)', transition: 'opacity 0.8s cubic-bezier(0.16,1,0.3,1), transform 0.8s cubic-bezier(0.16,1,0.3,1)' }}
-            className="flex flex-col items-center"
+            className="flex flex-col items-center pt-14"
           >
             <div className="flex items-center gap-3 mb-8">
               <div className="w-5 h-5 border border-white/20 flex items-center justify-center">
@@ -375,7 +423,7 @@ export default function GridBreakpointsSection() {
           <div
             ref={(el) => { if (el) devicesRef.current[1] = el; }}
             style={{ opacity: 0, transform: 'translateY(40px)', transition: 'opacity 0.8s cubic-bezier(0.16,1,0.3,1), transform 0.8s cubic-bezier(0.16,1,0.3,1)' }}
-            className="grid grid-cols-1 md:grid-cols-2 gap-16 md:gap-8 lg:gap-16 items-start"
+            className="grid grid-cols-1 md:grid-cols-2 gap-16 md:gap-8 lg:gap-16 items-start pb-14"
           >
             {/* Tablet */}
             <div className="flex flex-col items-center">
@@ -387,7 +435,7 @@ export default function GridBreakpointsSection() {
                 <span className="text-xs font-mono text-white/40">768px — 8 cols</span>
               </div>
               <TabletMockup gridColor="rgba(10,103,232,0.4)" />
-              <div className="mt-8 flex flex-wrap justify-center gap-3">
+              <div className="mt-14 flex flex-wrap justify-center gap-3">
                 {[
                   { label: 'Breakpoint', value: '768px' },
                   { label: 'Columns', value: '8' },
@@ -416,7 +464,7 @@ export default function GridBreakpointsSection() {
                 <span className="text-xs font-mono text-white/40">375px — 4 cols</span>
               </div>
               <MobileMockup gridColor="rgba(10,103,232,0.4)" />
-              <div className="mt-8 flex flex-wrap justify-center gap-3">
+              <div className="mt-14 flex flex-wrap justify-center gap-3">
                 {[
                   { label: 'Breakpoint', value: '375px' },
                   { label: 'Columns', value: '4' },

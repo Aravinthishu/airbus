@@ -1,3 +1,4 @@
+'use client';
 import React, { useState } from 'react';
 
 /* ============================================================
@@ -162,7 +163,7 @@ export function BreadcrumbsDemo() {
   const stateLabels = ['Default', 'Hover', 'Active', 'Focus'];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#FFFFFF' }}>
       <div
         style={{
           flex: '1 1 0',
@@ -171,7 +172,12 @@ export function BreadcrumbsDemo() {
           alignItems: 'center',
           justifyContent: 'center',
           padding: 32,
-          background: '#FFFFFF',
+          backgroundImage: `
+            linear-gradient(rgba(200, 200, 200, 0.15) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(200, 200, 200, 0.15) 1px, transparent 1px)
+          `,
+          backgroundSize: '40px 40px',
+          backgroundColor: '#FFFFFF',
         }}
       >
         <Breadcrumbs items={items} state={state} />
@@ -326,6 +332,7 @@ function BreadcrumbsLevelsSpec() {
             gridTemplateRows: `repeat(${rows.length}, auto)`,
             rowGap: 24,
             columnGap: 20,
+            width:400,
           }}
         >
           {rows.map((row, rIdx) => (

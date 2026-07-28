@@ -190,7 +190,7 @@ function RenderButton({
 }
 
 /* ============================================================
-   LIVE DEMO — interactive preview, sized to match reference cards
+   LIVE DEMO — interactive preview with grid background
 ============================================================ */
 export function ButtonDemo() {
   const [variant, setVariant] = useState<Variant>('primary');
@@ -204,23 +204,36 @@ export function ButtonDemo() {
         style={{
           flex: '1 1 0',
           minHeight: 240,
-          background: 'white',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           padding: '32px 20px',
+          backgroundImage: `
+            linear-gradient(rgba(200, 200, 200, 0.15) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(200, 200, 200, 0.15) 1px, transparent 1px)
+          `,
+          backgroundSize: '40px 40px',
+          backgroundColor: '#FFFFFF',
         }}
       >
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
           <RenderButton variant={variant} size={size} state={state} />
-          <span style={{ fontSize: 12, fontFamily: 'monospace', color: onDark ? 'rgba(255,255,255,0.6)' : '#8089A0' }}>
+          <span style={{ 
+            fontSize: 12, 
+            fontFamily: 'monospace', 
+            color: onDark ? 'rgba(255,255,255,0.6)' : '#8089A0',
+            background: '#FFFFFF',
+            padding: '4px 12px',
+            borderRadius: 4,
+            border: '1px solid #E5E5E5',
+          }}>
             {variant.charAt(0).toUpperCase() + variant.slice(1)} • {size.toUpperCase()}
             {state !== 'default' ? ` • ${state.charAt(0).toUpperCase() + state.slice(1)}` : ''}
           </span>
         </div>
       </div>
 
-      <div style={{ padding: '16px 20px', borderTop: '1px solid #EFEDE8', overflowY: 'auto' }}>
+      <div style={{ padding: '16px 20px', borderTop: '1px solid #EFEDE8', overflowY: 'auto', background: '#FFFFFF' }}>
         <div style={{ marginBottom: 16 }}>
           <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, color: '#8089A0', marginBottom: 8 }}>VARIANT</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -284,6 +297,7 @@ export function ButtonSpec() {
         height: '100%',
         fontFamily: "'DM Sans', sans-serif",
         boxSizing: 'border-box',
+        background: '#FFFFFF',
       }}
     >
       <SpecBadge label="Button" />
@@ -449,7 +463,7 @@ export default function ButtonSpecPage() {
   return (
     <div style={{ 
       padding: '20px 16px', 
-      background: '#FAFAF8', 
+      background: '#F9FAFB', 
       minHeight: '100vh', 
       fontFamily: "'DM Sans', sans-serif",
     }}>

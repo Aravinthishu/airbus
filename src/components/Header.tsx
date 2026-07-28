@@ -16,8 +16,7 @@ export default function Header() {
   const navItems = [
     { label: 'Overview', href: '#architecture' },
     // { label: 'Atomic Design', href: '#atomic' },
-    { label: 'Colors', href: '#color' },
-    { label: 'Typography', href: '#typography' },
+    { label: 'Foundation', href: '#color' },
     { label: 'Components', href: '#components' },
     { label: 'Accessibility', href: '#accessibility' },
     { label: 'Variables', href: '#variables' },

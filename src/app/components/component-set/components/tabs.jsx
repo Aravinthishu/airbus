@@ -179,6 +179,12 @@ export function TabsDemo() {
           justifyContent: 'center',
           padding: 32,
           background: '#FFFFFF',
+          backgroundImage: `
+  linear-gradient(rgba(200, 200, 200, 0.15) 1px, transparent 1px),
+  linear-gradient(90deg, rgba(200, 200, 200, 0.15) 1px, transparent 1px)
+`,
+backgroundSize: '40px 40px',
+backgroundColor: '#FFFFFF',
         }}
       >
         <div style={{ width: '100%', maxWidth: 600 }}>
@@ -364,6 +370,7 @@ const CARD_STYLE = {
   background: '#FFFFFF',
   overflow: 'hidden',
   boxShadow: '0 1px 2px rgba(16,24,40,0.04)',
+  
 };
 
 export default function TabsPage() {

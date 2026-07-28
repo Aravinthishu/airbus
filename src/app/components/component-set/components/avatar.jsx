@@ -1,3 +1,4 @@
+'use client';
 import React, { useState } from 'react';
 
 /* ============================================================
@@ -61,7 +62,8 @@ function FigmaFrame({ children, style }) {
         border: '2px dashed #C084FC',
         borderRadius: 8,
         background: '#FFFFFF',
-        padding: 16,
+        padding: '12px 16px',
+        display: 'inline-block',
         ...style,
       }}
     >
@@ -204,7 +206,7 @@ function Avatar({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          border:'3px solid white',
+          border: '3px solid white',
           fontSize: sz.font,
           fontWeight: 700,
           fontFamily: "'DM Sans', sans-serif",
@@ -214,6 +216,9 @@ function Avatar({
       </div>
     );
   };
+
+  // Status dot size based on avatar size
+  const dotSize = Math.max(7, sz.dim * 0.22);
 
   return (
     <div style={{ position: 'relative', width: sz.dim, height: sz.dim, display: 'inline-block', ...style }}>
@@ -247,18 +252,19 @@ function Avatar({
         </div>
       )}
 
-      {/* status dot, e.g. used alongside the size scale reference */}
+      {/* status dot - moved up to overlap the avatar */}
       {showStatusDot && (
         <div
           style={{
             position: 'absolute',
-            bottom: -1,
-            right: -1,
-            width: Math.max(7, sz.dim * 0.22),
-            height: Math.max(7, sz.dim * 0.22),
+            bottom: sz.dim * 0.,
+            right: sz.dim * 0.06,
+            width: dotSize,
+            height: dotSize,
             borderRadius: '50%',
             background: TOKENS.statusDot,
             border: '2px solid #FFFFFF',
+            zIndex:0,
           }}
         />
       )}
@@ -291,7 +297,12 @@ export function AvatarDemo() {
           justifyContent: 'center',
           gap: 12,
           padding: 32,
-          background: '#FFFFFF',
+          backgroundImage: `
+            linear-gradient(rgba(200, 200, 200, 0.15) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(200, 200, 200, 0.15) 1px, transparent 1px)
+          `,
+          backgroundSize: '40px 40px',
+          backgroundColor: '#FFFFFF',
         }}
       >
         <div style={{ fontSize: 11, fontWeight: 600, color: '#8089A0', fontFamily: "'DM Sans', sans-serif" }}>
@@ -356,12 +367,68 @@ export function AvatarSpec() {
     <div style={{ padding: 20, overflowY: 'auto', height: '100%', fontFamily: "'DM Sans', sans-serif", background: '#FFFFFF' }}>
       <SpecBadge label="Avatar" />
 
-      {/* Sizes — matches avatar-icon.png */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 28 }}>
+
+      {/* States × Variants — matches avatar.png */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div style={{ fontSize: 14, fontWeight: 600, color: '#3D4759', fontFamily: "'DM Sans', sans-serif" }}>
+          Avatar — States × Variants
+        </div>
+        <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
+          <div style={{ width: 70, flexShrink: 0, display: 'flex', flexDirection: 'column', paddingTop: 34 }}>
+            {stateRows.map((state, i) => (
+              <div
+                key={state.key}
+                style={{
+                  fontSize: 10,
+                  fontWeight: 500,
+                  color: '#6B7280',
+                  fontFamily: "'DM Sans', sans-serif",
+                  height: 48,
+                  display: 'flex',
+                  alignItems: 'center',
+                  marginBottom: i < stateRows.length - 1 ? 12 : 0,
+                }}
+              >
+                {state.label}
+              </div>
+            ))}
+          </div>
+          <FigmaFrame>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: `repeat(${variantRows.length}, auto)`,
+                rowGap: 12,
+                columnGap: 16,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              {variantRows.map((v) => (
+                <div key={v.key} style={{ textAlign: 'center', fontSize: 10, color: '#6B7280', fontFamily: "'DM Sans', sans-serif", fontWeight: 500 }}>
+                  {v.label}
+                </div>
+              ))}
+              {stateRows.map((state) => (
+                <React.Fragment key={state.key}>
+                  {variantRows.map((v) => (
+                    <div key={v.key} style={{ display: 'flex', justifyContent: 'center' }}>
+                      <Avatar size="l" initials="GV" state={state.key} variant={v.key} showStatusDot />
+                    </div>
+                  ))}
+                </React.Fragment>
+              ))}
+            </div>
+          </FigmaFrame>
+        </div>
+      </div>
+
+            {/* Sizes — matches avatar-icon.png */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 28 }}>
         <div style={{ fontSize: 14, fontWeight: 600, color: '#3D4759', fontFamily: "'DM Sans', sans-serif" }}>
           Avatar — Sizes
         </div>
-        <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start' }}>
+        <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
           <div style={{ width: 28, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
             {sizeLabels.map((label, i) => (
               <div
@@ -380,7 +447,7 @@ export function AvatarSpec() {
               </div>
             ))}
           </div>
-          <FigmaFrame style={{ flex: 1 }}>
+          <FigmaFrame>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {sizeRows.map((size) => (
                 <div key={size} style={{ display: 'flex', alignItems: 'center' }}>
@@ -396,62 +463,6 @@ export function AvatarSpec() {
                     />
                   ))}
                 </div>
-              ))}
-            </div>
-          </FigmaFrame>
-        </div>
-      </div>
-
-      {/* States × Variants — matches avatar.png */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        <div style={{ fontSize: 14, fontWeight: 600, color: '#3D4759', fontFamily: "'DM Sans', sans-serif" }}>
-          Avatar — States × Variants
-        </div>
-        <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start' }}>
-          <div style={{ width: 70, flexShrink: 0, display: 'flex', flexDirection: 'column', paddingTop: 34 }}>
-            {stateRows.map((state, i) => (
-              <div
-                key={state.key}
-                style={{
-                  fontSize: 10,
-                  fontWeight: 500,
-                  color: '#6B7280',
-                  fontFamily: "'DM Sans', sans-serif",
-                  height: 48,
-                  display: 'flex',
-                  alignItems: 'center',
-                  marginBottom: i < stateRows.length - 1 ? 16 : 0,
-                }}
-              >
-                {state.label}
-              </div>
-            ))}
-          </div>
-          <FigmaFrame style={{ flex: 1 }}>
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: `repeat(${variantRows.length}, 1fr)`,
-                rowGap: 16,
-                columnGap: 8,
-                alignItems: 'center',
-                maxWidth: 400,
-                margin: '0 auto',
-              }}
-            >
-              {variantRows.map((v) => (
-                <div key={v.key} style={{ textAlign: 'center', fontSize: 10, color: '#6B7280', fontFamily: "'DM Sans', sans-serif", fontWeight: 500 }}>
-                  {v.label}
-                </div>
-              ))}
-              {stateRows.map((state) => (
-                <React.Fragment key={state.key}>
-                  {variantRows.map((v) => (
-                    <div key={v.key} style={{ display: 'flex', justifyContent: 'center' }}>
-                      <Avatar size="l" initials="GV" state={state.key} variant={v.key} showStatusDot />
-                    </div>
-                  ))}
-                </React.Fragment>
               ))}
             </div>
           </FigmaFrame>
@@ -477,7 +488,7 @@ const CARD_STYLE = {
 
 export default function AvatarPage() {
   return (
-    <div style={{ padding: 32, background: '#FFFFFF', minHeight: '100vh', fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ padding: 32, background: '#F9FAFB', minHeight: '100vh', fontFamily: "'DM Sans', sans-serif" }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 32, alignItems: 'center' }}>
         <div style={{ width: '100%', maxWidth: 1100 }}>
           <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1, color: '#8089A0', marginBottom: 8, fontFamily: "'DM Sans', sans-serif" }}>

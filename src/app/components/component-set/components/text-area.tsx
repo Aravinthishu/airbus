@@ -1,3 +1,4 @@
+'use client';
 import React, { useState } from 'react';
 
 /* ============================================================
@@ -155,7 +156,7 @@ export function TextAreaDemo() {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#FFFFFF' }}>
       <div
         style={{
           flex: '1 1 0',
@@ -164,7 +165,12 @@ export function TextAreaDemo() {
           alignItems: 'center',
           justifyContent: 'center',
           padding: 32,
-          background: '#FFFFFF',
+          backgroundImage: `
+            linear-gradient(rgba(200, 200, 200, 0.15) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(200, 200, 200, 0.15) 1px, transparent 1px)
+          `,
+          backgroundSize: '40px 40px',
+          backgroundColor: '#FFFFFF',
         }}
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6, width: 340 }}>
@@ -220,7 +226,7 @@ export function TextAreaDemo() {
         </div>
       </div>
 
-      <div style={{ padding: 20, borderTop: '1px solid #EFEDE8', overflowY: 'auto' }}>
+      <div style={{ padding: 20, borderTop: '1px solid #EFEDE8', overflowY: 'auto', background: '#FFFFFF' }}>
         <div>
           <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, color: '#8089A0', marginBottom: 8, fontFamily: "'DM Sans', sans-serif" }}>
             STATE
@@ -229,7 +235,6 @@ export function TextAreaDemo() {
             {(['default', 'hover', 'active', 'filled', 'readonly', 'disabled'] as PreviewStateKey[]).map((s) => (
               <PropChip key={s} active={state === s} onClick={() => {
                 setState(s);
-                // Reset value when switching to default/hover/active
                 if (s === 'default' || s === 'hover' || s === 'active') {
                   setValue('');
                 }
@@ -245,9 +250,7 @@ export function TextAreaDemo() {
 }
 
 /* ============================================================
-   REFERENCE SPEC — coded replica of the shared image (no image
-   file used). Row titles sit outside the violet dashed box;
-   the dashed border wraps only the fields themselves.
+   REFERENCE SPEC — with violet dashed border tightly wrapped
 ============================================================ */
 interface SpecRowConfig {
   key: string;
@@ -279,7 +282,7 @@ function SpecTextareaRow({
   dim,
 }: Omit<SpecRowConfig, 'key' | 'title'>) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, width: 320 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, width: 280 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
         <span style={{ fontSize: 13, fontWeight: 700, color: dim ? '#B5B9C2' : '#3D4759', fontFamily: "'DM Sans', sans-serif" }}>
           {label}
@@ -291,7 +294,7 @@ function SpecTextareaRow({
         {showToolbar && <TextToolbar />}
         <div style={{ position: 'relative' }}>
           {showCursor && (
-            <span style={{ position: 'absolute', top: 10, left: 12, color: border, fontWeight: 400 }}>|</span>
+            <span style={{ position: 'absolute', top: 10, left: 12, color: border, fontWeight: 400, zIndex: 1 }}>|</span>
           )}
           <textarea
             readOnly
@@ -345,15 +348,15 @@ const SPEC_ROWS: SpecRowConfig[] = [
 ];
 
 export function TextAreaSpec() {
-  const LABEL_COL_WIDTH = 80;
-  const COLUMN_GAP = 16;
-  const ROW_GAP = 32;
+  const LABEL_COL_WIDTH = 70;
+  const COLUMN_GAP = 12;
+  const ROW_GAP = 16;
 
   return (
-    <div style={{ padding: 24, overflowY: 'auto', height: '100%', background: '#FFFFFF' }}>
+    <div style={{ padding: 20, overflowY: 'auto', height: '100%', background: '#FFFFFF' }}>
       <SpecBadge label="Text Area" />
-      <div style={{ position: 'relative' }}>
-        {/* violet dashed border overlay — sized to just the field column, spans every row automatically */}
+      <div style={{ position: 'relative', display: 'inline-block', width: 'auto' }}>
+        {/* violet dashed border — tightly wrapped */}
         <div
           style={{
             position: 'absolute',
@@ -370,10 +373,10 @@ export function TextAreaSpec() {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: `${LABEL_COL_WIDTH}px 1fr`,
+            gridTemplateColumns: `${LABEL_COL_WIDTH}px auto`,
             columnGap: COLUMN_GAP,
             rowGap: ROW_GAP,
-            padding: '24px 0',
+            padding: '16px 0',
           }}
         >
           {SPEC_ROWS.map(({ key, title, ...rowProps }, idx) => (
@@ -387,13 +390,13 @@ export function TextAreaSpec() {
                   paddingTop: 2,
                 }}
               >
-                <span style={{ fontSize: 13, color: '#6B7280', fontFamily: "'DM Sans', sans-serif" }}>{title}</span>
+                <span style={{ fontSize: 12, color: '#6B7280', fontFamily: "'DM Sans', sans-serif" }}>{title}</span>
               </div>
               <div
                 style={{
                   gridColumn: 2,
                   gridRow: idx + 1,
-                  padding: '0 24px',
+                  padding: '0 12px',
                 }}
               >
                 <SpecTextareaRow {...rowProps} />

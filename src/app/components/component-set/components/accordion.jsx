@@ -1,3 +1,4 @@
+'use client';
 import React, { useState } from 'react';
 
 /* ============================================================
@@ -42,7 +43,8 @@ function FigmaFrame({ children, style }) {
         border: '2px dashed #C084FC',
         borderRadius: 8,
         background: '#FFFFFF',
-        padding: 16,
+        padding: '12px 16px',
+        display: 'inline-block',
         ...style,
       }}
     >
@@ -287,7 +289,12 @@ export function AccordionDemo() {
           justifyContent: 'center',
           padding: 24,
           gap: 6,
-          background: '#FFFFFF',
+          backgroundImage: `
+            linear-gradient(rgba(200, 200, 200, 0.15) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(200, 200, 200, 0.15) 1px, transparent 1px)
+          `,
+          backgroundSize: '40px 40px',
+          backgroundColor: '#FFFFFF',
         }}
       >
         <div style={{ fontSize: 10, fontWeight: 600, color: '#8089A0', fontFamily: "'DM Sans', sans-serif" }}>
@@ -374,11 +381,11 @@ export function AccordionSpec() {
         >
           Accordion — Open
         </div>
-        <div style={{ display: 'flex', gap: 32, alignItems: 'flex-start' }}>
-          <div style={{ width: 60, flexShrink: 0, paddingTop: 10 }}>
+        <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start' }}>
+          <div style={{ width: 50, flexShrink: 0, paddingTop: 10 }}>
             <div style={{ fontSize: 12, color: '#151A24' }}>Item</div>
           </div>
-          <FigmaFrame style={{ flex: 1 }}>
+          <FigmaFrame>
             <Accordion 
               items={sevenItems} 
               openIds={['1', '2', '3', '4', '5', '6', '7']} 
@@ -409,9 +416,9 @@ export function AccordionSpec() {
         >
           Accordion — States
         </div>
-        <div style={{ display: 'flex', gap: 32, alignItems: 'flex-start' }}>
+        <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start' }}>
           <div style={{ 
-            width: 60,
+            width: 50,
             flexShrink: 0, 
             display: 'flex', 
             flexDirection: 'column', 
@@ -434,7 +441,7 @@ export function AccordionSpec() {
               </div>
             ))}
           </div>
-          <FigmaFrame style={{ flex: 1 }}>
+          <FigmaFrame>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               {stateOptions.map((state) => (
                 <Accordion 
@@ -463,7 +470,7 @@ export function AccordionSpec() {
 const CARD_STYLE = {
   width: '100%',
   maxWidth: 1000,
-  height: 480, // Fixed height for both cards
+  height: 480,
   border: '1px solid #EFEDE8',
   borderRadius: 12,
   background: '#FFFFFF',
@@ -473,7 +480,7 @@ const CARD_STYLE = {
 
 export default function AccordionPage() {
   return (
-    <div style={{ padding: 24, background: '#FFFFFF', minHeight: '100vh', fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ padding: 24, background: '#F9FAFB', minHeight: '100vh', fontFamily: "'DM Sans', sans-serif" }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 24, alignItems: 'center' }}>
         <div style={{ width: '100%', maxWidth: 1000 }}>
           <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, color: '#8089A0', marginBottom: 6, fontFamily: "'DM Sans', sans-serif" }}>

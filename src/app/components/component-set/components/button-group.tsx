@@ -58,8 +58,7 @@ function SpecBlock({
 }
 
 /* ============================================================
-   SETTINGS ICON — gear glyph, used everywhere (no plane icon
-   anywhere in this file)
+   SETTINGS ICON — gear glyph, used everywhere
 ============================================================ */
 function SettingsIcon({ size = 16 }: { size?: number }) {
   return (
@@ -99,7 +98,6 @@ const BUTTON_GROUP_STYLES: Record<
     bg: '#FFFFFF',
     border: '#0B1F4D',
     text: '#0B1F4D',
-    boxShadow: '0 0 0 3px rgba(11,31,77,0.25)',
   },
   disabled: {
     bg: '#FFFFFF',
@@ -154,6 +152,8 @@ function ButtonGroupButton({
         border: 'none',
         cursor: isDisabled ? 'not-allowed' : 'pointer',
         ...sizeStyle,
+        position: 'relative',
+        margin: '2px',
       }}
     >
       {showIcon && <SettingsIcon size={getIconSize()} />}
@@ -187,22 +187,23 @@ function ButtonGroup({
         border: `1.5px solid ${styles.border}`,
         borderRadius: 6,
         overflow: 'hidden',
-        boxShadow: styles.boxShadow || 'none',
+        boxShadow: state === 'focus' ? '0 0 0 2px #FFFFFF, 0 0 0 4px #053E9F' : 'none',
+        background: '#FFFFFF',
       }}
     >
       {Array.from({ length: itemCount }).map((_, index) => (
         <React.Fragment key={index}>
           {index > 0 && (
-              <div
-                style={{
-                  width: 1.5,
-                  alignSelf: 'stretch',
-                  margin: '8px 0',
-                  flexShrink: 0,
-                  backgroundColor: styles.border,
-                }}
-              />
-            )}
+            <div
+              style={{
+                width: 1.5,
+                alignSelf: 'stretch',
+                margin: '8px 0',
+                flexShrink: 0,
+                backgroundColor: styles.border,
+              }}
+            />
+          )}
           <ButtonGroupButton
             label={label}
             state={state}
@@ -230,9 +231,8 @@ export function ButtonGroupDemo() {
   const statusLabels = ['Default', 'Hover', 'Active', 'Focus', 'Disabled'];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#FFFFFF' }}>
       <div
-      className='bg-[#fff]'
         style={{
           flex: '1 1 0',
           minHeight: 200,
@@ -240,8 +240,13 @@ export function ButtonGroupDemo() {
           alignItems: 'center',
           justifyContent: 'center',
           padding: 32,
-          // background:
-          //   'repeating-linear-gradient(0deg, rgba(10,103,232,0.03) 0 1px, transparent 1px 24px), repeating-linear-gradient(90deg, rgba(10,103,232,0.03) 0 1px, transparent 1px 24px)',
+          // Line grid pattern - larger boxes with lighter lines
+          backgroundImage: `
+            linear-gradient(rgba(200, 200, 200, 0.15) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(200, 200, 200, 0.15) 1px, transparent 1px)
+          `,
+          backgroundSize: '40px 40px',
+          backgroundColor: '#FFFFFF',
         }}
       >
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
@@ -252,13 +257,13 @@ export function ButtonGroupDemo() {
             showIcon={hasIcon}
             iconOnly={iconOnly}
           />
-          <span style={{ fontSize: 12, fontFamily: 'monospace', color: '#8089A0' }}>
+          <span style={{ fontSize: 12, fontFamily: 'monospace', color: '#8089A0', background: '#FFFFFF', padding: '4px 12px', borderRadius: 4, border: '1px solid #E5E5E5' }}>
             {status.charAt(0).toUpperCase() + status.slice(1)} • {size.toUpperCase()} • {itemCount} items
           </span>
         </div>
       </div>
 
-      <div style={{ padding: 20, borderTop: '1px solid #EFEDE8', overflowY: 'auto' }}>
+      <div style={{ padding: 20, borderTop: '1px solid #EFEDE8', overflowY: 'auto', background: '#FFFFFF' }}>
         <div style={{ marginBottom: 16 }}>
           <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, color: '#8089A0', marginBottom: 8, fontFamily: "'DM Sans', sans-serif" }}>STATUS</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -303,9 +308,7 @@ export function ButtonGroupDemo() {
 }
 
 /* ============================================================
-   REFERENCE SPEC — matches btn-group-all.png / btn-group-icon-all.png
-   with violet dashed border like Figma. Uses SettingsIcon (gear)
-   everywhere — no plane icon anywhere in this file.
+   REFERENCE SPEC
 ============================================================ */
 export function ButtonGroupSpec() {
   const sizes: ButtonSize[] = ['l', 'm', 's'];
@@ -321,12 +324,12 @@ export function ButtonGroupSpec() {
   }) => (
     <div
       style={{
-        width: '100%',
+        width: 'fit-content',
+        minWidth: '300px',
         border: '2px dashed #C084FC',
         borderRadius: 8,
-        overflow: 'auto',
-        background: '#FFFFFF',
         padding: 20,
+        background: '#FFFFFF',
       }}
     >
       <div style={{
@@ -377,25 +380,23 @@ export function ButtonGroupSpec() {
     >
       <SpecBadge label="Button Group" />
 
-      {/* Exact match to btn-group-all.png with violet dashed border */}
       <SpecBlock title="Button Group — Icon + Label">
         <SizeRows iconOnly={false} title="Icon + Label" />
       </SpecBlock>
 
-      {/* Exact match to btn-group-icon-all.png with violet dashed border */}
       <SpecBlock title="Button Group — Icon Only">
         <SizeRows iconOnly={true} title="Icon Only" />
       </SpecBlock>
 
-      {/* Exact match to btn-group-2 / 3 / 4 .png with violet dashed border */}
       <SpecBlock title="Button Group — Item Count Examples">
         <div
           style={{
-            width: '100%',
+            width: 'fit-content',
+            minWidth: '300px',
             border: '2px dashed #C084FC',
             borderRadius: 8,
-            background: '#FFFFFF',
             padding: 20,
+            background: '#FFFFFF',
           }}
         >
           <div style={{
@@ -425,7 +426,7 @@ export function ButtonGroupSpec() {
 }
 
 /* ============================================================
-   PAGE — equal-size preview / reference cards
+   PAGE
 ============================================================ */
 const CARD_STYLE: React.CSSProperties = {
   width: '100%',
@@ -440,7 +441,7 @@ const CARD_STYLE: React.CSSProperties = {
 
 export default function ButtonGroupPage() {
   return (
-    <div style={{ padding: 32, background: '#FAFAF8', minHeight: '100vh', fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ padding: 32, background: '#F9FAFB', minHeight: '100vh', fontFamily: "'DM Sans', sans-serif" }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 32, alignItems: 'center' }}>
         <div style={{ width: '100%', maxWidth: 1100 }}>
           <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1, color: '#8089A0', marginBottom: 8, fontFamily: "'DM Sans', sans-serif" }}>

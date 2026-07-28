@@ -1,3 +1,4 @@
+'use client';
 import React, { useState } from 'react';
 
 /* ============================================================
@@ -120,11 +121,11 @@ const SIZE_STYLES: Record<
   SizeKey,
   { padding: string; fontSize: number; labelSize: number; width: number }
 > = {
-  xs: { padding: '6px 10px', fontSize: 11, labelSize: 11, width: 240 },
-  s: { padding: '8px 12px', fontSize: 12, labelSize: 11, width: 260 },
-  m: { padding: '10px 14px', fontSize: 13, labelSize: 12, width: 280 },
-  l: { padding: '12px 16px', fontSize: 14, labelSize: 12, width: 300 },
-  xl: { padding: '16px 16px', fontSize: 15, labelSize: 13, width: 320 },
+  xs: { padding: '6px 10px', fontSize: 11, labelSize: 11, width: 200 },
+  s: { padding: '8px 12px', fontSize: 12, labelSize: 11, width: 220 },
+  m: { padding: '10px 14px', fontSize: 13, labelSize: 12, width: 240 },
+  l: { padding: '12px 16px', fontSize: 14, labelSize: 12, width: 260 },
+  xl: { padding: '16px 16px', fontSize: 15, labelSize: 13, width: 280 },
 };
 
 /* ============================================================
@@ -228,7 +229,7 @@ function ForgotPasswordLink({ color = '#2554D6' }: { color?: string }) {
 }
 
 /* ============================================================
-   LIVE DEMO — interactive preview
+   LIVE DEMO — interactive preview with grid background
 ============================================================ */
 export function InputFieldDemo() {
   const [appearance, setAppearance] = useState<Appearance>('default');
@@ -319,7 +320,7 @@ export function InputFieldDemo() {
   const passwordValue = '4trsi3TjaiUl';
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#FFFFFF' }}>
       <div
         style={{
           flex: '1 1 0',
@@ -328,7 +329,12 @@ export function InputFieldDemo() {
           alignItems: 'center',
           justifyContent: 'center',
           padding: 24,
-          background: '#FFFFFF',
+          backgroundImage: `
+            linear-gradient(rgba(200, 200, 200, 0.15) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(200, 200, 200, 0.15) 1px, transparent 1px)
+          `,
+          backgroundSize: '40px 40px',
+          backgroundColor: '#FFFFFF',
         }}
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -379,7 +385,7 @@ export function InputFieldDemo() {
         </div>
       </div>
 
-      <div style={{ padding: 16, borderTop: '1px solid #EFEDE8', overflowY: 'auto' }}>
+      <div style={{ padding: 16, borderTop: '1px solid #EFEDE8', overflowY: 'auto', background: '#FFFFFF' }}>
         <div style={{ marginBottom: 12 }}>
           <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, color: '#8089A0', marginBottom: 6 }}>STATE</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
@@ -417,48 +423,7 @@ export function InputFieldDemo() {
 }
 
 /* ============================================================
-   SPEC — "Sizes" block, matches your Sizes reference exactly:
-   size tag on the left, Label + filled underline input on the
-   right, growing padding/font from XS to XL.
-============================================================ */
-function InputSizesList() {
-  const order: SizeKey[] = ['xs', 's', 'm', 'l', 'xl'];
-  return (
-    <div style={{ display: 'flex', gap: 16 }}>
-      {/* size labels, outside the dashed box — same pattern as the States grid */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 20, width: 24 }}>
-        {order.map((size) => (
-          <div key={size} style={{ height: 68, display: 'flex', alignItems: 'center' }}>
-            <span style={{ fontSize: 12, fontWeight: 600, color: '#8089A0', fontFamily: "'DM Sans', sans-serif" }}>
-              {size.toUpperCase()}
-            </span>
-          </div>
-        ))}
-      </div>
-
-      {/* dashed violet guide box wrapping just the fields */}
-      <div
-        style={{
-          border: '1.5px dashed #8B5CF6',
-          borderRadius: 4,
-          padding: '20px 24px',
-          flex: 1,
-        }}
-      >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-          {order.map((size) => (
-            <div key={size} style={{ height: 68, display: 'flex', alignItems: 'center' }}>
-              <Field size={size} stateKey="filled" label="Label" placeholder="Placeholder" />
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ============================================================
-   SPEC — "States" grid, matches your password-field reference:
+   SPEC — "States" grid first (swapped), matches your password-field reference:
    columns = Hidden / Show, rows = Default/Hover/Active/Filled/
    Disabled, dashed violet guide box wrapping header + rows,
    state labels sit outside the box on the left.
@@ -467,7 +432,7 @@ function InputStatesGrid() {
   const rows: FieldStateKey[] = ['default', 'hover', 'active', 'filled', 'disabled'];
   const HEADER_H = 32;
   const ROW_H = 100;
-  const COL_W = 240;
+  const COL_W = 220;
 
   const cell = (stateKey: FieldStateKey, visibility: 'hidden' | 'show') => {
     const isShow = visibility === 'show';
@@ -537,15 +502,58 @@ function InputStatesGrid() {
   );
 }
 
+/* ============================================================
+   SPEC — "Sizes" block second (swapped), matches your Sizes reference exactly:
+   size tag on the left, Label + filled underline input on the
+   right, growing padding/font from XS to XL.
+============================================================ */
+function InputSizesList() {
+  const order: SizeKey[] = ['xs', 's', 'm', 'l', 'xl'];
+  return (
+    <div style={{ display: 'flex', gap: 12 }}>
+      {/* size labels, outside the dashed box — same pattern as the States grid */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16, width: 24 }}>
+        {order.map((size) => (
+          <div key={size} style={{ height: 60, display: 'flex', alignItems: 'center' }}>
+            <span style={{ fontSize: 12, fontWeight: 600, color: '#8089A0', fontFamily: "'DM Sans', sans-serif" }}>
+              {size.toUpperCase()}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      {/* dashed violet guide box wrapping just the fields - fit to content */}
+      <div
+        style={{
+          border: '1.5px dashed #8B5CF6',
+          borderRadius: 4,
+          padding: '12px 16px',
+          display: 'inline-block',
+        }}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {order.map((size) => (
+            <div key={size} style={{ height: 60, display: 'flex', alignItems: 'center' }}>
+              <Field size={size} stateKey="filled" label="Label" placeholder="Placeholder" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function InputFieldSpec() {
   return (
     <div style={{ padding: 20, overflowY: 'auto', height: '100%', background: '#FFFFFF' }}>
       <SpecBadge label="Input Field" />
-      <SpecBlock title="Sizes">
-        <InputSizesList />
-      </SpecBlock>
+      {/* States first (swapped) */}
       <SpecBlock title="States">
         <InputStatesGrid />
+      </SpecBlock>
+      {/* Sizes second (swapped) */}
+      <SpecBlock title="Sizes">
+        <InputSizesList />
       </SpecBlock>
     </div>
   );
@@ -558,7 +566,7 @@ export function InputFieldSpec() {
 const CARD_STYLE: React.CSSProperties = {
   width: '100%',
   maxWidth: 920,
-  height: 480,
+  height: 560,
   border: '1px solid #EFEDE8',
   borderRadius: 12,
   background: '#FFFFFF',

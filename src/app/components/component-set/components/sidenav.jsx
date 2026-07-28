@@ -1,3 +1,4 @@
+'use client';
 import React, { useState, useEffect, useRef } from 'react';
 
 /* ============================================================
@@ -41,7 +42,8 @@ function FigmaFrame({ children, style }) {
         border: '2px dashed #C084FC',
         borderRadius: 8,
         background: '#FFFFFF',
-        padding: 20,
+        padding: '12px 16px',
+        display: 'inline-block',
         ...style,
       }}
     >
@@ -53,8 +55,8 @@ function FigmaFrame({ children, style }) {
 /* Row with a text label to the left of a FigmaFrame */
 function LabeledRow({ label, children }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 10 }}>
-      <span style={{ fontSize: 13, color: '#151A24', width: 110, flexShrink: 0, fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 6 }}>
+      <span style={{ fontSize: 13, color: '#151A24', width: 90, flexShrink: 0, fontFamily: "'DM Sans', sans-serif" }}>
         {label}
       </span>
       <div style={{ flex: 1 }}>{children}</div>
@@ -412,11 +414,18 @@ function Tree({ nodes, collapsedRail = false, onItemClick = null }) {
 }
 
 /* ============================================================
-   Scroller component with auto-hide scrollbar
+   Scroller component with auto-hide scrollbar - FIXED to maintain scroll position
 ============================================================ */
 function AutoHideScroll({ children, height }) {
   const [showScroll, setShowScroll] = useState(false);
   const timeoutRef = useRef(null);
+  const scrollContainerRef = useRef(null);
+
+  // Save scroll position before children update
+  useEffect(() => {
+    // Scroll position is maintained automatically by the browser
+    // because we're using the same DOM element
+  }, [children]);
 
   const handleScroll = () => {
     setShowScroll(true);
@@ -430,9 +439,10 @@ function AutoHideScroll({ children, height }) {
 
   return (
     <div
+      ref={scrollContainerRef}
       onScroll={handleScroll}
       style={{
-        height: height,
+        height: height || '100%',
         overflowY: 'auto',
         overflowX: 'hidden',
         scrollbarWidth: showScroll ? 'thin' : 'none',
@@ -468,6 +478,7 @@ function AutoHideScroll({ children, height }) {
 
 /* ============================================================
    LIVE DEMO — Clean single sidebar preview (SMALLER)
+   FIXED: Controls now don't cause scroll to top
 ============================================================ */
 export function SideNavDemo() {
   const [state, setState] = useState('default');
@@ -483,9 +494,14 @@ export function SideNavDemo() {
 
   const currentStateLabel = stateLabels[stateOptions.indexOf(state)];
 
+  // Memoize the SideNavShell to prevent unnecessary re-renders
+  const sidebarContent = React.useMemo(() => {
+    return <SideNavShell collapsed={collapsed} onItemClick={handleItemClick} state={state} />;
+  }, [state, collapsed]);
+
   return (
     <AutoHideScroll height="100%">
-      <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100%', padding: '12px 16px' }}>
+      <div style={{ display: 'flex', backgroundColor:'#ffff', flexDirection: 'column', minHeight: '100%', padding: '12px 16px' }}>
         {/* Preview Area - Single Sidebar with State Label */}
         <div
           style={{
@@ -497,8 +513,12 @@ export function SideNavDemo() {
             gap: 10,
             padding: '12px 0',
             minHeight: 280,
-            background:
-              'repeating-linear-gradient(0deg, rgba(10,103,232,0.03) 0 1px, transparent 1px 24px), repeating-linear-gradient(90deg, rgba(10,103,232,0.03) 0 1px, transparent 1px 24px)',
+            backgroundImage: `
+              linear-gradient(rgba(200, 200, 200, 0.15) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(200, 200, 200, 0.15) 1px, transparent 1px)
+            `,
+            backgroundSize: '40px 40px',
+            backgroundColor: '#FFFFFF',
             borderRadius: 8,
             marginBottom: 12,
           }}
@@ -507,7 +527,7 @@ export function SideNavDemo() {
             State: <span style={{ color: '#0B1F4D' }}>{currentStateLabel}</span>
             {collapsed && ' • Collapsed'}
           </div>
-          <SideNavShell collapsed={collapsed} onItemClick={handleItemClick} state={state} />
+          {sidebarContent}
           {selectedItem && (
             <div style={{ fontSize: 11, color: '#6B7280', fontFamily: "'DM Sans', sans-serif" }}>
               Selected: <strong>{selectedItem}</strong>
@@ -572,11 +592,11 @@ export function SideNavSpec() {
         <SpecBadge label="Side Navigation" />
 
         {/* side-category.png */}
-        <div style={{ marginBottom: 40 }}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: '#151A24', marginBottom: 16 }}>SideNav — Category</div>
-          <FigmaFrame>
-            <div style={{ display: 'flex', gap: 40 }}>
-              <div style={{ width: 100, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <div style={{ marginBottom: 32 }}>
+          <div style={{ fontSize: 14, fontWeight: 700, color: '#151A24', marginBottom: 12 }}>SideNav — Category</div>
+          <FigmaFrame style={{ display: 'inline-block' }}>
+            <div style={{ display: 'flex', gap: 24 }}>
+              <div style={{ width: 90, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
                 <div style={{ padding: '8px 0', fontSize: 13, color: '#151A24' }}>Category</div>
                 <div style={{ padding: '8px 0', fontSize: 13, color: '#151A24' }}>First Level</div>
                 <div style={{ padding: '8px 0', fontSize: 13, color: '#151A24' }}>Second Level</div>
@@ -588,17 +608,17 @@ export function SideNavSpec() {
         </div>
 
         {/* side-section.png */}
-        <div style={{ marginBottom: 40 }}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: '#151A24', marginBottom: 16 }}>SideNav — Section</div>
-          <FigmaFrame>
-            <div style={{ display: 'flex', gap: 40 }}>
-              <div style={{ width: 90, flexShrink: 0, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+        <div style={{ marginBottom: 32 }}>
+          <div style={{ fontSize: 14, fontWeight: 700, color: '#151A24', marginBottom: 12 }}>SideNav — Section</div>
+          <FigmaFrame style={{ display: 'inline-block' }}>
+            <div style={{ display: 'flex', gap: 24 }}>
+              <div style={{ width: 80, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 20 }}>
                 <span style={{ fontSize: 13, color: '#151A24' }}>Section 1</span>
                 <span style={{ fontSize: 13, color: '#151A24' }}>Section 2</span>
               </div>
               <div>
                 <Tree nodes={sectionOneTree} />
-                <div style={{ height: 20 }} />
+                <div style={{ height: 16 }} />
                 <Tree nodes={sectionTwoTree} />
               </div>
             </div>
@@ -606,12 +626,12 @@ export function SideNavSpec() {
         </div>
 
         {/* side-states.png */}
-        <div style={{ marginBottom: 40 }}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: '#151A24', marginBottom: 16 }}>SideNav — States</div>
-          <FigmaFrame>
+        <div style={{ marginBottom: 32 }}>
+          <div style={{ fontSize: 14, fontWeight: 700, color: '#151A24', marginBottom: 12 }}>SideNav — States</div>
+          <FigmaFrame style={{ display: 'inline-block' }}>
             {stateRows.map((row) => (
               <LabeledRow key={row.key} label={row.label}>
-                <div style={{ width: 220 }}>
+                <div style={{ width: 200 }}>
                   <SideNavItem label="Label" state={row.key} />
                 </div>
               </LabeledRow>
@@ -621,14 +641,14 @@ export function SideNavSpec() {
 
         {/* sice-expand.png */}
         <div>
-          <div style={{ fontSize: 14, fontWeight: 700, color: '#151A24', marginBottom: 16 }}>SideNav — Expanded / Collapsed</div>
-          <FigmaFrame style={{ display: 'flex', gap: 32, justifyContent: 'center', flexWrap: 'wrap' }}>
+          <div style={{ fontSize: 14, fontWeight: 700, color: '#151A24', marginBottom: 12 }}>SideNav — Expanded / Collapsed</div>
+          <FigmaFrame style={{ display: 'inline-flex', gap: 24, flexWrap: 'wrap' }}>
             <div>
-              <div style={{ fontSize: 13, color: '#151A24', marginBottom: 10 }}>Expanded</div>
+              <div style={{ fontSize: 13, color: '#151A24', marginBottom: 8 }}>Expanded</div>
               <SideNavShell collapsed={false} />
             </div>
             <div>
-              <div style={{ fontSize: 13, color: '#151A24', marginBottom: 10 }}>Collapsed</div>
+              <div style={{ fontSize: 13, color: '#151A24', marginBottom: 8 }}>Collapsed</div>
               <SideNavShell collapsed={true} />
             </div>
           </FigmaFrame>

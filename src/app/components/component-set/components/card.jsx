@@ -1,3 +1,4 @@
+'use client';
 import React, { useState, useEffect, useRef } from 'react';
 
 /* ============================================================
@@ -59,7 +60,16 @@ function SpecBadge({ label }) {
 
 function FigmaFrame({ children, style }) {
   return (
-    <div style={{ border: `1.5px dashed ${T.violet}`, borderRadius: 4, background: '#FFFFFF', padding: 16, ...style }}>
+    <div
+      style={{
+        border: `1.5px dashed ${T.violet}`,
+        borderRadius: 4,
+        background: '#FFFFFF',
+        padding: '12px 16px',
+        display: 'inline-block',
+        ...style,
+      }}
+    >
       {children}
     </div>
   );
@@ -457,8 +467,12 @@ export function CardDemo() {
             alignItems: 'center',
             justifyContent: 'center',
             padding: 16,
-            background:
-              'repeating-linear-gradient(0deg, rgba(10,103,232,0.03) 0 1px, transparent 1px 24px), repeating-linear-gradient(90deg, rgba(10,103,232,0.03) 0 1px, transparent 1px 24px)',
+            backgroundImage: `
+              linear-gradient(rgba(200, 200, 200, 0.15) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(200, 200, 200, 0.15) 1px, transparent 1px)
+            `,
+            backgroundSize: '40px 40px',
+            backgroundColor: '#FFFFFF',
             borderRadius: 8,
             marginBottom: 12,
           }}
@@ -558,13 +572,19 @@ export function CardSpec() {
       <div style={{ padding: 16, fontFamily: "'DM Sans', sans-serif", background: '#FFFFFF', minHeight: '100%' }}>
         <SpecBadge label="Card" />
 
-        {/* 1. States */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 24 }}>
+        {/* 1. States — alignItems:'center' added below so this flex column no
+            longer STRETCHES the FigmaFrame (an inline-block) to the full panel
+            width. Without it, FigmaFrame becomes a flex item with the default
+            align-items:stretch behavior, forcing the dashed border to span the
+            whole panel even though its content is only ~300px wide — that's
+            the big empty gap you were seeing. With alignItems:'center', the
+            frame shrinks back to fit its content and centers itself. */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 24, alignItems: 'center' }}>
           <div style={{ fontSize: 14, fontWeight: 600, color: '#3D4759', textAlign: 'center' }}>Card — States</div>
           <FigmaFrame>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 20, alignItems: 'center' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16, alignItems: 'center', width:300, }}>
               {states.map((s, i) => (
-                <div key={s} style={{ display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap', justifyContent: 'center' }}>
+                <div key={s} style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap', justifyContent: 'center' }}>
                   <span style={{ width: 60, fontSize: 11, color: '#6B7280', textAlign: 'right' }}>{stateLabels[i]}</span>
                   <SpecCard state={s} imageSrc={IMAGES[0]} width={220} />
                 </div>
@@ -645,7 +665,7 @@ const CARD_STYLE = {
 
 export default function CardPage() {
   return (
-    <div style={{ padding: 32, background: '#FAFAF8', minHeight: '100vh', fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ padding: 32, background: '#F9FAFB', minHeight: '100vh', fontFamily: "'DM Sans', sans-serif" }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 32, alignItems: 'center' }}>
         <div style={{ width: '100%', maxWidth: 1100 }}>
           <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1, color: '#8089A0', marginBottom: 8, fontFamily: "'DM Sans', sans-serif" }}>
