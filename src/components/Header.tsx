@@ -2,10 +2,18 @@
 import React, { useState, useEffect } from 'react';
 import AppLogo from '../components/ui/AppLogo';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+
+interface NavItem {
+  label: string;
+  href: string;
+  sectionIds: string[];
+}
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 40);
@@ -13,15 +21,49 @@ export default function Header() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const navItems = [
-    { label: 'Overview', href: '#architecture' },
-    // { label: 'Atomic Design', href: '#atomic' },
-    { label: 'Foundation', href: '#color' },
-    { label: 'Components', href: '#components' },
-    { label: 'Accessibility', href: '#accessibility' },
-    { label: 'Variables', href: '#variables' },
-    { label: 'Results', href: '#results' },
+  const navItems: NavItem[] = [
+    { label: 'Overview', href: '#architecture', sectionIds: ['architecture'] },
+    { label: 'Foundation', href: '#color', sectionIds: ['atomic', 'color', 'typography', 'grid'] },
+    { label: 'Components', href: '#components', sectionIds: ['components'] },
+    { label: 'Accessibility', href: '#accessibility', sectionIds: ['accessibility'] },
+    { label: 'Variables', href: '#variables', sectionIds: ['variables'] },
+    { label: 'Results', href: '#results', sectionIds: ['results'] },
   ];
+
+  const [activeSection, setActiveSection] = useState('');
+
+  useEffect(() => {
+    const allSectionIds = navItems.flatMap((item) => item.sectionIds);
+
+    const handleScroll = () => {
+      const sections = allSectionIds
+        .map((id) => ({ id, element: document.getElementById(id) }))
+        .filter((s): s is { id: string; element: HTMLElement } => s.element !== null);
+
+      const scrollPosition = window.scrollY + 100;
+
+      let current = '';
+      for (let i = 0; i < sections.length; i++) {
+        if (sections[i].element.offsetTop <= scrollPosition) {
+          current = sections[i].id;
+        } else {
+          break;
+        }
+      }
+      setActiveSection(current);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const isItemActive = (item: NavItem) => item.sectionIds.includes(activeSection);
+
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.currentTarget.blur();
+  };
 
   return (
     <header
@@ -55,7 +97,7 @@ export default function Header() {
               style={{
                 color: '#0A67E8',
                 borderRadius: '4px',
-                border:'1px solid'
+                border: '1px solid'
               }}
             >
               Design System
@@ -64,15 +106,25 @@ export default function Header() {
 
           {/* Desktop Nav */}
           <nav className="hidden lg:flex items-center gap-8">
-            {navItems?.map((item) => (
-              <a
-                key={item?.label}
-                href={item?.href}
-                className="nav-link-underline text-sm font-medium text-[#0D0D0D]/60 hover:text-[#0D0D0D] transition-colors"
-              >
-                {item?.label}
-              </a>
-            ))}
+            {navItems?.map((item) => {
+              const active = isItemActive(item);
+              return (
+                <a
+                  key={item.label}
+                  href={item.href}
+                  onClick={handleNavClick}
+                  className="nav-link-underline text-sm font-medium relative"
+                  style={{
+                    color: active ? '#0A67E8' : 'rgba(13,13,13,0.6)',
+                    borderBottom: active ? '2px solid #0A67E8' : '2px solid transparent',
+                    paddingBottom: '4px',
+                    transition: 'color 0.35s ease, border-color 0.35s ease',
+                  }}
+                >
+                  {item.label}
+                </a>
+              );
+            })}
           </nav>
 
           {/* Mobile toggle */}
@@ -114,16 +166,28 @@ export default function Header() {
             }}
           >
             <nav className="flex flex-col gap-4">
-              {navItems?.map((item) => (
-                <a
-                  key={item?.label}
-                  href={item?.href}
-                  className="text-[#0D0D0D]/70 hover:text-[#0D0D0D] font-medium text-base transition-colors"
-                  onClick={() => setMenuOpen(false)}
-                >
-                  {item?.label}
-                </a>
-              ))}
+              {navItems?.map((item) => {
+                const active = isItemActive(item);
+                return (
+                  <a
+                    key={item.label}
+                    href={item.href}
+                    className="font-medium text-base"
+                    style={{
+                      color: active ? '#0A67E8' : 'rgba(13,13,13,0.7)',
+                      borderLeft: active ? '3px solid #0A67E8' : '3px solid transparent',
+                      paddingLeft: '12px',
+                      transition: 'color 0.35s ease, border-color 0.35s ease',
+                    }}
+                    onClick={(e) => {
+                      handleNavClick(e);
+                      setMenuOpen(false);
+                    }}
+                  >
+                    {item.label}
+                  </a>
+                );
+              })}
             </nav>
           </div>
         )}

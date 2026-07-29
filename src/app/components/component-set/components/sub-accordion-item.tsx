@@ -5,6 +5,11 @@ import { COMPONENTS } from "../data";
 import { MiniBadge, statusColor, statusBg } from "../ui-helpers";
 import { LiveDemo, SpecSheet } from "./registry";
 import { A11yPanel } from "./a11y-panel";
+import { scrollUnderNavbar  } from "./scroll-utils";
+
+/* Keep this equal to the offset used in category-accordion.tsx so both
+   levels of accordion land at the same spot under the sticky navbar. */
+const NAVBAR_OFFSET = 88;
 
 export function SubAccordionItem({
   id,
@@ -23,17 +28,26 @@ export function SubAccordionItem({
 }) {
   const comp = COMPONENTS[id];
   const contentRef = React.useRef<HTMLDivElement>(null);
+  const containerRef = React.useRef<HTMLDivElement>(null);
+
+
+const handleToggle = () => {
+  onToggle();
+  scrollUnderNavbar(() => containerRef.current);
+};
 
   return (
     <div
+      ref={containerRef}
       className="border-b last:border-b-0"
       style={{
         borderColor: "#EFEDE8",
         background: isOpen ? "rgba(10,103,232,0.02)" : "transparent",
+        scrollMarginTop: NAVBAR_OFFSET,
       }}
     >
       <div
-        onClick={onToggle}
+        onClick={handleToggle}
         className="px-5 py-4 flex items-center justify-between gap-4 cursor-pointer hover:bg-black/[0.02] transition-colors"
       >
         <div className="flex items-center gap-3.5 min-w-0">
@@ -94,7 +108,7 @@ export function SubAccordionItem({
           {/* Enhanced Tabs */}
           <div
             className="inline-flex gap-1 p-1 rounded-xl mb-4"
-            style={{ 
+            style={{
               background: "#F0F2F5",
               border: "1px solid #E4E6E9",
               boxShadow: "inset 0 1px 2px rgba(0,0,0,0.04)"
@@ -112,8 +126,8 @@ export function SubAccordionItem({
                       fontFamily: "'DM Sans', sans-serif",
                       transform: "scale(1.02)"
                     }
-                  : { 
-                      color: "#6B6B6B", 
+                  : {
+                      color: "#6B6B6B",
                       fontFamily: "'DM Sans', sans-serif",
                       background: "transparent"
                     }
@@ -150,8 +164,8 @@ export function SubAccordionItem({
                       fontFamily: "'DM Sans', sans-serif",
                       transform: "scale(1.02)"
                     }
-                  : { 
-                      color: "#6B6B6B", 
+                  : {
+                      color: "#6B6B6B",
                       fontFamily: "'DM Sans', sans-serif",
                       background: "transparent"
                     }

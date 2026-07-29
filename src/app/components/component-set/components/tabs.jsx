@@ -86,7 +86,7 @@ function Tabs({
         color: '#255FCC',
         borderColor: 'transparent',
         bg: 'transparent',
-        boxShadow: '0 0 0 2px #0A67E8',
+        boxShadow: '0 0 0 2px #255FCC',
       };
     }
     // default
@@ -104,6 +104,7 @@ function Tabs({
         borderBottom: '1px solid #E4E2DD',
         fontFamily: FONT,
         gap: 0,
+        width: '100%',
       }}>
         {items.map((item, index) => {
           const isActive = index === activeIndex;
@@ -117,6 +118,7 @@ function Tabs({
               onClick={() => !isDisabled && onChange(index)}
               disabled={isDisabled}
               style={{
+                flex: 1, // This makes each tab take equal space
                 padding: sz.padding,
                 fontSize: sz.fontSize,
                 fontWeight: 600,
@@ -132,6 +134,7 @@ function Tabs({
                 outline: 'none',
                 opacity: styles.opacity || 1,
                 whiteSpace: 'nowrap',
+                textAlign: 'center', // Center the text
               }}
             >
               {item}

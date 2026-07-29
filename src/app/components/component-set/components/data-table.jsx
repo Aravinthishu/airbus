@@ -500,7 +500,7 @@ export function DataTableDemo() {
       <div
         style={{
           flex: '1 1 0',
-          minHeight: 235,
+          minHeight: 200,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',

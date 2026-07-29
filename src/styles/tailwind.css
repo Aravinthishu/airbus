@@ -226,6 +226,16 @@
     transition: background 0.2s ease;
   }
 
+
+  .nav-link-underline,
+.nav-link-underline:visited,
+.nav-link-underline:focus,
+.nav-link-underline:focus-visible,
+.nav-link-underline:active {
+  color: inherit;
+  outline: none;
+}
+
   .spacing-row:hover {
     background: rgba(232, 71, 10, 0.04);
   }

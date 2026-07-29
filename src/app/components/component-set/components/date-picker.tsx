@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 
 /* ============================================================
    Minimal stand-ins for your ui-helpers
@@ -49,6 +49,108 @@ function SpecBadge({ label }: SpecBadgeProps) {
       }}
     >
       {label.toUpperCase()}
+    </div>
+  );
+}
+
+/* ============================================================
+   ScrollContainer component with auto-hiding scrollbars
+============================================================ */
+function ScrollContainer({ children }: { children: React.ReactNode }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [showScrollbar, setShowScrollbar] = useState(false);
+  const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const showScrollbars = () => {
+    setShowScrollbar(true);
+    if (hideTimeoutRef.current) {
+      clearTimeout(hideTimeoutRef.current);
+      hideTimeoutRef.current = null;
+    }
+  };
+
+  const hideScrollbars = () => {
+    if (hideTimeoutRef.current) {
+      clearTimeout(hideTimeoutRef.current);
+      hideTimeoutRef.current = null;
+    }
+    hideTimeoutRef.current = setTimeout(() => {
+      setShowScrollbar(false);
+    }, 5000);
+  };
+
+  useEffect(() => {
+    const element = containerRef.current;
+    if (!element) return;
+
+    const checkOverflow = () => {
+      const hasHorizontalScroll = element.scrollWidth > element.clientWidth;
+      const hasVerticalScroll = element.scrollHeight > element.clientHeight;
+      if (hasHorizontalScroll || hasVerticalScroll) {
+        setShowScrollbar(true);
+        hideScrollbars();
+      }
+    };
+
+    checkOverflow();
+    window.addEventListener('resize', checkOverflow);
+
+    return () => {
+      window.removeEventListener('resize', checkOverflow);
+      if (hideTimeoutRef.current) {
+        clearTimeout(hideTimeoutRef.current);
+      }
+    };
+  }, [children]);
+
+  return (
+    <div
+      ref={containerRef}
+      onMouseEnter={showScrollbars}
+      onMouseLeave={hideScrollbars}
+      style={{
+        overflow: 'auto',
+        position: 'relative',
+        ...(showScrollbar ? {
+          scrollbarWidth: 'thin',
+          scrollbarColor: '#C084FC transparent',
+        } : {
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+        }),
+      }}
+    >
+      <style>
+        {`
+          .scroll-container::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+            opacity: ${showScrollbar ? 1 : 0};
+            transition: opacity 0.3s ease;
+          }
+          
+          .scroll-container::-webkit-scrollbar-track {
+            background: transparent;
+          }
+          
+          .scroll-container::-webkit-scrollbar-thumb {
+            background: ${showScrollbar ? '#C084FC' : 'transparent'};
+            border-radius: 3px;
+            transition: background 0.3s ease;
+          }
+          
+          .scroll-container::-webkit-scrollbar-thumb:hover {
+            background: #A855F7;
+          }
+          
+          .scroll-container {
+            scrollbar-width: ${showScrollbar ? 'thin' : 'none'};
+            scrollbar-color: ${showScrollbar ? '#C084FC transparent' : 'transparent transparent'};
+            transition: scrollbar-color 0.3s ease;
+          }
+        `}
+      </style>
+      {children}
     </div>
   );
 }
@@ -110,101 +212,227 @@ function SpinnerIcon() {
   );
 }
 
-function MiniStepper({ onUp, onDown }: { onUp: () => void; onDown: () => void }) {
-  return (
-    <div style={{ display: "flex", flexDirection: "column", marginLeft: 4 }}>
-      <svg
-        onClick={(e) => {
-          e.stopPropagation();
-          onUp();
-        }}
-        width="9"
-        height="6"
-        viewBox="0 0 10 6"
-        style={{ cursor: "pointer" }}
-      >
-        <path d="M1 5 L5 1 L9 5" stroke="#8089A0" strokeWidth="1.4" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-      <svg
-        onClick={(e) => {
-          e.stopPropagation();
-          onDown();
-        }}
-        width="9"
-        height="6"
-        viewBox="0 0 10 6"
-        style={{ cursor: "pointer" }}
-      >
-        <path d="M1 1 L5 5 L9 1" stroke="#8089A0" strokeWidth="1.4" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    </div>
-  );
-}
-
 /* ============================================================
-   Small dropdown list used for the month / year quick-pick
-   popovers in the calendar header.
+   Month/Year Picker Grid - 4 columns showing month and year together
+   FIX: now takes compact/preview and is sized/anchored to fill the
+   Calendar's header row (left:0, right:0) instead of a fixed 260px
+   width centered on the small month-label chip. That's what was
+   causing it to overflow the DateTimeDropdown's clipped container
+   and lose the right ("›") arrow.
 ============================================================ */
-function QuickPickList({
-  items,
-  activeIndex,
+function MonthYearPicker({
+  currentMonth,
+  currentYear,
   onSelect,
-  width,
-  fontSize,
+  onClose,
+  compact = false,
+  preview = false,
 }: {
-  items: (string | number)[];
-  activeIndex: number;
-  onSelect: (index: number) => void;
-  width: number;
-  fontSize: number;
+  currentMonth: number;
+  currentYear: number;
+  onSelect: (month: number, year: number) => void;
+  onClose: () => void;
+  compact?: boolean;
+  preview?: boolean;
 }) {
+  const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const [selectedYear, setSelectedYear] = useState(currentYear);
+  const [viewMode, setViewMode] = useState<'months' | 'years'>('months');
+
+  // Generate years array (20 years: 10 before, 10 after current)
+  const years = Array.from({ length: 20 }, (_, i) => selectedYear - 10 + i);
+
+  const sizing = preview
+    ? { pad: "10px 12px", yearFont: 12, arrowFont: 14, arrowPad: "2px 6px", gap: 4, cellPad: "5px 2px", cellFont: 10, footFont: 9, footMt: 8, footPt: 8, headerMb: 10, headerPb: 8 }
+    : compact
+    ? { pad: "12px 14px", yearFont: 13, arrowFont: 16, arrowPad: "3px 7px", gap: 5, cellPad: "6px 3px", cellFont: 11, footFont: 10, footMt: 9, footPt: 9, headerMb: 11, headerPb: 9 }
+    : { pad: "16px 18px", yearFont: 15, arrowFont: 18, arrowPad: "4px 8px", gap: 6, cellPad: "8px 4px", cellFont: 13, footFont: 11, footMt: 12, footPt: 10, headerMb: 14, headerPb: 10 };
+
   return (
     <div
       onClick={(e) => e.stopPropagation()}
       style={{
         position: "absolute",
-        top: "100%",
+        top: "calc(100% + 4px)",
         left: 0,
-        marginTop: 2,
-        width,
-        maxHeight: 140,
-        overflowY: "auto",
+        right: 0,
+        boxSizing: "border-box",
+        padding: sizing.pad,
         background: "#FFFFFF",
         border: "1px solid #EFEDE8",
         borderRadius: BORDER_RADIUS,
-        boxShadow: "0 4px 14px rgba(0,0,0,0.12)",
+        boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
         zIndex: 1100,
       }}
     >
-      {items.map((item, idx) => (
-        <div
-          key={item}
-          onClick={() => onSelect(idx)}
+      {/* Header with year and navigation */}
+      <div style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        marginBottom: sizing.headerMb,
+        paddingBottom: sizing.headerPb,
+        borderBottom: "1px solid #EFEDE8"
+      }}>
+        <button
+          onClick={() => setSelectedYear(selectedYear - (viewMode === 'years' ? 20 : 1))}
           style={{
-            padding: "4px 8px",
-            fontSize,
-            fontFamily: FONT,
-            fontWeight: idx === activeIndex ? 700 : 400,
-            color: idx === activeIndex ? "#FFFFFF" : "#151A24",
-            background: idx === activeIndex ? "#0B1F4D" : "transparent",
+            background: "none",
+            border: "none",
             cursor: "pointer",
-            textAlign: "center",
+            fontSize: sizing.arrowFont,
+            color: "#8089A0",
+            padding: sizing.arrowPad,
+            borderRadius: 4,
+            lineHeight: 1,
+            transition: "all 0.15s ease",
           }}
+          onMouseEnter={(e) => e.currentTarget.style.background = "#F5F5F4"}
+          onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
         >
-          {item}
+          ‹
+        </button>
+
+        <div
+          onClick={() => setViewMode(viewMode === 'months' ? 'years' : 'months')}
+          style={{
+            cursor: "pointer",
+            padding: "4px 12px",
+            borderRadius: 4,
+            fontSize: sizing.yearFont,
+            fontWeight: 700,
+            color: "#151A24",
+            fontFamily: FONT,
+            transition: "all 0.15s ease",
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.background = "#F5F5F4"}
+          onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
+        >
+          {selectedYear}
         </div>
-      ))}
+
+        <button
+          onClick={() => setSelectedYear(selectedYear + (viewMode === 'years' ? 20 : 1))}
+          style={{
+            background: "none",
+            border: "none",
+            cursor: "pointer",
+            fontSize: sizing.arrowFont,
+            color: "#8089A0",
+            padding: sizing.arrowPad,
+            borderRadius: 4,
+            lineHeight: 1,
+            transition: "all 0.15s ease",
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.background = "#F5F5F4"}
+          onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
+        >
+          ›
+        </button>
+      </div>
+
+      {/* Month grid - 4 columns */}
+      {viewMode === 'months' ? (
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: sizing.gap }}>
+          {MONTH_NAMES.map((month, idx) => (
+            <div
+              key={month}
+              onClick={() => {
+                onSelect(idx, selectedYear);
+                onClose();
+              }}
+              style={{
+                padding: sizing.cellPad,
+                textAlign: "center",
+                fontSize: sizing.cellFont,
+                fontFamily: FONT,
+                fontWeight: idx === currentMonth && selectedYear === currentYear ? 700 : 400,
+                color: idx === currentMonth && selectedYear === currentYear ? "#FFFFFF" : "#151A24",
+                background: idx === currentMonth && selectedYear === currentYear ? "#0B1F4D" : "transparent",
+                borderRadius: BORDER_RADIUS,
+                cursor: "pointer",
+                transition: "all 0.15s ease",
+              }}
+              onMouseEnter={(e) => {
+                if (!(idx === currentMonth && selectedYear === currentYear)) {
+                  e.currentTarget.style.background = "#F5F5F4";
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!(idx === currentMonth && selectedYear === currentYear)) {
+                  e.currentTarget.style.background = "transparent";
+                }
+              }}
+            >
+              {month}
+            </div>
+          ))}
+        </div>
+      ) : (
+        /* Year grid - 4 columns */
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: sizing.gap }}>
+          {years.map((year) => (
+            <div
+              key={year}
+              onClick={() => {
+                setSelectedYear(year);
+                setViewMode('months');
+              }}
+              style={{
+                padding: sizing.cellPad,
+                textAlign: "center",
+                fontSize: sizing.cellFont,
+                fontFamily: FONT,
+                fontWeight: year === selectedYear ? 700 : 400,
+                color: year === selectedYear ? "#FFFFFF" : "#151A24",
+                background: year === selectedYear ? "#0B1F4D" : "transparent",
+                borderRadius: BORDER_RADIUS,
+                cursor: "pointer",
+                transition: "all 0.15s ease",
+              }}
+              onMouseEnter={(e) => {
+                if (year !== selectedYear) {
+                  e.currentTarget.style.background = "#F5F5F4";
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (year !== selectedYear) {
+                  e.currentTarget.style.background = "transparent";
+                }
+              }}
+            >
+              {year}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Footer with view toggle hint */}
+      <div style={{
+        marginTop: sizing.footMt,
+        paddingTop: sizing.footPt,
+        borderTop: "1px solid #EFEDE8",
+        textAlign: "center",
+        fontSize: sizing.footFont,
+        color: "#8089A0",
+        fontFamily: FONT,
+      }}>
+        {viewMode === 'months' ? (
+          <span style={{ cursor: "pointer" }} onClick={() => setViewMode('years')}>
+            Click year to change
+          </span>
+        ) : (
+          <span style={{ cursor: "pointer" }} onClick={() => setViewMode('months')}>
+            Click month to select
+          </span>
+        )}
+      </div>
     </div>
   );
 }
 
 /* ============================================================
    Calendar dropdown
-   NOTE: `onDateClick` fires on every day click with the raw
-   date string. `autoClose` controls whether picking a day also
-   calls onClose (true for the standalone date/calendar picker,
-   false when embedded inside the DateTime combo, where we want
-   to switch to the Time tab instead of closing).
 ============================================================ */
 interface CalendarProps {
   selectedDate: string;
@@ -224,8 +452,7 @@ function Calendar({ selectedDate, onSelectDate, onClose, inline = false, demo, c
   const [currentMonth, setCurrentMonth] = useState(
     demo ? new Date(demo.year, MONTH_NAMES.indexOf(demo.monthLabel), 1) : new Date()
   );
-  const [monthPickerOpen, setMonthPickerOpen] = useState(false);
-  const [yearPickerOpen, setYearPickerOpen] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
 
   const getDaysInMonth = (date: Date) => {
     const year = date.getFullYear();
@@ -240,25 +467,10 @@ function Calendar({ selectedDate, onSelectDate, onClose, inline = false, demo, c
   const shiftMonth = (delta: number) => {
     setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + delta, 1));
   };
-  const shiftYear = (delta: number) => {
-    setCurrentMonth(new Date(currentMonth.getFullYear() + delta, currentMonth.getMonth(), 1));
-  };
 
-  const pickMonth = (monthIndex: number) => {
-    setCurrentMonth(new Date(currentMonth.getFullYear(), monthIndex, 1));
-    setMonthPickerOpen(false);
-  };
-
-  const yearRange = React.useMemo(() => {
-    const base = currentMonth.getFullYear();
-    const years: number[] = [];
-    for (let y = base - 15; y <= base + 15; y++) years.push(y);
-    return years;
-  }, [currentMonth]);
-
-  const pickYear = (year: number) => {
-    setCurrentMonth(new Date(year, currentMonth.getMonth(), 1));
-    setYearPickerOpen(false);
+  const handleMonthYearSelect = (month: number, year: number) => {
+    setCurrentMonth(new Date(year, month, 1));
+    setPickerOpen(false);
   };
 
   const handleDateSelect = (day: number) => {
@@ -374,86 +586,64 @@ function Calendar({ selectedDate, onSelectDate, onClose, inline = false, demo, c
         ...styles,
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: preview ? 5 : 6 }}>
+      {/* FIX: position:"relative" moved from the small month-label chip
+          onto this whole header row, so the MonthYearPicker (left:0,
+          right:0) spans the calendar's full width and can't get
+          clipped by an ancestor's overflow:hidden. */}
+      <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: preview ? 5 : 6 }}>
         <button
           onClick={() => shiftMonth(-1)}
-          style={{ background: "none", border: "none", cursor: "pointer", fontSize: preview ? 11 : 12, color: "#8089A0", padding: "1px 3px" }}
+          style={{ background: "none", border: "none", cursor: "pointer", fontSize: preview ? 16 : 18, color: "#8089A0", padding: "4px 8px" }}
         >
           ‹
         </button>
 
-        <div style={{ display: "flex", alignItems: "center", gap: preview ? 3 : 4 }}>
-          <div style={{ position: "relative" }}>
-            <div
-              onClick={() => {
-                if (demo) return;
-                setMonthPickerOpen((v) => !v);
-                setYearPickerOpen(false);
-              }}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                border: "1px solid #EFEDE8",
-                borderRadius: BORDER_RADIUS,
-                padding: "2px 4px",
-                cursor: demo ? "default" : "pointer",
-              }}
-            >
-              <span style={{ fontSize: preview ? 9 : compact ? 10 : 13, fontWeight: 600, color: "#151A24", fontFamily: FONT }}>
-                {MONTH_NAMES[currentMonth.getMonth()]}
-              </span>
-              <MiniStepper onUp={() => shiftMonth(1)} onDown={() => shiftMonth(-1)} />
-            </div>
-            {monthPickerOpen && (
-              <QuickPickList
-                items={MONTH_NAMES}
-                activeIndex={currentMonth.getMonth()}
-                onSelect={pickMonth}
-                width={72}
-                fontSize={preview ? 9 : compact ? 10 : 12}
-              />
-            )}
-          </div>
-
-          <div style={{ position: "relative" }}>
-            <div
-              onClick={() => {
-                if (demo) return;
-                setYearPickerOpen((v) => !v);
-                setMonthPickerOpen(false);
-              }}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                border: "1px solid #EFEDE8",
-                borderRadius: BORDER_RADIUS,
-                padding: "2px 4px",
-                cursor: demo ? "default" : "pointer",
-              }}
-            >
-              <span style={{ fontSize: preview ? 9 : compact ? 10 : 13, fontWeight: 600, color: "#151A24", fontFamily: FONT }}>
-                {currentMonth.getFullYear()}
-              </span>
-              <MiniStepper onUp={() => shiftYear(1)} onDown={() => shiftYear(-1)} />
-            </div>
-            {yearPickerOpen && (
-              <QuickPickList
-                items={yearRange}
-                activeIndex={yearRange.indexOf(currentMonth.getFullYear())}
-                onSelect={(idx) => pickYear(yearRange[idx])}
-                width={64}
-                fontSize={preview ? 9 : compact ? 10 : 12}
-              />
-            )}
-          </div>
+        <div
+          onClick={() => {
+            if (demo) return;
+            setPickerOpen((v) => !v);
+          }}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            padding: "6px 14px",
+            border: "1px solid #EFEDE8",
+            borderRadius: BORDER_RADIUS,
+            cursor: demo ? "default" : "pointer",
+            minWidth: 120,
+            justifyContent: "center",
+            transition: "all 0.15s ease",
+          }}
+          onMouseEnter={(e) => {
+            if (!demo) e.currentTarget.style.background = "#F5F5F4";
+          }}
+          onMouseLeave={(e) => {
+            if (!demo) e.currentTarget.style.background = "transparent";
+          }}
+        >
+          <span style={{ fontSize: preview ? 12 : compact ? 13 : 15, fontWeight: 600, color: "#151A24", fontFamily: FONT }}>
+            {MONTH_NAMES[currentMonth.getMonth()]} {currentMonth.getFullYear()}
+          </span>
         </div>
 
         <button
           onClick={() => shiftMonth(1)}
-          style={{ background: "none", border: "none", cursor: "pointer", fontSize: preview ? 11 : 12, color: "#8089A0", padding: "1px 3px" }}
+          style={{ background: "none", border: "none", cursor: "pointer", fontSize: preview ? 16 : 18, color: "#8089A0", padding: "4px 8px" }}
         >
           ›
         </button>
+
+        {pickerOpen && (
+          <MonthYearPicker
+            currentMonth={currentMonth.getMonth()}
+            currentYear={currentMonth.getFullYear()}
+            onSelect={handleMonthYearSelect}
+            onClose={() => setPickerOpen(false)}
+            compact={compact}
+            preview={preview}
+          />
+        )}
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 1, marginBottom: preview ? 1 : 2 }}>
@@ -489,9 +679,7 @@ function Calendar({ selectedDate, onSelectDate, onClose, inline = false, demo, c
 }
 
 /* ============================================================
-   TimeColumnsPicker — the 3 scrollable hh / mm / AM-PM columns,
-   extracted so both the standalone Time Picker and the combined
-   Date & Time Picker can share the exact same UI.
+   TimeColumnsPicker — the 3 scrollable hh / mm / AM-PM columns
 ============================================================ */
 function TimeColumnsPicker({
   selHour,
@@ -560,10 +748,7 @@ function currentTimeParts() {
 }
 
 /* ============================================================
-   Time picker dropdown.
-   Picking a column value no longer confirms/closes by itself —
-   you now pick hh / mm / AM-PM, then tap OK to confirm. "Now"
-   jumps the columns to (and confirms) the actual current time.
+   Time picker dropdown
 ============================================================ */
 interface TimePickerDropdownProps {
   onSelectTime: (time: string) => void;
@@ -653,10 +838,7 @@ function TimePickerDropdown({ onSelectTime, onClose, inline = false, compact = f
 }
 
 /* ============================================================
-   Date & Time combo dropdown — used by type="datetime".
-   Tabbed: pick a day (auto-advances to the Time tab), then pick
-   hh / mm / AM-PM, then confirm with Done, which combines both
-   into a single "yyyy/mm/dd hh:mm AM/PM" value.
+   Date & Time combo dropdown
 ============================================================ */
 interface DateTimeDropdownProps {
   value: string;
@@ -668,7 +850,6 @@ interface DateTimeDropdownProps {
 }
 
 function splitDateTimeValue(value: string): { date: string; hour: string; minute: string; period: string } {
-  // Expects "yyyy/mm/dd hh:mm AM" — falls back to blanks/defaults if not present.
   const parts = value.trim().split(" ");
   const date = parts[0] && parts[0].includes("/") ? parts[0] : "";
   const time = parts[1] || "";
@@ -857,8 +1038,6 @@ function DatePicker({
 
   const displayValue = hasValue ? value : placeholder;
 
-  // Both showCalendar and showTimePicker act as the single "is this
-  // field's dropdown open" flag — datetime listens to either.
   const dropdownOpen = showCalendar || showTimePicker;
 
   let compactStyles;
@@ -1035,7 +1214,7 @@ export function DatePickerDemo() {
 }
 
 /* ============================================================
-   Shared spec grid — unchanged
+   Shared spec grid
 ============================================================ */
 function SpecColumn({ title, rows }: { title: string; rows: { label: string; content: React.ReactNode }[] }) {
   const ROW_LABEL_WIDTH = 60;
@@ -1106,7 +1285,7 @@ function SpecColumn({ title, rows }: { title: string; rows: { label: string; con
 }
 
 /* ============================================================
-   REFERENCE SPEC — unchanged
+   REFERENCE SPEC
 ============================================================ */
 function DateTimeOverviewSpec() {
   return (
@@ -1196,15 +1375,19 @@ export function DatePickerSpec() {
     <div style={{ padding: "16px 18px", overflowY: "auto", height: "100%", display: "flex", flexDirection: "column", gap: 20, background: "#FFFFFF", fontFamily: FONT }}>
       <SpecBadge label="Date & Time Picker" />
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
-        <DateTimeOverviewSpec />
-        <DatePickerStatesSpec />
-      </div>
+      <ScrollContainer>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
+          <DateTimeOverviewSpec />
+          <DatePickerStatesSpec />
+        </div>
+      </ScrollContainer>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
-        <TimePickerStatesSpec />
-        <CalendarStatesSpec />
-      </div>
+      <ScrollContainer>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
+          <TimePickerStatesSpec />
+          <CalendarStatesSpec />
+        </div>
+      </ScrollContainer>
     </div>
   );
 }

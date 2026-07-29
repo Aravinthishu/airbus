@@ -145,7 +145,7 @@ function DesktopMockup({ gridColor }: { gridColor: string }) {
             value="160px"
             label="Margin"
             edge="top"
-            labelAlign="right"
+            labelAlign="center"
           />
 
           {/* Gutter marker - at bottom, shifted to the SECOND gap (2 layers over) */}
@@ -218,7 +218,7 @@ function TabletMockup({ gridColor }: { gridColor: string }) {
             value="32px"
             label="Margin"
             edge="top"
-            labelAlign="right"
+            labelAlign="center"
           />
 
           {/* Gutter marker - at bottom, shifted to the SECOND gap (2 layers over) */}
@@ -293,7 +293,7 @@ function MobileMockup({ gridColor }: { gridColor: string }) {
             value="16px"
             label="Margin"
             edge="top"
-            labelAlign="right"
+            labelAlign="center"
           />
 
           {/* Gutter marker - at bottom, shifted to the SECOND gap (2 layers over) */}

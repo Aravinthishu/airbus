@@ -362,7 +362,7 @@ export function AccordionSpec() {
       <SpecBadge label="Accordion" />
 
       {/* Accordion - Open State */}
-      <div
+      {/* <div
         style={{
           display: 'flex',
           flexDirection: 'column',
@@ -395,7 +395,7 @@ export function AccordionSpec() {
             />
           </FigmaFrame>
         </div>
-      </div>
+      </div> */}
 
       {/* Accordion - States */}
       <div

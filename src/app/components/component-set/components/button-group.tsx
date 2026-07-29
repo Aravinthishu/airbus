@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 /* ============================================================
    Minimal stand-ins for your ui-helpers
@@ -52,6 +52,109 @@ function SpecBlock({
   return (
     <div style={{ marginBottom: 40 }}>
       <div style={{ fontSize: 14, fontWeight: 700, color: '#151A24', marginBottom: 16, fontFamily: "'DM Sans', sans-serif" }}>{title}</div>
+      {children}
+    </div>
+  );
+}
+
+/* ============================================================
+   ScrollContainer component with auto-hiding scrollbars
+============================================================ */
+function ScrollContainer({ children, className = '' }: { children: React.ReactNode; className?: string }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [showScrollbar, setShowScrollbar] = useState(false);
+  const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const showScrollbars = () => {
+    setShowScrollbar(true);
+    if (hideTimeoutRef.current) {
+      clearTimeout(hideTimeoutRef.current);
+      hideTimeoutRef.current = null;
+    }
+  };
+
+  const hideScrollbars = () => {
+    if (hideTimeoutRef.current) {
+      clearTimeout(hideTimeoutRef.current);
+      hideTimeoutRef.current = null;
+    }
+    hideTimeoutRef.current = setTimeout(() => {
+      setShowScrollbar(false);
+    }, 5000);
+  };
+
+  useEffect(() => {
+    const element = containerRef.current;
+    if (!element) return;
+
+    const checkOverflow = () => {
+      const hasHorizontalScroll = element.scrollWidth > element.clientWidth;
+      const hasVerticalScroll = element.scrollHeight > element.clientHeight;
+      if (hasHorizontalScroll || hasVerticalScroll) {
+        setShowScrollbar(true);
+        hideScrollbars();
+      }
+    };
+
+    checkOverflow();
+    window.addEventListener('resize', checkOverflow);
+
+    return () => {
+      window.removeEventListener('resize', checkOverflow);
+      if (hideTimeoutRef.current) {
+        clearTimeout(hideTimeoutRef.current);
+      }
+    };
+  }, [children]);
+
+  return (
+    <div
+      ref={containerRef}
+      onMouseEnter={showScrollbars}
+      onMouseLeave={hideScrollbars}
+      style={{
+        overflow: 'auto',
+        position: 'relative',
+        ...(showScrollbar ? {
+          scrollbarWidth: 'thin',
+          scrollbarColor: '#C084FC transparent',
+        } : {
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+        }),
+      }}
+      className={className}
+    >
+      <style>
+        {`
+          .scroll-container::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+            opacity: ${showScrollbar ? 1 : 0};
+            transition: opacity 0.3s ease;
+          }
+          
+          .scroll-container::-webkit-scrollbar-track {
+            background: transparent;
+          }
+          
+          .scroll-container::-webkit-scrollbar-thumb {
+            background: ${showScrollbar ? '#C084FC' : 'transparent'};
+            border-radius: 3px;
+            transition: background 0.3s ease;
+          }
+          
+          .scroll-container::-webkit-scrollbar-thumb:hover {
+            background: #A855F7;
+          }
+          
+          .scroll-container {
+            scrollbar-width: ${showScrollbar ? 'thin' : 'none'};
+            scrollbar-color: ${showScrollbar ? '#C084FC transparent' : 'transparent transparent'};
+            transition: scrollbar-color 0.3s ease;
+          }
+        `}
+      </style>
       {children}
     </div>
   );
@@ -240,7 +343,6 @@ export function ButtonGroupDemo() {
           alignItems: 'center',
           justifyContent: 'center',
           padding: 32,
-          // Line grid pattern - larger boxes with lighter lines
           backgroundImage: `
             linear-gradient(rgba(200, 200, 200, 0.15) 1px, transparent 1px),
             linear-gradient(90deg, rgba(200, 200, 200, 0.15) 1px, transparent 1px)
@@ -381,45 +483,51 @@ export function ButtonGroupSpec() {
       <SpecBadge label="Button Group" />
 
       <SpecBlock title="Button Group — Icon + Label">
-        <SizeRows iconOnly={false} title="Icon + Label" />
+        <ScrollContainer>
+          <SizeRows iconOnly={false} title="Icon + Label" />
+        </ScrollContainer>
       </SpecBlock>
 
       <SpecBlock title="Button Group — Icon Only">
-        <SizeRows iconOnly={true} title="Icon Only" />
+        <ScrollContainer>
+          <SizeRows iconOnly={true} title="Icon Only" />
+        </ScrollContainer>
       </SpecBlock>
 
       <SpecBlock title="Button Group — Item Count Examples">
-        <div
-          style={{
-            width: 'fit-content',
-            minWidth: '300px',
-            border: '2px dashed #C084FC',
-            borderRadius: 8,
-            padding: 20,
-            background: '#FFFFFF',
-          }}
-        >
-          <div style={{
-            fontSize: 12,
-            fontWeight: 600,
-            color: '#7C3AED',
-            marginBottom: 16,
-            fontFamily: "'DM Sans', sans-serif",
-            letterSpacing: '0.5px',
-          }}>
-            Item Count Examples
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-            {[2, 3, 4].map((count) => (
-              <div key={count}>
-                <div style={{ fontSize: 12, fontWeight: 500, color: '#6B7280', marginBottom: 10 }}>
-                  {count} Items
+        <ScrollContainer>
+          <div
+            style={{
+              width: 'fit-content',
+              minWidth: '300px',
+              border: '2px dashed #C084FC',
+              borderRadius: 8,
+              padding: 20,
+              background: '#FFFFFF',
+            }}
+          >
+            <div style={{
+              fontSize: 12,
+              fontWeight: 600,
+              color: '#7C3AED',
+              marginBottom: 16,
+              fontFamily: "'DM Sans', sans-serif",
+              letterSpacing: '0.5px',
+            }}>
+              Item Count Examples
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+              {[2, 3, 4].map((count) => (
+                <div key={count}>
+                  <div style={{ fontSize: 12, fontWeight: 500, color: '#6B7280', marginBottom: 10 }}>
+                    {count} Items
+                  </div>
+                  <ButtonGroup itemCount={count} state="default" size="m" showIcon={true} iconOnly={false} />
                 </div>
-                <ButtonGroup itemCount={count} state="default" size="m" showIcon={true} iconOnly={false} />
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
+        </ScrollContainer>
       </SpecBlock>
     </div>
   );

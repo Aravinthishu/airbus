@@ -72,6 +72,108 @@ function SpecState({
 }
 
 /* ============================================================
+   ScrollContainer component with auto-hiding scrollbars
+============================================================ */
+function ScrollContainer({ children }: { children: React.ReactNode }) {
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const [showScrollbar, setShowScrollbar] = React.useState(false);
+  const hideTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+
+  const showScrollbars = () => {
+    setShowScrollbar(true);
+    if (hideTimeoutRef.current) {
+      clearTimeout(hideTimeoutRef.current);
+      hideTimeoutRef.current = null;
+    }
+  };
+
+  const hideScrollbars = () => {
+    if (hideTimeoutRef.current) {
+      clearTimeout(hideTimeoutRef.current);
+      hideTimeoutRef.current = null;
+    }
+    hideTimeoutRef.current = setTimeout(() => {
+      setShowScrollbar(false);
+    }, 5000);
+  };
+
+  React.useEffect(() => {
+    const element = containerRef.current;
+    if (!element) return;
+
+    const checkOverflow = () => {
+      const hasHorizontalScroll = element.scrollWidth > element.clientWidth;
+      const hasVerticalScroll = element.scrollHeight > element.clientHeight;
+      if (hasHorizontalScroll || hasVerticalScroll) {
+        setShowScrollbar(true);
+        hideScrollbars();
+      }
+    };
+
+    checkOverflow();
+    window.addEventListener('resize', checkOverflow);
+
+    return () => {
+      window.removeEventListener('resize', checkOverflow);
+      if (hideTimeoutRef.current) {
+        clearTimeout(hideTimeoutRef.current);
+      }
+    };
+  }, [children]);
+
+  return (
+    <div
+      ref={containerRef}
+      onMouseEnter={showScrollbars}
+      onMouseLeave={hideScrollbars}
+      style={{
+        overflow: 'auto',
+        position: 'relative',
+        ...(showScrollbar ? {
+          scrollbarWidth: 'thin',
+          scrollbarColor: '#C084FC transparent',
+        } : {
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+        }),
+      }}
+    >
+      <style>
+        {`
+          .scroll-container::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+            opacity: ${showScrollbar ? 1 : 0};
+            transition: opacity 0.3s ease;
+          }
+          
+          .scroll-container::-webkit-scrollbar-track {
+            background: transparent;
+          }
+          
+          .scroll-container::-webkit-scrollbar-thumb {
+            background: ${showScrollbar ? '#C084FC' : 'transparent'};
+            border-radius: 3px;
+            transition: background 0.3s ease;
+          }
+          
+          .scroll-container::-webkit-scrollbar-thumb:hover {
+            background: #A855F7;
+          }
+          
+          .scroll-container {
+            scrollbar-width: ${showScrollbar ? 'thin' : 'none'};
+            scrollbar-color: ${showScrollbar ? '#C084FC transparent' : 'transparent transparent'};
+            transition: scrollbar-color 0.3s ease;
+          }
+        `}
+      </style>
+      {children}
+    </div>
+  );
+}
+
+/* ============================================================
    Small inline icons (no external icon dependency)
 ============================================================ */
 function EyeIcon({ color = '#0B1F4D', size = 16 }: { color?: string; size?: number }) {
@@ -431,14 +533,14 @@ export function InputFieldDemo() {
 function InputStatesGrid() {
   const rows: FieldStateKey[] = ['default', 'hover', 'active', 'filled', 'disabled'];
   const HEADER_H = 32;
-  const ROW_H = 100;
+  const ROW_H = 120; // Increased from 100 to give more vertical spacing
   const COL_W = 220;
 
   const cell = (stateKey: FieldStateKey, visibility: 'hidden' | 'show') => {
     const isShow = visibility === 'show';
     const value = isShow ? '4trsi3TjaiUI' : '••••••••••••';
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
         <Field
           label="Label"
           size="m"
@@ -453,14 +555,14 @@ function InputStatesGrid() {
   };
 
   return (
-    <div style={{ overflowX: 'auto', paddingBottom: 4 }}>
-      <div style={{ display: 'flex', width: 60 + COL_W * 2 + 12, minWidth: 60 + COL_W * 2 + 12 }}>
+    <ScrollContainer>
+      <div style={{ display: 'flex', width: 80 + COL_W * 2 + 12, minWidth: 80 + COL_W * 2 + 12, padding: '12px 0' }}>
         {/* row labels, outside the dashed box */}
-        <div style={{ display: 'flex', flexDirection: 'column', width: 60 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', width: 80, paddingRight: 12 }}>
           <div style={{ height: HEADER_H }} />
           {rows.map((r) => (
             <div key={r} style={{ height: ROW_H, display: 'flex', alignItems: 'center' }}>
-              <span style={{ fontSize: 12, color: '#6B7280', fontFamily: "'DM Sans', sans-serif" }}>
+              <span style={{ fontSize: 13, fontWeight: 500, color: '#6B7280', fontFamily: "'DM Sans', sans-serif" }}>
                 {r.charAt(0).toUpperCase() + r.slice(1)}
               </span>
             </div>
@@ -472,7 +574,7 @@ function InputStatesGrid() {
           style={{
             position: 'relative',
             borderRadius: 4,
-            padding: '12px 20px',
+            padding: '24px 28px', // Increased padding for more gap
             flex: 1,
             justifyContent: 'center',
             border: '1.5px dashed #8B5CF6',
@@ -483,11 +585,12 @@ function InputStatesGrid() {
               display: 'grid',
               gridTemplateColumns: `repeat(2, ${COL_W}px)`,
               gridTemplateRows: `${HEADER_H}px repeat(${rows.length}, ${ROW_H}px)`,
-              columnGap: 12,
+              columnGap: 28, // Increased gap between columns
+              rowGap: 0,
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, color: '#3D4759' }}>Hidden</div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, color: '#3D4759' }}>Show</div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, color: '#3D4759', fontWeight: 600 }}>Hidden</div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, color: '#3D4759', fontWeight: 600 }}>Show</div>
 
             {rows.map((r) => (
               <React.Fragment key={r}>
@@ -498,7 +601,7 @@ function InputStatesGrid() {
           </div>
         </div>
       </div>
-    </div>
+    </ScrollContainer>
   );
 }
 
@@ -510,36 +613,38 @@ function InputStatesGrid() {
 function InputSizesList() {
   const order: SizeKey[] = ['xs', 's', 'm', 'l', 'xl'];
   return (
-    <div style={{ display: 'flex', gap: 12 }}>
-      {/* size labels, outside the dashed box — same pattern as the States grid */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 16, width: 24 }}>
-        {order.map((size) => (
-          <div key={size} style={{ height: 60, display: 'flex', alignItems: 'center' }}>
-            <span style={{ fontSize: 12, fontWeight: 600, color: '#8089A0', fontFamily: "'DM Sans', sans-serif" }}>
-              {size.toUpperCase()}
-            </span>
-          </div>
-        ))}
-      </div>
-
-      {/* dashed violet guide box wrapping just the fields - fit to content */}
-      <div
-        style={{
-          border: '1.5px dashed #8B5CF6',
-          borderRadius: 4,
-          padding: '12px 16px',
-          display: 'inline-block',
-        }}
-      >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+    <ScrollContainer>
+      <div style={{ display: 'flex', gap: 20, padding: '12px 0' }}>
+        {/* size labels, outside the dashed box — same pattern as the States grid */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 20, width: 36, paddingRight: 8 }}>
           {order.map((size) => (
-            <div key={size} style={{ height: 60, display: 'flex', alignItems: 'center' }}>
-              <Field size={size} stateKey="filled" label="Label" placeholder="Placeholder" />
+            <div key={size} style={{ height: 68, display: 'flex', alignItems: 'center' }}>
+              <span style={{ fontSize: 12, fontWeight: 600, color: '#8089A0', fontFamily: "'DM Sans', sans-serif" }}>
+                {size.toUpperCase()}
+              </span>
             </div>
           ))}
         </div>
+
+        {/* dashed violet guide box wrapping just the fields - fit to content */}
+        <div
+          style={{
+            border: '1.5px dashed #8B5CF6',
+            borderRadius: 4,
+            padding: '24px 28px', // Increased padding for more gap
+            display: 'inline-block',
+          }}
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+            {order.map((size) => (
+              <div key={size} style={{ height: 68, display: 'flex', alignItems: 'center' }}>
+                <Field size={size} stateKey="filled" label="Label" placeholder="Placeholder" />
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
-    </div>
+    </ScrollContainer>
   );
 }
 

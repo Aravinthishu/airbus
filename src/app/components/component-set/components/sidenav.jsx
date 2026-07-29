@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useCallback } from 'react';
 
 /* ============================================================
    Minimal stand-ins for your ui-helpers
@@ -34,7 +34,6 @@ function SpecBadge({ label }) {
   );
 }
 
-/* Figma-inspect-style dashed violet frame used around every reference block */
 function FigmaFrame({ children, style }) {
   return (
     <div
@@ -52,7 +51,6 @@ function FigmaFrame({ children, style }) {
   );
 }
 
-/* Row with a text label to the left of a FigmaFrame */
 function LabeledRow({ label, children }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 6 }}>
@@ -65,7 +63,7 @@ function LabeledRow({ label, children }) {
 }
 
 /* ============================================================
-   ICONS — Home, Settings, Chevron, Search, Help, Collapse
+   ICONS
 ============================================================ */
 function HomeIcon({ size = 15, color = 'currentColor' }) {
   return (
@@ -112,9 +110,20 @@ function HelpIcon({ size = 15, color = '#8089A0' }) {
   );
 }
 
-function CollapseIcon({ size = 15, color = '#8089A0' }) {
+/* Points left when the rail is expanded (collapse it), points right when collapsed (expand it) */
+function CollapseIcon({ size = 15, color = '#8089A0', pointing = 'left' }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={color}
+      strokeWidth="2.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      style={{ flexShrink: 0, transform: pointing === 'right' ? 'rotate(180deg)' : 'none', transition: 'transform .15s ease' }}
+    >
       <polyline points="11 17 6 12 11 7" />
       <polyline points="18 17 13 12 18 7" />
     </svg>
@@ -122,47 +131,82 @@ function CollapseIcon({ size = 15, color = '#8089A0' }) {
 }
 
 /* ============================================================
-   STATE STYLES — matches side-states.png exactly
+   REAL, INTERACTIVE NAV ITEM
+   Style is computed live from actual hover / focus / open / active
+   state instead of a hard-coded "state" prop.
 ============================================================ */
-const STATE_STYLES = {
-  default:      { bg: 'transparent', border: 'none',                 color: '#0B1F4D', weight: 500, opacity: 1 },
-  hover:        { bg: '#F1F1EF',     border: 'none',                 color: '#0B1F4D', weight: 500, opacity: 1 },
-  'open-active':{ bg: '#E9EEFC',     border: 'none',                 color: '#0B1F4D', weight: 700, opacity: 1 },
-  'open-default':{ bg: 'transparent', border: 'none',                 color: '#0B1F4D', weight: 700, opacity: 1 },
-  'open-hover': { bg: '#F1F1EF',     border: 'none',                 color: '#0B1F4D', weight: 700, opacity: 1 },
-  focus:        { bg: 'transparent', border: '1.5px solid #155EEF',  color: '#0B1F4D', weight: 500, opacity: 1 },
-  disabled:     { bg: 'transparent', border: 'none',                 color: '#0B1F4D', weight: 500, opacity: 0.35 },
-};
+function getItemStyle({ variant, isActive, isOpen, isHovered, isFocused, disabled }) {
+  let bg = 'transparent';
+  let color = variant === 'branch' ? '#0B1F4D' : '#48577A';
+  let weight = variant === 'branch' ? 700 : 500;
+  let border = 'none';
+  let borderLeft = 'none';
 
-/* ============================================================
-   SideNavItem — a single row
-============================================================ */
-function SideNavItem({ label, variant = 'leaf', open = false, state = null, showIcon = true, collapsedRail = false, onClick = null }) {
-  if (variant === 'heading') {
-    return (
-      <div style={{ padding: '6px 12px', fontSize: 12, fontWeight: 600, color: '#9AA2B1', fontFamily: "'DM Sans', sans-serif" }}>
-        {collapsedRail ? '' : label}
-      </div>
-    );
+  if (isActive) {
+    bg = '#E9EEFC';
+    color = '#0B1F4D';
+    weight = 700;
+    borderLeft = '3px solid #0B1F4D';
+  }
+  if (isHovered && !disabled) {
+    bg = isActive ? '#E3E9FA' : '#F1F1EF';
+  }
+  if (isFocused && !disabled) {
+    border = '1.5px solid #155EEF';
+  }
+  if (disabled) {
+    bg = 'transparent';
   }
 
-  let bg = 'transparent', border = 'none', color = '#0B1F4D', weight = 500, opacity = 1, chevron = null, borderLeftAccent = null;
+  return { bg, color, weight, border, borderLeft };
+}
 
-  if (state) {
-    const s = STATE_STYLES[state] || STATE_STYLES.default;
-    bg = s.bg; border = s.border; color = s.color; weight = s.weight; opacity = s.opacity;
-    chevron = state.startsWith('open') ? 'up' : (state === 'disabled' ? 'down' : 'down');
-  } else if (variant === 'branch') {
-    color = '#0B1F4D'; weight = 700; chevron = open ? 'up' : 'down';
-  } else if (variant === 'leaf') {
-    color = '#48577A'; weight = 500; chevron = null;
-  } else if (variant === 'active-leaf') {
-    bg = '#E9EEFC'; color = '#0B1F4D'; weight = 700; chevron = null; borderLeftAccent = '#0B1F4D';
-  }
+function NavRow({
+  node,
+  collapsedRail,
+  isOpen,
+  isActive,
+  isHovered,
+  isFocused,
+  onHover,
+  onUnhover,
+  onFocus,
+  onBlur,
+  onActivate,
+}) {
+  const disabled = !!node.disabled;
+  const hasChildren = !!(node.children && node.children.length);
+  const { bg, color, weight, border, borderLeft } = getItemStyle({
+    variant: node.variant,
+    isActive,
+    isOpen,
+    isHovered,
+    isFocused,
+    disabled,
+  });
+
+  const showChevron = node.variant === 'branch' && !collapsedRail;
+  const chevronDir = hasChildren ? (isOpen ? 'up' : 'down') : 'down';
 
   return (
     <div
-      onClick={onClick}
+      role="button"
+      tabIndex={disabled ? -1 : 0}
+      aria-disabled={disabled}
+      aria-expanded={hasChildren ? isOpen : undefined}
+      title={collapsedRail ? node.label : undefined}
+      onMouseEnter={() => !disabled && onHover(node.id)}
+      onMouseLeave={() => !disabled && onUnhover(node.id)}
+      onFocus={() => !disabled && onFocus(node.id)}
+      onBlur={() => !disabled && onBlur(node.id)}
+      onClick={() => !disabled && onActivate(node)}
+      onKeyDown={(e) => {
+        if (disabled) return;
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onActivate(node);
+        }
+      }}
       style={{
         display: 'flex',
         alignItems: 'center',
@@ -173,33 +217,145 @@ function SideNavItem({ label, variant = 'leaf', open = false, state = null, show
         background: bg,
         color,
         border,
-        borderLeft: borderLeftAccent ? `3px solid ${borderLeftAccent}` : (border !== 'none' ? border : 'none'),
-        boxShadow: 'none',
-        cursor: state === 'disabled' ? 'not-allowed' : 'pointer',
-        opacity,
+        borderLeft: borderLeft !== 'none' ? borderLeft : (border !== 'none' ? border : 'none'),
+        boxSizing: 'border-box',
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        opacity: disabled ? 0.35 : 1,
         fontSize: 13,
         fontWeight: weight,
         fontFamily: "'DM Sans', sans-serif",
-        transition: 'all .15s ease',
+        outline: 'none',
+        transition: 'background .12s ease, border-color .12s ease',
       }}
     >
-      {showIcon && <HomeIcon size={14} />}
-      {!collapsedRail && <span style={{ flex: 1, whiteSpace: 'nowrap' }}>{label}</span>}
-      {!collapsedRail && chevron && <Chevron direction={chevron} size={13} />}
+      <HomeIcon size={14} />
+      {!collapsedRail && <span style={{ flex: 1, whiteSpace: 'nowrap' }}>{node.label}</span>}
+      {showChevron && <Chevron direction={chevronDir} size={13} />}
+    </div>
+  );
+}
+
+function TreeNode({ node, depth = 0, collapsedRail, nav }) {
+  const { expandedIds, activeId, hoveredId, focusedId, toggleExpand, setHovered, clearHovered, setFocused, clearFocused, setActive } = nav;
+
+  if (node.variant === 'heading') {
+    return (
+      <div style={{ padding: '6px 12px', fontSize: 12, fontWeight: 600, color: '#9AA2B1', fontFamily: "'DM Sans', sans-serif" }}>
+        {collapsedRail ? '' : node.label}
+      </div>
+    );
+  }
+
+  const hasChildren = !!(node.children && node.children.length);
+  const isOpen = expandedIds.has(node.id);
+
+  const handleActivate = (n) => {
+    if (n.variant === 'branch' && hasChildren) {
+      toggleExpand(n.id);
+    } else {
+      setActive(n.id);
+    }
+  };
+
+  return (
+    <div>
+      <NavRow
+        node={node}
+        collapsedRail={collapsedRail}
+        isOpen={isOpen}
+        isActive={activeId === node.id}
+        isHovered={hoveredId === node.id}
+        isFocused={focusedId === node.id}
+        onHover={setHovered}
+        onUnhover={clearHovered}
+        onFocus={setFocused}
+        onBlur={clearFocused}
+        onActivate={handleActivate}
+      />
+      {hasChildren && !collapsedRail && isOpen && (
+        <div
+          style={{
+            marginLeft: 20,
+            paddingLeft: 10,
+            borderLeft: '1px solid #E4E2DD',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 2,
+            marginTop: 2,
+            marginBottom: 2,
+          }}
+        >
+          {node.children.map((child) => (
+            <TreeNode key={child.id} node={child} depth={depth + 1} collapsedRail={collapsedRail} nav={nav} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Tree({ nodes, collapsedRail, nav }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 2, width: collapsedRail ? 'auto' : '100%' }}>
+      {nodes.map((n) => (
+        <TreeNode key={n.id} node={n} collapsedRail={collapsedRail} nav={nav} />
+      ))}
     </div>
   );
 }
 
 /* ============================================================
-   DATA — mirrors the exact structures in your uploaded images
+   Static item — used ONLY for the "States" reference swatches,
+   which by definition need to freeze one state at a time.
+============================================================ */
+const STATE_STYLES = {
+  default:        { bg: 'transparent', border: 'none',                color: '#0B1F4D', weight: 500, opacity: 1 },
+  hover:          { bg: '#F1F1EF',     border: 'none',                color: '#0B1F4D', weight: 500, opacity: 1 },
+  'open-active':  { bg: '#E9EEFC',     border: 'none',                color: '#0B1F4D', weight: 700, opacity: 1 },
+  'open-default': { bg: 'transparent', border: 'none',                color: '#0B1F4D', weight: 700, opacity: 1 },
+  'open-hover':   { bg: '#F1F1EF',     border: 'none',                color: '#0B1F4D', weight: 700, opacity: 1 },
+  focus:          { bg: 'transparent', border: '1.5px solid #155EEF', color: '#0B1F4D', weight: 500, opacity: 1 },
+  disabled:       { bg: 'transparent', border: 'none',                color: '#0B1F4D', weight: 500, opacity: 0.35 },
+};
+
+function StaticStateItem({ label, state }) {
+  const s = STATE_STYLES[state] || STATE_STYLES.default;
+  const chevron = state.startsWith('open') ? 'up' : 'down';
+  return (
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 8,
+        padding: '8px 12px',
+        borderRadius: 6,
+        background: s.bg,
+        color: s.color,
+        border: s.border,
+        opacity: s.opacity,
+        fontSize: 13,
+        fontWeight: s.weight,
+        fontFamily: "'DM Sans', sans-serif",
+      }}
+    >
+      <HomeIcon size={14} />
+      <span style={{ flex: 1, whiteSpace: 'nowrap' }}>{label}</span>
+      <Chevron direction={chevron} size={13} />
+    </div>
+  );
+}
+
+/* ============================================================
+   DATA — every node has a stable id so hover/open/active state
+   can target the exact row that was interacted with.
 ============================================================ */
 const categoryTree = [
-  { label: 'Label', variant: 'heading' },
+  { id: 'cat-heading', label: 'Label', variant: 'heading' },
   {
-    label: 'First Level', variant: 'branch', children: [
+    id: 'cat-first', label: 'First Level', variant: 'branch', children: [
       {
-        label: 'Second Level', variant: 'branch', children: [
-          { label: 'Third Level', variant: 'leaf' },
+        id: 'cat-second', label: 'Second Level', variant: 'branch', children: [
+          { id: 'cat-third', label: 'Third Level', variant: 'leaf' },
         ],
       },
     ],
@@ -207,84 +363,87 @@ const categoryTree = [
 ];
 
 const sectionOneTree = [
-  { label: 'Label', variant: 'heading' },
+  { id: 's1-heading', label: 'Label', variant: 'heading' },
   {
-    label: 'Label', variant: 'branch', children: [
-      { label: 'Label', variant: 'leaf' },
-      { label: 'Label', variant: 'leaf' },
+    id: 's1-branch', label: 'Label', variant: 'branch', children: [
+      { id: 's1-leaf-1', label: 'Label', variant: 'leaf' },
+      { id: 's1-leaf-2', label: 'Label', variant: 'leaf' },
     ],
   },
 ];
 
+/* All former top-level "main tabs" (branch-4/5/6) now live nested two or
+   three levels deep under the single top-level branch, instead of sitting
+   flat at the root. */
 const sectionTwoTree = [
-  { label: 'Label', variant: 'heading' },
+  { id: 's2-heading', label: 'Label', variant: 'heading' },
   {
-    label: 'Label', variant: 'branch', children: [
+    id: 's2-branch-1', label: 'Label', variant: 'branch', children: [
       {
-        label: 'Label', variant: 'branch', children: [
-          { label: 'Label', variant: 'leaf' },
-          { label: 'Label', variant: 'leaf' },
-          { label: 'Label', variant: 'active-leaf' },
-          { label: 'Label', variant: 'leaf' },
-          { label: 'Label', variant: 'leaf' },
+        id: 's2-sub-branch', label: 'Label', variant: 'branch', children: [
+          { id: 's2-leaf-1', label: 'Label', variant: 'leaf' },
+          { id: 's2-leaf-2', label: 'Label', variant: 'leaf' },
+          { id: 's2-leaf-3', label: 'Label', variant: 'leaf' },
+          { id: 's2-leaf-4', label: 'Label', variant: 'leaf' },
+          { id: 's2-leaf-5', label: 'Label', variant: 'leaf' },
         ],
       },
-      { label: 'Label', variant: 'branch' },
-      { label: 'Label', variant: 'branch' },
+      {
+        id: 's2-branch-2', label: 'Label', variant: 'branch', children: [
+          { id: 's2-branch-2-leaf-1', label: 'Label', variant: 'leaf' },
+          { id: 's2-branch-2-leaf-2', label: 'Label', variant: 'leaf' },
+        ],
+      },
+      {
+        id: 's2-branch-3', label: 'Label', variant: 'branch', children: [
+          { id: 's2-branch-3-leaf-1', label: 'Label', variant: 'leaf' },
+        ],
+      },
+      {
+        id: 's2-branch-4', label: 'Label', variant: 'branch', children: [
+          { id: 's2-branch-4-leaf-1', label: 'Label', variant: 'leaf' },
+        ],
+      },
+      {
+        id: 's2-branch-5', label: 'Label', variant: 'branch', children: [
+          { id: 's2-branch-5-leaf-1', label: 'Label', variant: 'leaf' },
+        ],
+      },
+      {
+        id: 's2-branch-6', label: 'Label', variant: 'branch', children: [
+          { id: 's2-branch-6-leaf-1', label: 'Label', variant: 'leaf' },
+        ],
+      },
     ],
   },
-  { label: 'Label', variant: 'branch' },
-  { label: 'Label', variant: 'branch' },
-  { label: 'Label', variant: 'branch' },
 ];
 
 const fullNavTree = [...sectionOneTree, ...sectionTwoTree];
 
+/* Collects every branch id that actually has children, for Expand All / Collapse All */
+function collectBranchIds(nodes, acc = []) {
+  for (const n of nodes) {
+    if (n.variant === 'branch' && n.children && n.children.length) {
+      acc.push(n.id);
+      collectBranchIds(n.children, acc);
+    }
+  }
+  return acc;
+}
+const allBranchIds = collectBranchIds(fullNavTree);
+
 /* ============================================================
-   Full sidebar shell — search + tree + footer (SMALLER VERSION)
-   - MODIFIED to only apply state to first item
+   Real, fully interactive sidebar shell
+   - hover comes from actual mouse events
+   - branches actually expand/collapse their own children
+   - the rail actually collapses/expands on click
 ============================================================ */
-function SideNavShell({ collapsed = false, onItemClick = null, state = null }) {
-  // Create a modified tree where only the first non-heading item gets the state
-  const getTreeWithState = (nodes, stateToApply) => {
-    if (!stateToApply || stateToApply === 'default') {
-      return nodes;
-    }
-    
-    // Deep clone and modify only the first non-heading item
-    const clone = JSON.parse(JSON.stringify(nodes));
-    let found = false;
-    
-    const traverse = (node) => {
-      if (found) return;
-      if (node.variant !== 'heading' && !found) {
-        // Apply state to this node
-        node.state = stateToApply;
-        found = true;
-        return;
-      }
-      if (node.children) {
-        for (let child of node.children) {
-          traverse(child);
-          if (found) break;
-        }
-      }
-    };
-    
-    for (let node of clone) {
-      traverse(node);
-      if (found) break;
-    }
-    
-    return clone;
-  };
-
-  const treeData = getTreeWithState(fullNavTree, state);
-
+function SideNavShell({ collapsedRail, onToggleCollapsed, nav }) {
   return (
     <div
       style={{
-        width: collapsed ? 56 : 200,
+        width: collapsedRail ? 56 : 220,
+        flexShrink: 0,
         background: '#FFFFFF',
         border: '1px solid #E4E2DD',
         borderRadius: 10,
@@ -294,13 +453,11 @@ function SideNavShell({ collapsed = false, onItemClick = null, state = null }) {
         gap: 2,
         fontFamily: "'DM Sans', sans-serif",
         transition: 'width 0.2s ease',
-        minHeight: 300,
-        maxHeight: 400,
-        overflow: 'auto',
+        boxSizing: 'border-box',
       }}
     >
       {/* Search */}
-      {collapsed ? (
+      {collapsedRail ? (
         <div style={{ display: 'flex', justifyContent: 'center', padding: '6px 0', marginBottom: 4 }}>
           <SearchIcon size={14} />
         </div>
@@ -322,11 +479,9 @@ function SideNavShell({ collapsed = false, onItemClick = null, state = null }) {
         </div>
       )}
 
-      {/* Tree - Render with state applied to first item */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-        {treeData.slice(0, 6).map((n, i) => (
-          <TreeNode key={i} node={n} collapsedRail={collapsed} onItemClick={onItemClick} />
-        ))}
+      {/* Tree */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 1, overflowY: 'auto', maxHeight: 380 }}>
+        <Tree nodes={fullNavTree} collapsedRail={collapsedRail} nav={nav} />
       </div>
 
       {/* Footer */}
@@ -336,28 +491,38 @@ function SideNavShell({ collapsed = false, onItemClick = null, state = null }) {
             display: 'flex',
             alignItems: 'center',
             gap: 6,
-            justifyContent: collapsed ? 'center' : 'flex-start',
+            justifyContent: collapsedRail ? 'center' : 'flex-start',
             padding: '4px 10px',
             color: '#8089A0',
             fontSize: 12,
+            borderRadius: 6,
           }}
         >
           <HelpIcon size={13} />
-          {!collapsed && <span>Documentation</span>}
+          {!collapsedRail && <span>Documentation</span>}
         </div>
         <div
+          role="button"
+          tabIndex={0}
+          onClick={onToggleCollapsed}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onToggleCollapsed(); } }}
+          title={collapsedRail ? 'Expand' : 'Collapse'}
           style={{
             display: 'flex',
             alignItems: 'center',
             gap: 6,
-            justifyContent: collapsed ? 'center' : 'flex-start',
+            justifyContent: collapsedRail ? 'center' : 'flex-start',
             padding: '4px 10px',
             color: '#8089A0',
             fontSize: 12,
+            borderRadius: 6,
+            cursor: 'pointer',
           }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = '#F1F1EF'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
         >
-          <CollapseIcon size={13} />
-          {!collapsed && <span>Collapse</span>}
+          <CollapseIcon size={13} pointing={collapsedRail ? 'right' : 'left'} />
+          {!collapsedRail && <span>Collapse</span>}
         </div>
       </div>
     </div>
@@ -365,217 +530,146 @@ function SideNavShell({ collapsed = false, onItemClick = null, state = null }) {
 }
 
 /* ============================================================
-   TreeNode - Updated to handle state in node
+   LIVE DEMO — a real sidebar, not a state-simulator.
+   Hover, expand/collapse, active selection, and the rail
+   collapse toggle are all driven by actual interaction.
 ============================================================ */
-function TreeNode({ node, collapsedRail = false, onItemClick = null }) {
-  return (
-    <div>
-      <SideNavItem 
-        label={node.label} 
-        variant={node.variant} 
-        open={!!node.children} 
-        collapsedRail={collapsedRail} 
-        onClick={() => onItemClick && onItemClick(node.label)}
-        state={node.state || null} // Use state from node if present
-      />
-      {node.children && !collapsedRail && (
-        <div
-          style={{
-            marginLeft: 20,
-            paddingLeft: 10,
-            borderLeft: '1px solid #E4E2DD',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 2,
-            marginTop: 2,
-            marginBottom: 2,
-          }}
-        >
-          {node.children.map((child, i) => (
-            <TreeNode key={i} node={child} collapsedRail={collapsedRail} onItemClick={onItemClick} />
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
+export function SideNavDemo() {
+  const [collapsedRail, setCollapsedRail] = useState(false);
+  const [expandedIds, setExpandedIds] = useState(() => new Set(['s2-branch-1', 's2-sub-branch']));
+  const [activeId, setActiveId] = useState('s2-leaf-3');
+  const [hoveredId, setHoveredId] = useState(null);
+  const [focusedId, setFocusedId] = useState(null);
 
-/* ============================================================
-   Tree - Updated to handle state in node
-============================================================ */
-function Tree({ nodes, collapsedRail = false, onItemClick = null }) {
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 2, width: collapsedRail ? 'auto' : 220 }}>
-      {nodes.map((n, i) => (
-        <TreeNode key={i} node={n} collapsedRail={collapsedRail} onItemClick={onItemClick} />
-      ))}
-    </div>
-  );
-}
+  const toggleExpand = useCallback((id) => {
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
 
-/* ============================================================
-   Scroller component with auto-hide scrollbar - FIXED to maintain scroll position
-============================================================ */
-function AutoHideScroll({ children, height }) {
-  const [showScroll, setShowScroll] = useState(false);
-  const timeoutRef = useRef(null);
-  const scrollContainerRef = useRef(null);
-
-  // Save scroll position before children update
-  useEffect(() => {
-    // Scroll position is maintained automatically by the browser
-    // because we're using the same DOM element
-  }, [children]);
-
-  const handleScroll = () => {
-    setShowScroll(true);
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-    timeoutRef.current = setTimeout(() => {
-      setShowScroll(false);
-    }, 5000);
+  const nav = {
+    expandedIds,
+    activeId,
+    hoveredId,
+    focusedId,
+    toggleExpand,
+    setHovered: setHoveredId,
+    clearHovered: (id) => setHoveredId((cur) => (cur === id ? null : cur)),
+    setFocused: setFocusedId,
+    clearFocused: (id) => setFocusedId((cur) => (cur === id ? null : cur)),
+    setActive: setActiveId,
   };
+
+  const allExpanded = allBranchIds.every((id) => expandedIds.has(id));
 
   return (
     <div
-      ref={scrollContainerRef}
-      onScroll={handleScroll}
       style={{
-        height: height || '100%',
-        overflowY: 'auto',
-        overflowX: 'hidden',
-        scrollbarWidth: showScroll ? 'thin' : 'none',
-        msOverflowStyle: showScroll ? 'auto' : 'none',
-        position: 'relative',
+        display: 'flex',
+        flexDirection: 'column',
+        background: '#FFFFFF',
+        padding: '16px 20px',
+        boxSizing: 'border-box',
       }}
     >
-      <style>
-        {`
-          .auto-hide-scroll::-webkit-scrollbar {
-            width: ${showScroll ? '6px' : '0px'};
-            transition: width 0.3s ease;
-          }
-          .auto-hide-scroll::-webkit-scrollbar-track {
-            background: transparent;
-          }
-          .auto-hide-scroll::-webkit-scrollbar-thumb {
-            background: ${showScroll ? '#C8C4BC' : 'transparent'};
-            border-radius: 3px;
-            transition: background 0.3s ease;
-          }
-          .auto-hide-scroll::-webkit-scrollbar-thumb:hover {
-            background: '#A8A4A0';
-          }
-        `}
-      </style>
-      <div className="auto-hide-scroll" style={{ height: '100%' }}>
-        {children}
+      <div style={{ fontSize: 11, color: '#8089A0', fontFamily: "'DM Sans', sans-serif", marginBottom: 12 }}>
+        Hover a row, click a branch to expand it, click a leaf to select it — or use the controls below.
+        Buttons and clicking control the exact same state, so they always stay in sync.
+      </div>
+
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'flex-start',
+          padding: 20,
+          backgroundImage: `
+            linear-gradient(rgba(200, 200, 200, 0.15) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(200, 200, 200, 0.15) 1px, transparent 1px)
+          `,
+          backgroundSize: '40px 40px',
+          backgroundColor: '#FCFCFB',
+          borderRadius: 8,
+          boxSizing: 'border-box',
+          marginBottom: 12,
+        }}
+      >
+        <SideNavShell
+          collapsedRail={collapsedRail}
+          onToggleCollapsed={() => setCollapsedRail((c) => !c)}
+          nav={nav}
+        />
+      </div>
+
+      <div
+        style={{
+          padding: '10px 12px',
+          borderTop: '1px solid #EFEDE8',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 8,
+        }}
+      >
+        <div>
+          <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 1, color: '#8089A0', marginBottom: 4, fontFamily: "'DM Sans', sans-serif" }}>
+            LAYOUT
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+            <PropChip active={!collapsedRail} onClick={() => setCollapsedRail(false)}>Expanded</PropChip>
+            <PropChip active={collapsedRail} onClick={() => setCollapsedRail(true)}>Collapsed</PropChip>
+          </div>
+        </div>
+        <div>
+          <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 1, color: '#8089A0', marginBottom: 4, fontFamily: "'DM Sans', sans-serif" }}>
+            TREE
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+            <PropChip active={allExpanded} onClick={() => setExpandedIds(new Set(allBranchIds))}>Expand All</PropChip>
+            <PropChip active={expandedIds.size === 0} onClick={() => setExpandedIds(new Set())}>Collapse All</PropChip>
+          </div>
+        </div>
       </div>
     </div>
   );
 }
 
 /* ============================================================
-   LIVE DEMO — Clean single sidebar preview (SMALLER)
-   FIXED: Controls now don't cause scroll to top
-============================================================ */
-export function SideNavDemo() {
-  const [state, setState] = useState('default');
-  const [collapsed, setCollapsed] = useState(false);
-  const [selectedItem, setSelectedItem] = useState('');
-
-  const stateOptions = ['default', 'hover', 'open-default', 'open-hover', 'open-active', 'focus', 'disabled'];
-  const stateLabels = ['Default', 'Hover', 'Open Default', 'Open Hover', 'Open Active', 'Focus', 'Disabled'];
-
-  const handleItemClick = (label) => {
-    setSelectedItem(label);
-  };
-
-  const currentStateLabel = stateLabels[stateOptions.indexOf(state)];
-
-  // Memoize the SideNavShell to prevent unnecessary re-renders
-  const sidebarContent = React.useMemo(() => {
-    return <SideNavShell collapsed={collapsed} onItemClick={handleItemClick} state={state} />;
-  }, [state, collapsed]);
-
-  return (
-    <AutoHideScroll height="100%">
-      <div style={{ display: 'flex', backgroundColor:'#ffff', flexDirection: 'column', minHeight: '100%', padding: '12px 16px' }}>
-        {/* Preview Area - Single Sidebar with State Label */}
-        <div
-          style={{
-            flex: '1 1 0',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 10,
-            padding: '12px 0',
-            minHeight: 280,
-            backgroundImage: `
-              linear-gradient(rgba(200, 200, 200, 0.15) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(200, 200, 200, 0.15) 1px, transparent 1px)
-            `,
-            backgroundSize: '40px 40px',
-            backgroundColor: '#FFFFFF',
-            borderRadius: 8,
-            marginBottom: 12,
-          }}
-        >
-          <div style={{ fontSize: 11, fontWeight: 600, color: '#8089A0', fontFamily: "'DM Sans', sans-serif" }}>
-            State: <span style={{ color: '#0B1F4D' }}>{currentStateLabel}</span>
-            {collapsed && ' • Collapsed'}
-          </div>
-          {sidebarContent}
-          {selectedItem && (
-            <div style={{ fontSize: 11, color: '#6B7280', fontFamily: "'DM Sans', sans-serif" }}>
-              Selected: <strong>{selectedItem}</strong>
-            </div>
-          )}
-        </div>
-
-        {/* Controls - Fixed at bottom */}
-        <div style={{ 
-          padding: '10px 12px', 
-          borderTop: '1px solid #EFEDE8', 
-          background: '#FFFFFF',
-          borderRadius: 8,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 6,
-        }}>
-          <div>
-            <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 1, color: '#8089A0', marginBottom: 4, fontFamily: "'DM Sans', sans-serif" }}>
-              STATE
-            </div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-              {stateOptions.map((s, index) => (
-                <PropChip key={s} active={state === s} onClick={() => setState(s)}>
-                  {stateLabels[index]}
-                </PropChip>
-              ))}
-            </div>
-          </div>
-          <div>
-            <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 1, color: '#8089A0', marginBottom: 4, fontFamily: "'DM Sans', sans-serif" }}>
-              LAYOUT
-            </div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-              <PropChip active={!collapsed} onClick={() => setCollapsed(false)}>Expanded</PropChip>
-              <PropChip active={collapsed} onClick={() => setCollapsed(true)}>Collapsed</PropChip>
-            </div>
-          </div>
-        </div>
-      </div>
-    </AutoHideScroll>
-  );
-}
-
-/* ============================================================
-   REFERENCE SPEC — exact match to your 4 uploaded images
+   REFERENCE SPEC — exact match to your 4 uploaded images.
+   These are documentation swatches, so the "States" block stays
+   static on purpose (that's the point of a states reference).
+   Everything else reuses the same live, interactive nav pieces.
 ============================================================ */
 export function SideNavSpec() {
+  const [expandedIds, setExpandedIds] = useState(() => new Set(['cat-first', 'cat-second', 's1-branch', 's2-branch-1']));
+  const [activeId, setActiveId] = useState('s2-leaf-3');
+  const [hoveredId, setHoveredId] = useState(null);
+  const [focusedId, setFocusedId] = useState(null);
+  const [specCollapsed, setSpecCollapsed] = useState(false);
+
+  const toggleExpand = useCallback((id) => {
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
+
+  const nav = {
+    expandedIds,
+    activeId,
+    hoveredId,
+    focusedId,
+    toggleExpand,
+    setHovered: setHoveredId,
+    clearHovered: (id) => setHoveredId((cur) => (cur === id ? null : cur)),
+    setFocused: setFocusedId,
+    clearFocused: (id) => setFocusedId((cur) => (cur === id ? null : cur)),
+    setActive: setActiveId,
+  };
+
   const stateRows = [
     { key: 'default', label: 'Default' },
     { key: 'hover', label: 'Hover' },
@@ -587,88 +681,84 @@ export function SideNavSpec() {
   ];
 
   return (
-    <AutoHideScroll height="100%">
-      <div style={{ padding: 24, fontFamily: "'DM Sans', sans-serif", background: '#FFFFFF', minHeight: '100%' }}>
-        <SpecBadge label="Side Navigation" />
+    <div style={{ padding: 24, fontFamily: "'DM Sans', sans-serif", background: '#FFFFFF' }}>
+      <SpecBadge label="Side Navigation" />
 
-        {/* side-category.png */}
-        <div style={{ marginBottom: 32 }}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: '#151A24', marginBottom: 12 }}>SideNav — Category</div>
-          <FigmaFrame style={{ display: 'inline-block' }}>
-            <div style={{ display: 'flex', gap: 24 }}>
-              <div style={{ width: 90, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <div style={{ padding: '8px 0', fontSize: 13, color: '#151A24' }}>Category</div>
-                <div style={{ padding: '8px 0', fontSize: 13, color: '#151A24' }}>First Level</div>
-                <div style={{ padding: '8px 0', fontSize: 13, color: '#151A24' }}>Second Level</div>
-                <div style={{ padding: '8px 0', fontSize: 13, color: '#151A24' }}>Third Level</div>
-              </div>
-              <Tree nodes={categoryTree} />
+      {/* side-category.png */}
+      <div style={{ marginBottom: 32 }}>
+        <div style={{ fontSize: 14, fontWeight: 700, color: '#151A24', marginBottom: 12 }}>SideNav — Category</div>
+        <FigmaFrame style={{ display: 'inline-block' }}>
+          <div style={{ display: 'flex', gap: 24 }}>
+            <div style={{ width: 90, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <div style={{ padding: '8px 0', fontSize: 13, color: '#151A24' }}>Category</div>
+              <div style={{ padding: '8px 0', fontSize: 13, color: '#151A24' }}>First Level</div>
+              <div style={{ padding: '8px 0', fontSize: 13, color: '#151A24' }}>Second Level</div>
+              <div style={{ padding: '8px 0', fontSize: 13, color: '#151A24' }}>Third Level</div>
             </div>
-          </FigmaFrame>
-        </div>
-
-        {/* side-section.png */}
-        <div style={{ marginBottom: 32 }}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: '#151A24', marginBottom: 12 }}>SideNav — Section</div>
-          <FigmaFrame style={{ display: 'inline-block' }}>
-            <div style={{ display: 'flex', gap: 24 }}>
-              <div style={{ width: 80, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 20 }}>
-                <span style={{ fontSize: 13, color: '#151A24' }}>Section 1</span>
-                <span style={{ fontSize: 13, color: '#151A24' }}>Section 2</span>
-              </div>
-              <div>
-                <Tree nodes={sectionOneTree} />
-                <div style={{ height: 16 }} />
-                <Tree nodes={sectionTwoTree} />
-              </div>
+            <div style={{ width: 220 }}>
+              <Tree nodes={categoryTree} collapsedRail={false} nav={nav} />
             </div>
-          </FigmaFrame>
-        </div>
-
-        {/* side-states.png */}
-        <div style={{ marginBottom: 32 }}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: '#151A24', marginBottom: 12 }}>SideNav — States</div>
-          <FigmaFrame style={{ display: 'inline-block' }}>
-            {stateRows.map((row) => (
-              <LabeledRow key={row.key} label={row.label}>
-                <div style={{ width: 200 }}>
-                  <SideNavItem label="Label" state={row.key} />
-                </div>
-              </LabeledRow>
-            ))}
-          </FigmaFrame>
-        </div>
-
-        {/* sice-expand.png */}
-        <div>
-          <div style={{ fontSize: 14, fontWeight: 700, color: '#151A24', marginBottom: 12 }}>SideNav — Expanded / Collapsed</div>
-          <FigmaFrame style={{ display: 'inline-flex', gap: 24, flexWrap: 'wrap' }}>
-            <div>
-              <div style={{ fontSize: 13, color: '#151A24', marginBottom: 8 }}>Expanded</div>
-              <SideNavShell collapsed={false} />
-            </div>
-            <div>
-              <div style={{ fontSize: 13, color: '#151A24', marginBottom: 8 }}>Collapsed</div>
-              <SideNavShell collapsed={true} />
-            </div>
-          </FigmaFrame>
-        </div>
+          </div>
+        </FigmaFrame>
       </div>
-    </AutoHideScroll>
+
+      {/* side-section.png */}
+      <div style={{ marginBottom: 32 }}>
+        <div style={{ fontSize: 14, fontWeight: 700, color: '#151A24', marginBottom: 12 }}>SideNav — Section</div>
+        <FigmaFrame style={{ display: 'inline-block' }}>
+          <div style={{ display: 'flex', gap: 24 }}>
+            <div style={{ width: 80, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 20 }}>
+              <span style={{ fontSize: 13, color: '#151A24' }}>Section 1</span>
+              <span style={{ fontSize: 13, color: '#151A24' }}>Section 2</span>
+            </div>
+            <div style={{ width: 220 }}>
+              <Tree nodes={sectionOneTree} collapsedRail={false} nav={nav} />
+              <div style={{ height: 16 }} />
+              <Tree nodes={sectionTwoTree} collapsedRail={false} nav={nav} />
+            </div>
+          </div>
+        </FigmaFrame>
+      </div>
+
+      {/* side-states.png — intentionally static, this IS the states reference */}
+      <div style={{ marginBottom: 32 }}>
+        <div style={{ fontSize: 14, fontWeight: 700, color: '#151A24', marginBottom: 12 }}>SideNav — States</div>
+        <FigmaFrame style={{ display: 'inline-block' }}>
+          {stateRows.map((row) => (
+            <LabeledRow key={row.key} label={row.label}>
+              <div style={{ width: 200 }}>
+                <StaticStateItem label="Label" state={row.key} />
+              </div>
+            </LabeledRow>
+          ))}
+        </FigmaFrame>
+      </div>
+
+      {/* side-expand.png — real, clickable collapse toggle */}
+      <div>
+        <div style={{ fontSize: 14, fontWeight: 700, color: '#151A24', marginBottom: 12 }}>SideNav — Expanded / Collapsed</div>
+        <FigmaFrame style={{ display: 'inline-flex', gap: 24, flexWrap: 'wrap' }}>
+          <div>
+            <div style={{ fontSize: 13, color: '#151A24', marginBottom: 8 }}>{specCollapsed ? 'Collapsed' : 'Expanded'} (click Collapse to toggle)</div>
+            <SideNavShell collapsedRail={specCollapsed} onToggleCollapsed={() => setSpecCollapsed((c) => !c)} nav={nav} />
+          </div>
+        </FigmaFrame>
+      </div>
+    </div>
   );
 }
 
 /* ============================================================
-   PAGE — equal-size preview / reference cards
+   PAGE
 ============================================================ */
 const CARD_STYLE = {
   width: '100%',
   maxWidth: 1100,
-  height: 560,
+  minHeight: 460,
   border: '1px solid #EFEDE8',
   borderRadius: 12,
   background: '#FFFFFF',
-  overflow: 'hidden',
+  overflow: 'auto',
   boxShadow: '0 1px 2px rgba(16,24,40,0.04)',
 };
 

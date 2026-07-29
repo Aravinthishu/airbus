@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 /* ============================================================
    Minimal stand-ins for your ui-helpers (PropChip, SpecBadge, 
@@ -40,6 +40,108 @@ function SpecBadge({ label }: { label: string }) {
   return (
     <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, color: '#8089A0', marginBottom: 12 }}>
       {label.toUpperCase()}
+    </div>
+  );
+}
+
+/* ============================================================
+   ScrollContainer component with auto-hiding scrollbars
+============================================================ */
+function ScrollContainer({ children }: { children: React.ReactNode }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [showScrollbar, setShowScrollbar] = useState(false);
+  const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const showScrollbars = () => {
+    setShowScrollbar(true);
+    if (hideTimeoutRef.current) {
+      clearTimeout(hideTimeoutRef.current);
+      hideTimeoutRef.current = null;
+    }
+  };
+
+  const hideScrollbars = () => {
+    if (hideTimeoutRef.current) {
+      clearTimeout(hideTimeoutRef.current);
+      hideTimeoutRef.current = null;
+    }
+    hideTimeoutRef.current = setTimeout(() => {
+      setShowScrollbar(false);
+    }, 5000);
+  };
+
+  useEffect(() => {
+    const element = containerRef.current;
+    if (!element) return;
+
+    const checkOverflow = () => {
+      const hasHorizontalScroll = element.scrollWidth > element.clientWidth;
+      const hasVerticalScroll = element.scrollHeight > element.clientHeight;
+      if (hasHorizontalScroll || hasVerticalScroll) {
+        setShowScrollbar(true);
+        hideScrollbars();
+      }
+    };
+
+    checkOverflow();
+    window.addEventListener('resize', checkOverflow);
+
+    return () => {
+      window.removeEventListener('resize', checkOverflow);
+      if (hideTimeoutRef.current) {
+        clearTimeout(hideTimeoutRef.current);
+      }
+    };
+  }, [children]);
+
+  return (
+    <div
+      ref={containerRef}
+      onMouseEnter={showScrollbars}
+      onMouseLeave={hideScrollbars}
+      style={{
+        overflow: 'auto',
+        position: 'relative',
+        ...(showScrollbar ? {
+          scrollbarWidth: 'thin',
+          scrollbarColor: '#C084FC transparent',
+        } : {
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+        }),
+      }}
+    >
+      <style>
+        {`
+          .scroll-container::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+            opacity: ${showScrollbar ? 1 : 0};
+            transition: opacity 0.3s ease;
+          }
+          
+          .scroll-container::-webkit-scrollbar-track {
+            background: transparent;
+          }
+          
+          .scroll-container::-webkit-scrollbar-thumb {
+            background: ${showScrollbar ? '#C084FC' : 'transparent'};
+            border-radius: 3px;
+            transition: background 0.3s ease;
+          }
+          
+          .scroll-container::-webkit-scrollbar-thumb:hover {
+            background: #A855F7;
+          }
+          
+          .scroll-container {
+            scrollbar-width: ${showScrollbar ? 'thin' : 'none'};
+            scrollbar-color: ${showScrollbar ? '#C084FC transparent' : 'transparent transparent'};
+            transition: scrollbar-color 0.3s ease;
+          }
+        `}
+      </style>
+      {children}
     </div>
   );
 }
@@ -197,6 +299,9 @@ export function ButtonDemo() {
   const [size, setSize] = useState<ButtonSize>('l');
   const [state, setState] = useState<ButtonState>('default');
   const onDark = VARIANT_STYLES[variant]?.onDark;
+  
+  // Check if we need dark background
+  const isGhostNegative = variant === 'ghostNegative';
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -213,7 +318,7 @@ export function ButtonDemo() {
             linear-gradient(90deg, rgba(200, 200, 200, 0.15) 1px, transparent 1px)
           `,
           backgroundSize: '40px 40px',
-          backgroundColor: '#FFFFFF',
+          backgroundColor: isGhostNegative ? '#002F7B' : '#FFFFFF', // Added dark background
         }}
       >
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
@@ -221,11 +326,11 @@ export function ButtonDemo() {
           <span style={{ 
             fontSize: 12, 
             fontFamily: 'monospace', 
-            color: onDark ? 'rgba(255,255,255,0.6)' : '#8089A0',
-            background: '#FFFFFF',
+            color: isGhostNegative ? 'rgba(255,255,255,0.8)' : '#8089A0', // Changed text color for dark bg
+            background: isGhostNegative ? 'rgba(255,255,255,0.1)' : '#FFFFFF', // Changed chip bg for dark bg
             padding: '4px 12px',
             borderRadius: 4,
-            border: '1px solid #E5E5E5',
+            border: isGhostNegative ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E5E5E5', // Changed border for dark bg
           }}>
             {variant.charAt(0).toUpperCase() + variant.slice(1)} • {size.toUpperCase()}
             {state !== 'default' ? ` • ${state.charAt(0).toUpperCase() + state.slice(1)}` : ''}
@@ -310,9 +415,7 @@ export function ButtonSpec() {
           Button — All States
         </div>
 
-        <div style={{ overflowX: 'auto' }}>
-          {/* inline-flex so this wrapper's own width shrinks/grows to fit its
-              content exactly — the scrollbar (not a mis-sized overlay) handles overflow */}
+        <ScrollContainer>
           <div style={{ display: 'inline-flex', flexDirection: 'column' }}>
             {/* header row — label spacer + variant names, same fixed column widths as below */}
             <div
@@ -397,7 +500,7 @@ export function ButtonSpec() {
               </div>
             </div>
           </div>
-        </div>
+        </ScrollContainer>
       </div>
 
       {/* ============================================================
@@ -408,35 +511,37 @@ export function ButtonSpec() {
           Button — Sizes
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: CELL_GAP }}>
-          <div style={{ width: LABEL_COL_WIDTH, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: CELL_GAP }}>
-            {SIZE_ROWS.map((size) => (
-              <div
-                key={size}
-                style={{
-                  height: 56,
-                  display: 'flex',
-                  alignItems: 'center',
-                  fontSize: 14,
-                  fontWeight: 700,
-                  color: '#0B1F4D',
-                }}
-              >
-                {size.toUpperCase()}
-              </div>
-            ))}
-          </div>
-
-          <div style={{ border: '2px dashed #8B5CF6', borderRadius: 8, padding: CELL_GAP }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: CELL_GAP }}>
+        <ScrollContainer>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: CELL_GAP }}>
+            <div style={{ width: LABEL_COL_WIDTH, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: CELL_GAP }}>
               {SIZE_ROWS.map((size) => (
-                <div key={size} style={{ height: 56, display: 'flex', alignItems: 'center' }}>
-                  <RenderButton variant="primary" size={size} state="default" />
+                <div
+                  key={size}
+                  style={{
+                    height: 56,
+                    display: 'flex',
+                    alignItems: 'center',
+                    fontSize: 14,
+                    fontWeight: 700,
+                    color: '#0B1F4D',
+                  }}
+                >
+                  {size.toUpperCase()}
                 </div>
               ))}
             </div>
+
+            <div style={{ border: '2px dashed #8B5CF6', borderRadius: 8, padding: CELL_GAP }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: CELL_GAP }}>
+                {SIZE_ROWS.map((size) => (
+                  <div key={size} style={{ height: 56, display: 'flex', alignItems: 'center' }}>
+                    <RenderButton variant="primary" size={size} state="default" />
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
-        </div>
+        </ScrollContainer>
       </div>
     </div>
   );
