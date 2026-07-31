@@ -290,7 +290,7 @@ export function AvatarDemo() {
       <div
         style={{
           flex: '1 1 0',
-          minHeight: 345,
+          minHeight: 400,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',

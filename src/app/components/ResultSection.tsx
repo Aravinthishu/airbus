@@ -83,14 +83,6 @@ export default function ResultsSection() {
         }}
       />
 
-      {/* Top right indicator */}
-      {/* <div
-        className="hidden sm:block absolute top-16 right-8"
-        style={{ fontFamily: MONO, fontSize: 12, opacity: 0.35, letterSpacing: '1px' }}
-      >
-        08 / 08
-      </div> */}
-
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         {/* Meta row similar to other sections */}
         <div className="flex items-center justify-between mb-12">
@@ -98,7 +90,6 @@ export default function ResultsSection() {
             <span className="text-xs font-mono text-white/40">/ Results</span>
             <span className="text-xs font-mono text-white/40">// Impact & Outcomes</span>
           </div>
-          {/* <span className="text-xs font-mono text-white/30">/ 08</span> */}
         </div>
 
         <div className="flex justify-between items-end gap-10 flex-wrap mb-16">
@@ -179,7 +170,7 @@ export default function ResultsSection() {
         </div>
 
         {/* Timeline */}
-        <div className="rounded-[18px] border p-7 sm:p-9" style={{ borderColor: LINE_DARK }}>
+        <div className="rounded-[18px] border p-7 sm:p-9 mb-14" style={{ borderColor: LINE_DARK }}>
           <div className="mb-6 text-white" style={{ fontFamily: DISPLAY, fontSize: 19, fontWeight: 600 }}>
             8-month journey
           </div>
@@ -200,6 +191,50 @@ export default function ResultsSection() {
               </div>
             </div>
           ))}
+        </div>
+
+        {/* === NEW: Thank You & Next Project Section === */}
+        <div className="text-center pt-8 border-t" style={{ borderColor: LINE_DARK }}>
+          <p 
+            className="mb-8 text-white/70"
+            style={{ 
+              fontFamily: DISPLAY, 
+              fontSize: 'clamp(20px, 2.5vw, 32px)', 
+              fontWeight: 500,
+              letterSpacing: '-0.01em'
+            }}
+          >
+            Thank you for watching this case study.
+          </p>
+          
+          <a 
+            href="#" 
+            className="inline-flex items-center gap-3 px-8 py-4 rounded-full transition-all duration-300 hover:scale-105 hover:shadow-lg"
+            style={{ 
+              background: PRIMARY_COLOR, 
+              color: '#FFFFFF',
+              fontFamily: DISPLAY,
+              fontSize: 15,
+              fontWeight: 600,
+              letterSpacing: '0.3px',
+              textDecoration: 'none'
+            }}
+          >
+            <span>View Next Project</span>
+            <svg 
+              width="20" 
+              height="20" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2.5" 
+              strokeLinecap="round" 
+              strokeLinejoin="round"
+            >
+              <path d="M5 12h14" />
+              <path d="M12 5l7 7-7 7" />
+            </svg>
+          </a>
         </div>
       </div>
     </section>

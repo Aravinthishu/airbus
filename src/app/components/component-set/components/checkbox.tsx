@@ -182,7 +182,7 @@ export function CheckboxDemo() {
       <div
         style={{
           flex: '1 1 0',
-          minHeight: 275,
+          minHeight: 330,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',

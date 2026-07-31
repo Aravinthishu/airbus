@@ -426,7 +426,7 @@ export function InputFieldDemo() {
       <div
         style={{
           flex: '1 1 0',
-          minHeight: 290,
+          minHeight: 350,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',

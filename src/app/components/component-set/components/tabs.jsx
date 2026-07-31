@@ -176,7 +176,7 @@ export function TabsDemo() {
       <div
         style={{
           flex: '1 1 0',
-          minHeight: 270,
+          minHeight: 330,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',

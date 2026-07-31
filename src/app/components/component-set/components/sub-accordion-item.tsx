@@ -5,7 +5,7 @@ import { COMPONENTS } from "../data";
 import { MiniBadge, statusColor, statusBg } from "../ui-helpers";
 import { LiveDemo, SpecSheet } from "./registry";
 import { A11yPanel } from "./a11y-panel";
-import { scrollUnderNavbar  } from "./scroll-utils";
+import { scrollUnderNavbar } from "./scroll-utils";
 
 /* Keep this equal to the offset used in category-accordion.tsx so both
    levels of accordion land at the same spot under the sticky navbar. */
@@ -30,11 +30,10 @@ export function SubAccordionItem({
   const contentRef = React.useRef<HTMLDivElement>(null);
   const containerRef = React.useRef<HTMLDivElement>(null);
 
-
-const handleToggle = () => {
-  onToggle();
-  scrollUnderNavbar(() => containerRef.current);
-};
+  const handleToggle = () => {
+    onToggle();
+    scrollUnderNavbar(() => containerRef.current);
+  };
 
   return (
     <div
@@ -111,7 +110,7 @@ const handleToggle = () => {
             style={{
               background: "#F0F2F5",
               border: "1px solid #E4E6E9",
-              boxShadow: "inset 0 1px 2px rgba(0,0,0,0.04)"
+              boxShadow: "inset 0 1px 2px rgba(0,0,0,0.04)",
             }}
           >
             <button
@@ -124,12 +123,12 @@ const handleToggle = () => {
                       color: "#ffffff",
                       boxShadow: "0 4px 14px rgba(10,103,232,0.35)",
                       fontFamily: "'DM Sans', sans-serif",
-                      transform: "scale(1.02)"
+                      transform: "scale(1.02)",
                     }
                   : {
                       color: "#6B6B6B",
                       fontFamily: "'DM Sans', sans-serif",
-                      background: "transparent"
+                      background: "transparent",
                     }
               }
               onMouseEnter={(e) => {
@@ -145,7 +144,14 @@ const handleToggle = () => {
                 }
               }}
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
                 <rect x="3" y="3" width="18" height="18" rx="2" />
                 <path d="M3 9h18" />
                 <path d="M9 21V9" />
@@ -162,12 +168,12 @@ const handleToggle = () => {
                       color: "#ffffff",
                       boxShadow: "0 4px 14px rgba(10,103,232,0.35)",
                       fontFamily: "'DM Sans', sans-serif",
-                      transform: "scale(1.02)"
+                      transform: "scale(1.02)",
                     }
                   : {
                       color: "#6B6B6B",
                       fontFamily: "'DM Sans', sans-serif",
-                      background: "transparent"
+                      background: "transparent",
                     }
               }
               onMouseEnter={(e) => {
@@ -183,7 +189,14 @@ const handleToggle = () => {
                 }
               }}
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
                 <circle cx="12" cy="12" r="10" />
                 <path d="M12 16v-4" />
                 <path d="M12 8h.01" />
@@ -192,8 +205,12 @@ const handleToggle = () => {
               <span
                 className="text-[9px] font-mono px-2 py-0.5 rounded-full"
                 style={{
-                  color: activeTab === "a11y" ? "#ffffff" : statusColor(comp.status),
-                  background: activeTab === "a11y" ? "rgba(255,255,255,0.2)" : statusBg(comp.status),
+                  color:
+                    activeTab === "a11y" ? "#ffffff" : statusColor(comp.status),
+                  background:
+                    activeTab === "a11y"
+                      ? "rgba(255,255,255,0.2)"
+                      : statusBg(comp.status),
                 }}
               >
                 {comp.pass}/{comp.total}
@@ -221,7 +238,11 @@ const handleToggle = () => {
                     Live Preview
                   </span>
                 </div>
-                <LiveDemo id={id} />
+                <div className="max-h-[580px] overflow-y-auto">
+                  {" "}
+                  {/* 👈 added */}
+                  <LiveDemo id={id} />
+                </div>
               </div>
               <div
                 className="rounded-2xl overflow-hidden border"
@@ -241,7 +262,7 @@ const handleToggle = () => {
                     Design Reference
                   </span>
                 </div>
-                <div className="max-h-[500px] overflow-y-auto">
+                <div className="max-h-[560px] overflow-y-auto">
                   <SpecSheet id={id} />
                 </div>
               </div>

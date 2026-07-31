@@ -282,7 +282,7 @@ export function AccordionDemo() {
       <div
         style={{
           flex: '1 1 0',
-          minHeight: 430,
+          minHeight: 490,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',

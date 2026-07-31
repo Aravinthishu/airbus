@@ -338,7 +338,7 @@ export function ButtonGroupDemo() {
       <div
         style={{
           flex: '1 1 0',
-          minHeight: 200,
+          minHeight: 260,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',

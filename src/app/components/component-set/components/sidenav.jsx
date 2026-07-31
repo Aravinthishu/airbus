@@ -372,7 +372,7 @@ const sectionOneTree = [
   },
 ];
 
-/* All former top-level "main tabs" (branch-4/5/6) now live nested two or
+/* All former top-level "main tabs" (branch-4/5/6) now nested two or
    three levels deep under the single top-level branch, instead of sitting
    flat at the root. */
 const sectionTwoTree = [
@@ -479,8 +479,42 @@ function SideNavShell({ collapsedRail, onToggleCollapsed, nav }) {
         </div>
       )}
 
-      {/* Tree */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 1, overflowY: 'auto', maxHeight: 380 }}>
+      {/* Tree with custom scrollbar styling */}
+      <div 
+        className="nav-tree-scroll"
+        style={{ 
+          display: 'flex', 
+          flexDirection: 'column', 
+          gap: 1, 
+          overflowY: 'auto', 
+          maxHeight: 380,
+          scrollbarWidth: 'thin',
+          scrollbarColor: 'transparent transparent',
+        }}
+      >
+        <style jsx>{`
+          .nav-tree-scroll::-webkit-scrollbar {
+            width: 4px;
+          }
+          .nav-tree-scroll::-webkit-scrollbar-track {
+            background: transparent;
+          }
+          .nav-tree-scroll::-webkit-scrollbar-thumb {
+            background: transparent;
+            border-radius: 10px;
+            transition: background 0.3s ease;
+          }
+          .nav-tree-scroll:hover::-webkit-scrollbar-thumb {
+            background: #D8D4CC;
+          }
+          .nav-tree-scroll {
+            scrollbar-width: thin;
+            scrollbar-color: transparent transparent;
+          }
+          .nav-tree-scroll:hover {
+            scrollbar-color: #D8D4CC transparent;
+          }
+        `}</style>
         <Tree nodes={fullNavTree} collapsedRail={collapsedRail} nav={nav} />
       </div>
 
@@ -754,11 +788,11 @@ export function SideNavSpec() {
 const CARD_STYLE = {
   width: '100%',
   maxWidth: 1100,
-  minHeight: 460,
+  height: 460,           // 👈 minHeight-ku pathila fixed height
   border: '1px solid #EFEDE8',
   borderRadius: 12,
   background: '#FFFFFF',
-  overflow: 'auto',
+  overflow: 'auto',       // already irukku - content overflow aana ithu scroll pannum
   boxShadow: '0 1px 2px rgba(16,24,40,0.04)',
 };
 

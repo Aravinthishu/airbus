@@ -1,24 +1,10 @@
 'use client';
 import React, { useEffect, useRef, useState } from 'react';
 
-/**
- * DESIGN NOTE (delete if you like):
- * Signature element = the HUD / attitude-indicator instrument frame around the
- * hero image, with live-ticking ALT / SPD / HDG telemetry and a radar sweep.
- * It's the one thing this page should be remembered by — everything else
- * (grid, chips, marquee) stays quiet in support of it.
- *
- * Fonts: this file assumes "Space Grotesk" (display) + "JetBrains Mono"
- * (telemetry/labels) + "Inter" (body) are available globally — e.g. via
- * next/font in your root layout. A <style> fallback @import is included
- * below so it still renders correctly if you drop this in standalone.
- */
-
 export default function HeroSection() {
   const leftRef = useRef<HTMLDivElement>(null);
   const rightRef = useRef<HTMLDivElement>(null);
 
-  // Live-ticking HUD telemetry — purely decorative, evokes a flight instrument
   const [alt, setAlt] = useState(38042);
   const [spd, setSpd] = useState(487);
   const [hdg, setHdg] = useState(271);
@@ -82,8 +68,129 @@ export default function HeroSection() {
           94% { opacity: 0.4; }
           96% { opacity: 0.9; }
         }
+        @keyframes hud-drift {
+          0%, 100% { transform: translateY(0px) rotate(-4deg); }
+          50% { transform: translateY(-18px) rotate(-3deg); }
+        }
         @media (prefers-reduced-motion: reduce) {
           .hud-anim { animation: none !important; }
+        }
+
+        /* Responsive aircraft positioning */
+        .aircraft-container {
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+          z-index: 3;
+          overflow: hidden;
+        }
+
+        .aircraft-glow {
+          position: absolute;
+          width: 80%;
+          height: 80%;
+          background: radial-gradient(ellipse at 60% 45%, rgba(10,103,232,0.20) 0%, transparent 68%);
+          filter: blur(20px);
+          top: 10%;
+          right: -10%;
+        }
+
+        .aircraft-image {
+          position: absolute;
+          animation: hud-drift 8s ease-in-out infinite;
+          filter: drop-shadow(0 40px 70px rgba(10,103,232,0.4)) drop-shadow(0 12px 24px rgba(0,0,0,0.6)) brightness(0.93) saturate(1.05);
+          width: 90%;
+          max-width: 1200px;
+          right: -15%;
+          bottom: 25%;
+          transform-origin: center;
+        }
+
+        /* Responsive breakpoints for aircraft */
+        @media (min-width: 1536px) {
+          .aircraft-image {
+            width: 80%;
+            right: -10%;
+            bottom: 30%;
+          }
+        }
+
+        @media (max-width: 1280px) {
+          .aircraft-image {
+            width: 95%;
+            right: -20%;
+            bottom: 30%;
+          }
+        }
+
+        @media (max-width: 1024px) {
+          .aircraft-image {
+            width: 100%;
+            right: -25%;
+            bottom: 15%;
+          }
+        }
+
+        @media (max-width: 768px) {
+          .aircraft-image {
+            width: 120%;
+            right: -30%;
+            bottom: 10%;
+          }
+        }
+
+        @media (max-width: 640px) {
+          .aircraft-image {
+            width: 150%;
+            right: -40%;
+            bottom: 5%;
+          }
+        }
+
+        /* Responsive legibility scrim */
+        .legibility-scrim {
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+          z-index: 4;
+          background: linear-gradient(90deg, #05070B 0%, rgba(5,7,11,0.88) 28%, rgba(5,7,11,0.35) 52%, transparent 68%);
+        }
+
+        @media (max-width: 768px) {
+          .legibility-scrim {
+            background: linear-gradient(90deg, #05070B 0%, rgba(5,7,11,0.92) 40%, rgba(5,7,11,0.6) 70%, transparent 85%);
+          }
+        }
+
+        @media (max-width: 640px) {
+          .legibility-scrim {
+            background: linear-gradient(90deg, #05070B 0%, rgba(5,7,11,0.95) 50%, rgba(5,7,11,0.7) 80%, transparent 90%);
+          }
+        }
+
+        /* Heading responsive sizes */
+        .heading-primary {
+          font-size: clamp(42px, 9vw, 120px);
+          letter-spacing: -0.03em;
+        }
+
+        .heading-secondary {
+          font-size: clamp(42px, 9vw, 120px);
+          letter-spacing: -0.03em;
+        }
+
+        /* Reticle corners responsive */
+        .reticle-corner {
+          width: 18px;
+          height: 18px;
+          border-color: rgba(255,158,44,0.75);
+        }
+
+        @media (min-width: 768px) {
+          .reticle-corner {
+            width: 22px;
+            height: 22px;
+          }
         }
       `}</style>
 
@@ -96,7 +203,6 @@ export default function HeroSection() {
           backgroundSize: '48px 48px'
         }}
       />
-      {/* Fine sub-grid */}
       <div
         className="absolute inset-0 pointer-events-none opacity-[0.05]"
         style={{
@@ -106,7 +212,7 @@ export default function HeroSection() {
         }}
       />
 
-      {/* Ambient glows — Airbus blue + cockpit amber */}
+      {/* Ambient glows */}
       <div
         className="absolute top-0 right-0 w-[700px] h-[700px] pointer-events-none"
         style={{
@@ -122,7 +228,7 @@ export default function HeroSection() {
         }}
       />
 
-      {/* Slow vertical scan sweep across the whole viewport */}
+      {/* Slow vertical scan sweep */}
       <div
         className="hud-anim absolute inset-x-0 top-0 h-full pointer-events-none opacity-[0.05]"
         style={{
@@ -131,104 +237,76 @@ export default function HeroSection() {
         }}
       />
 
-      {/* Scattered decorative elements (design-tool motifs, dimmed for dark theme) */}
-      <div className="absolute top-28 left-8 opacity-30 pointer-events-none hidden lg:block" style={{ transform: 'rotate(-12deg)' }}>
+      {/* FULL-BLEED AIRCRAFT - Responsive */}
+      <div className="aircraft-container">
+        <div className="aircraft-glow" />
         <img
-          src="https://img.rocket.new/generatedImages/rocket_gen_img_170707ae2-1768299361011.png"
-          alt="Figma icon"
-          width={44}
-          height={44}
-          className="drop-shadow-md"
-          style={{ filter: 'grayscale(0.3) brightness(1.3)' }}
-        />
-      </div>
-      <div className="absolute bottom-32 left-16 opacity-25 pointer-events-none hidden lg:block" style={{ transform: 'rotate(-5deg)' }}>
-        <img
-          src="https://img.rocket.new/generatedImages/rocket_gen_img_16c00302b-1767106876728.png"
-          alt="Cursor icon"
-          width={30}
-          height={30}
-          style={{ filter: 'brightness(1.5)' }}
+          src="https://pngimg.com/uploads/plane/plane_PNG101255.png"
+          alt="Airbus aircraft, transparent cutout, climbing across the frame"
+          className="aircraft-image select-none"
+          draggable={false}
         />
       </div>
 
-      {/* Dashed annotation lines */}
-      <div
-        className="absolute top-24 left-1/4 w-px h-20 pointer-events-none hidden lg:block"
-        style={{ background: 'repeating-linear-gradient(to bottom, #3B82F6 0px, #3B82F6 4px, transparent 4px, transparent 8px)', opacity: 0.4 }}
-      />
-      <div
-        className="absolute top-24 right-1/3 w-20 h-px pointer-events-none hidden lg:block"
-        style={{ background: 'repeating-linear-gradient(to right, #3B82F6 0px, #3B82F6 4px, transparent 4px, transparent 8px)', opacity: 0.3 }}
-      />
+      {/* Legibility scrim */}
+      <div className="legibility-scrim" />
 
-      <div className="relative z-10 max-w-7xl mx-auto px-6 pt-32 pb-16 w-full">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 sm:pt-24 md:pt-28 lg:pt-32 pb-12 sm:pb-16 w-full">
         {/* Eyebrow */}
-        <div className="flex items-center gap-3 mb-10">
-          <div className="w-8 h-px bg-[#3B82F6]" />
-          <span className="hud-font-mono text-xs font-bold uppercase tracking-[0.4em] text-[#5B9FF5]">
+        <div className="flex items-center gap-2 sm:gap-3 mb-6 sm:mb-8 lg:mb-10 flex-wrap">
+          <div className="w-6 sm:w-8 h-px bg-[#3B82F6]" />
+          <span className="hud-font-mono text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] sm:tracking-[0.4em] text-[#5B9FF5]">
             Portfolio Case Study
           </span>
-          <div className="w-8 h-px bg-[#3B82F6]" />
-          <span className="hud-anim hud-font-mono flex items-center gap-1.5 ml-auto text-[10px] uppercase tracking-widest text-[#FF9E2C]/80" style={{ animation: 'hud-flicker 4s infinite' }}>
+          <div className="w-6 sm:w-8 h-px bg-[#3B82F6]" />
+          <span className="hud-anim hud-font-mono flex items-center gap-1.5 ml-auto text-[8px] sm:text-[10px] uppercase tracking-widest text-[#FF9E2C]/80" style={{ animation: 'hud-flicker 4s infinite' }}>
             <span className="w-1.5 h-1.5 rounded-full bg-[#FF9E2C]" />
             Live System
           </span>
         </div>
 
         {/* Split layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 xl:gap-20 items-start lg:items-center">
           {/* LEFT: Title / Heading */}
-          <div ref={leftRef}>
-            <div className="flex items-center gap-2 mb-4">
-              <span className="hud-font-mono text-xs text-[#E8EDF4]/50 border border-[#3B82F6]/25 px-2 py-0.5 rounded">
+          <div ref={leftRef} className="relative z-20">
+            <div className="flex items-center gap-2 mb-3 sm:mb-4">
+              <span className="hud-font-mono text-[10px] sm:text-xs text-[#E8EDF4]/50 border border-[#3B82F6]/25 px-2 py-0.5 rounded">
                 Airbus
               </span>
-              <span className="hud-font-mono text-xs text-[#E8EDF4]/30">/ 2026</span>
+              <span className="hud-font-mono text-[10px] sm:text-xs text-[#E8EDF4]/30">/ 2026</span>
             </div>
 
-            <h1
-              className="hud-font-display font-bold leading-none tracking-tight text-[#F3F6FA] mb-6"
-              style={{ fontSize: 'clamp(56px, 9vw, 120px)', letterSpacing: '-0.03em' }}
-            >
+            <h1 className="hud-font-display font-bold leading-none tracking-tight text-[#F3F6FA] mb-4 sm:mb-6 heading-primary">
               Design{' '}
               <span className="relative inline-block">
                 <span className="relative z-10 text-[#3B82F6]">System</span>
 
-                {/* Targeting reticle corners — replaces generic dashed box */}
                 {[
-                  { top: '-14px', left: '-16px', borderTop: '2px solid', borderLeft: '2px solid' },
-                  { top: '-14px', right: '-16px', borderTop: '2px solid', borderRight: '2px solid' },
-                  { bottom: '-14px', left: '-16px', borderBottom: '2px solid', borderLeft: '2px solid' },
-                  { bottom: '-14px', right: '-16px', borderBottom: '2px solid', borderRight: '2px solid' }
+                  { top: '-12px', left: '-14px', borderTop: '2px solid', borderLeft: '2px solid' },
+                  { top: '-12px', right: '-14px', borderTop: '2px solid', borderRight: '2px solid' },
+                  { bottom: '-12px', left: '-14px', borderBottom: '2px solid', borderLeft: '2px solid' },
+                  { bottom: '-12px', right: '-14px', borderBottom: '2px solid', borderRight: '2px solid' }
                 ].map((pos, i) => (
                   <span
                     key={i}
-                    className="absolute pointer-events-none"
-                    style={{
-                      width: '22px',
-                      height: '22px',
-                      borderColor: 'rgba(255,158,44,0.75)',
-                      ...pos
-                    }}
+                    className="absolute pointer-events-none reticle-corner"
+                    style={pos as React.CSSProperties}
                     aria-hidden="true"
                   />
                 ))}
               </span>
             </h1>
-            <h2
-              className="hud-font-display font-bold leading-none tracking-tight text-[#F3F6FA]/10 mb-10"
-              style={{ fontSize: 'clamp(56px, 9vw, 120px)', letterSpacing: '-0.03em' }}
-            >
+            
+            <h2 className="hud-font-display font-bold leading-none tracking-tight text-[#F3F6FA]/10 mb-6 sm:mb-8 lg:mb-10 heading-secondary">
               Airbus
             </h2>
 
-            <p className="hud-font-body text-base text-[#E8EDF4]/55 max-w-md leading-relaxed mb-10">
+            <p className="hud-font-body text-sm sm:text-base text-[#E8EDF4]/55 max-w-md leading-relaxed mb-6 sm:mb-8 lg:mb-10">
               Build interconnected, scalable, accessible component library — driving digital products across enterprise data patterns and airline operations.
             </p>
 
-            {/* Stats row */}
-            <div className="flex flex-wrap gap-6 mb-10">
+            {/* Stats row - responsive grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8 lg:mb-10">
               {[
                 { value: '8 Months', label: 'Duration' },
                 { value: '44+', label: 'Components' },
@@ -236,130 +314,78 @@ export default function HeroSection() {
                 { value: 'WCAG 2.2', label: 'Compliance' }
               ].map((stat) => (
                 <div key={stat.label} className="flex flex-col">
-                  <span className="hud-font-display text-xl font-bold text-[#F3F6FA]">{stat.value}</span>
-                  <span className="hud-font-mono text-[10px] text-[#E8EDF4]/35 uppercase tracking-wider">{stat.label}</span>
+                  <span className="hud-font-display text-lg sm:text-xl font-bold text-[#F3F6FA]">{stat.value}</span>
+                  <span className="hud-font-mono text-[8px] sm:text-[10px] text-[#E8EDF4]/35 uppercase tracking-wider">{stat.label}</span>
                 </div>
               ))}
             </div>
 
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
               <a
                 href="#components"
                 rel="noopener noreferrer"
-                className="hud-font-body px-7 py-3 bg-[#0a67e8] text-white text-sm font-semibold hover:bg-[#1c7bff] transition-all"
+                className="hud-font-body px-5 sm:px-7 py-2.5 sm:py-3 bg-[#0a67e8] text-white text-sm font-semibold hover:bg-[#1c7bff] transition-all text-center w-full sm:w-auto"
                 style={{ borderRadius: '2px', boxShadow: '0 0 24px rgba(10,103,232,0.35)' }}
               >
                 View components →
               </a>
-              <span className="hud-font-mono text-xs text-[#E8EDF4]/40 border border-[#3B82F6]/20 px-3 py-3">
+              <span className="hud-font-mono text-xs text-[#E8EDF4]/40 border border-[#3B82F6]/20 px-3 py-2.5 sm:py-3 w-full sm:w-auto text-center">
                 v2.4.0
               </span>
             </div>
           </div>
 
-          {/* RIGHT: HUD instrument panel around aircraft imagery */}
-          <div ref={rightRef} className="relative flex items-center justify-center">
+          {/* RIGHT: floating HUD instrumentation */}
+          <div ref={rightRef} className="relative z-20" style={{ minHeight: '300px', height: '100%' }}>
+
+            {/* Radar blip */}
+            <div className="absolute top-2 right-2 flex items-center gap-1.5 z-20">
+              <span className="hud-anim w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-[#FF9E2C]" style={{ animation: 'hud-blip 1.8s ease-in-out infinite' }} />
+              <span className="hud-font-mono text-[8px] sm:text-[10px] text-[#FF9E2C]/90 uppercase tracking-widest">Rec</span>
+            </div>
+
+            {/* Live telemetry */}
+            <div className="absolute bottom-2 left-0 right-4 flex items-center justify-between hud-font-mono text-[9px] sm:text-[11px] text-[#9FD1FF] tracking-wider z-20 flex-wrap gap-1">
+              <span>ALT&nbsp;&nbsp;{alt.toString().padStart(5, '0')} FT</span>
+              <span>SPD&nbsp;&nbsp;{spd} KT</span>
+              <span>HDG&nbsp;&nbsp;{hdg.toString().padStart(3, '0')}°</span>
+            </div>
+
+            {/* Annotation chips - responsive visibility */}
             <div
-              className="absolute inset-0 rounded-2xl pointer-events-none"
-              style={{
-                background: 'rgba(15,22,34,0.55)',
-                backdropFilter: 'blur(20px)',
-                WebkitBackdropFilter: 'blur(20px)',
-                border: '1px solid rgba(59,130,246,0.18)',
-                boxShadow: '0 8px 60px rgba(10,103,232,0.12), 0 2px 20px rgba(0,0,0,0.4)'
-              }}
-            />
+              className="hud-font-mono absolute top-10 sm:top-16 left-0 px-2 sm:px-3 py-1.5 sm:py-2 text-[10px] sm:text-xs font-semibold text-[#5B9FF5] rounded-lg shadow-lg z-20 hidden sm:block"
+              style={{ background: 'rgba(10,16,26,0.85)', backdropFilter: 'blur(12px)', border: '1px solid rgba(59,130,246,0.3)' }}
+            >
+              Atomic Design
+            </div>
+            
+            <div
+              className="hud-font-mono absolute bottom-12 sm:bottom-16 right-0 px-2 sm:px-3 py-1.5 sm:py-2 text-[10px] sm:text-xs text-[#E8EDF4]/80 rounded-lg shadow-lg z-20 hidden sm:block"
+              style={{ background: 'rgba(10,16,26,0.85)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.08)' }}
+            >
+              44+ Components
+            </div>
+            
+            <div
+              className="hud-font-mono absolute top-1/2 -translate-y-1/2 left-0 px-2 sm:px-3 py-1.5 sm:py-2 text-[10px] sm:text-xs text-[#E8EDF4]/70 rounded-lg shadow-md hidden xl:block z-20"
+              style={{ background: 'rgba(10,16,26,0.8)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.07)' }}
+            >
+              WCAG 2.2 AA
+            </div>
 
-            <div className="relative z-10 p-6 w-full">
-              <div
-                className="relative w-full rounded-xl overflow-hidden"
-                style={{ aspectRatio: '4/3', border: '1px solid rgba(59,130,246,0.3)' }}
-              >
-                <img
-                  src="https://images.unsplash.com/photo-1688315203770-cfbd4aecb8f3?fm=jpg&q=80&w=1400&auto=format&fit=crop"
-                  alt="Airbus cockpit at night — flight instrument panel"
-                  className="w-full h-full object-cover"
-                  style={{ filter: 'saturate(1.05) brightness(0.9)' }}
-                />
-                {/* Dark tint for legibility */}
-                <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(5,7,11,0.15) 0%, rgba(5,7,11,0.55) 100%)' }} />
-
-                {/* Scanline sweep over the image */}
-                <div
-                  className="hud-anim absolute inset-x-0 top-0 h-1/2 pointer-events-none"
-                  style={{
-                    background: 'linear-gradient(to bottom, transparent, rgba(59,130,246,0.35), transparent)',
-                    animation: 'hud-scan 4s linear infinite'
-                  }}
-                />
-
-                {/* Corner brackets — HUD frame */}
-                {[
-                  { top: '10px', left: '10px', borderTop: '2px solid', borderLeft: '2px solid' },
-                  { top: '10px', right: '10px', borderTop: '2px solid', borderRight: '2px solid' },
-                  { bottom: '10px', left: '10px', borderBottom: '2px solid', borderLeft: '2px solid' },
-                  { bottom: '10px', right: '10px', borderBottom: '2px solid', borderRight: '2px solid' }
-                ].map((pos, i) => (
-                  <span
-                    key={i}
-                    className="absolute pointer-events-none"
-                    style={{ width: '18px', height: '18px', borderColor: 'rgba(255,158,44,0.85)', ...pos }}
-                  />
-                ))}
-
-                {/* Radar blip */}
-                <div className="absolute top-4 right-4 flex items-center gap-1.5">
-                  <span className="hud-anim w-2 h-2 rounded-full bg-[#FF9E2C]" style={{ animation: 'hud-blip 1.8s ease-in-out infinite' }} />
-                  <span className="hud-font-mono text-[10px] text-[#FF9E2C]/90 uppercase tracking-widest">Rec</span>
-                </div>
-
-                {/* Live telemetry readout */}
-                <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between hud-font-mono text-[11px] text-[#9FD1FF] tracking-wider">
-                  <span>ALT&nbsp;&nbsp;{alt.toString().padStart(5, '0')} FT</span>
-                  <span>SPD&nbsp;&nbsp;{spd} KT</span>
-                  <span>HDG&nbsp;&nbsp;{hdg.toString().padStart(3, '0')}°</span>
-                </div>
-              </div>
-
-              {/* Floating annotation chips */}
-              <div
-                className="hud-font-mono absolute -top-4 -left-4 px-3 py-2 text-xs font-semibold text-[#5B9FF5] rounded-lg shadow-lg"
-                style={{ background: 'rgba(10,16,26,0.85)', backdropFilter: 'blur(12px)', border: '1px solid rgba(59,130,246,0.3)' }}
-              >
-                Atomic Design
-              </div>
-              <div
-                className="hud-font-mono absolute -bottom-4 -right-4 px-3 py-2 text-xs text-[#E8EDF4]/80 rounded-lg shadow-lg"
-                style={{ background: 'rgba(10,16,26,0.85)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.08)' }}
-              >
-                44+ Components
-              </div>
-              <div
-                className="hud-font-mono absolute top-1/2 -right-6 -translate-y-1/2 px-3 py-2 text-xs text-[#E8EDF4]/70 rounded-lg shadow-md hidden xl:block"
-                style={{ background: 'rgba(10,16,26,0.8)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.07)' }}
-              >
-                WCAG 2.2 AA
-              </div>
-
-              {/* Secondary floating photo — aircraft in flight */}
-              <div
-                className="absolute -bottom-10 -left-8 w-28 h-20 rounded-lg overflow-hidden hidden md:block"
-                style={{ border: '1px solid rgba(255,158,44,0.35)', boxShadow: '0 8px 30px rgba(0,0,0,0.5)' }}
-              >
-                <img
-                  src="https://images.unsplash.com/photo-1721068466638-b80ca5b35662?fm=jpg&q=80&w=600&auto=format&fit=crop"
-                  alt="Aircraft wing above the clouds at dusk"
-                  className="w-full h-full object-cover"
-                  style={{ filter: 'brightness(0.85)' }}
-                />
-              </div>
+            {/* Aircraft ID tag */}
+            <div
+              className="hud-font-mono absolute bottom-8 sm:bottom-2 left-1/2 -translate-x-1/2 px-2 sm:px-3 py-1 text-[8px] sm:text-[10px] text-[#E8EDF4]/50 rounded shadow-md z-20 tracking-widest whitespace-nowrap hidden sm:block"
+              style={{ background: 'rgba(10,16,26,0.75)', border: '1px solid rgba(255,255,255,0.07)', marginBottom: '30px' }}
+            >
+              A350-900 · XWB
             </div>
           </div>
         </div>
 
-        {/* Bottom: scrolling component instrument strip */}
+        {/* Bottom: scrolling component strip */}
         <div
-          className="mt-24 rounded-xl overflow-hidden relative"
+          className="mt-12 sm:mt-16 lg:mt-20 xl:mt-24 rounded-xl overflow-hidden relative"
           style={{
             background: 'rgba(10,16,26,0.6)',
             backdropFilter: 'blur(24px)',
@@ -367,13 +393,13 @@ export default function HeroSection() {
             border: '1px solid rgba(59,130,246,0.15)'
           }}
         >
-          <div className="flex items-center py-4">
+          <div className="flex items-center py-3 sm:py-4">
             <div
-              className="hud-anim flex items-center gap-8 whitespace-nowrap hud-font-mono text-xs uppercase tracking-[0.25em] text-[#E8EDF4]/40"
+              className="hud-anim flex items-center gap-4 sm:gap-6 md:gap-8 whitespace-nowrap hud-font-mono text-[10px] sm:text-xs uppercase tracking-[0.15em] sm:tracking-[0.25em] text-[#E8EDF4]/40"
               style={{ animation: 'hud-marquee 22s linear infinite' }}
             >
               {[...components, ...components].map((c, i) => (
-                <span key={i} className="flex items-center gap-8">
+                <span key={i} className="flex items-center gap-4 sm:gap-6 md:gap-8">
                   {c}
                   <span className="text-[#FF9E2C]/50">✦</span>
                 </span>
@@ -384,9 +410,9 @@ export default function HeroSection() {
       </div>
 
       {/* Scroll indicator */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-[#E8EDF4]/25">
-        <span className="hud-font-mono text-xs uppercase tracking-widest">Scroll</span>
-        <div className="w-px h-10 bg-gradient-to-b from-[#3B82F6]/50 to-transparent" />
+      <div className="absolute bottom-4 sm:bottom-6 lg:bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 sm:gap-2 text-[#E8EDF4]/25">
+        <span className="hud-font-mono text-[10px] sm:text-xs uppercase tracking-widest">Scroll</span>
+        <div className="w-px h-6 sm:h-8 lg:h-10 bg-gradient-to-b from-[#3B82F6]/50 to-transparent" />
       </div>
     </section>
   );

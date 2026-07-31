@@ -245,7 +245,7 @@ export function TextAreaDemo() {
       <div
         style={{
           flex: "1 1 0",
-          minHeight: 375,
+          minHeight: 430,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",

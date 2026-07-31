@@ -321,7 +321,7 @@ function Fab({
 ============================================================ */
 export function FabDemo() {
   const [size, setSize] = useState<FabSize>("m");
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
   const [direction, setDirection] = useState<FabDirection>("horizontal");
   const [state, setState] = useState<FabState>("default");
 
@@ -330,7 +330,7 @@ export function FabDemo() {
       <div
         style={{
           flex: "1 1 0",
-          minHeight: 260,
+          minHeight: 320,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",

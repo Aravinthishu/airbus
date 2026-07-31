@@ -462,7 +462,7 @@ export function CardDemo() {
         <div
           style={{
             flex: '1 1 0',
-            minHeight: 350,
+            minHeight: 410,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
