@@ -241,7 +241,7 @@ export default function HeroSection() {
       <div className="aircraft-container">
         <div className="aircraft-glow" />
         <img
-          src="https://pngimg.com/uploads/plane/plane_PNG101255.png"
+          src="images/plane_PNG101255.png"
           alt="Airbus aircraft, transparent cutout, climbing across the frame"
           className="aircraft-image select-none"
           draggable={false}
