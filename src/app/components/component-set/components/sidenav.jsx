@@ -613,29 +613,30 @@ export function SideNavDemo() {
         Hover a row, click a branch to expand it, click a leaf to select it — or use the controls below.
         Buttons and clicking control the exact same state, so they always stay in sync.
       </div>
-
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'flex-start',
-          padding: 20,
-          backgroundImage: `
-            linear-gradient(rgba(200, 200, 200, 0.15) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(200, 200, 200, 0.15) 1px, transparent 1px)
-          `,
-          backgroundSize: '40px 40px',
-          backgroundColor: '#FCFCFB',
-          borderRadius: 8,
-          boxSizing: 'border-box',
-          marginBottom: 12,
-        }}
-      >
-        <SideNavShell
-          collapsedRail={collapsedRail}
-          onToggleCollapsed={() => setCollapsedRail((c) => !c)}
-          nav={nav}
-        />
-      </div>
+<div
+  style={{
+    display: 'flex',
+    justifyContent: 'flex-start',
+    padding: 20,
+    backgroundImage: `
+      linear-gradient(rgba(200, 200, 200, 0.15) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(200, 200, 200, 0.15) 1px, transparent 1px)
+    `,
+    backgroundSize: '40px 40px',
+    backgroundColor: '#FCFCFB',
+    borderRadius: 8,
+    boxSizing: 'border-box',
+    marginBottom: 12,
+    height: 340,          // 👈 fixed height for preview item area only
+    overflow: 'auto',     // 👈 scrollbar lives here now
+  }}
+>
+  <SideNavShell
+    collapsedRail={collapsedRail}
+    onToggleCollapsed={() => setCollapsedRail((c) => !c)}
+    nav={nav}
+  />
+</div>
 
       <div
         style={{
@@ -788,11 +789,9 @@ export function SideNavSpec() {
 const CARD_STYLE = {
   width: '100%',
   maxWidth: 1100,
-  height: 460,           // 👈 minHeight-ku pathila fixed height
   border: '1px solid #EFEDE8',
   borderRadius: 12,
   background: '#FFFFFF',
-  overflow: 'auto',       // already irukku - content overflow aana ithu scroll pannum
   boxShadow: '0 1px 2px rgba(16,24,40,0.04)',
 };
 

@@ -90,7 +90,7 @@ export default function Header() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 group">
             <span className="font-bold text-lg tracking-tight text-[#0D0D0D]">
-              Airbus
+              AIRBUS
             </span>
             <span
               className="hidden sm:block text-xs font-mono px-2 py-0.5 bg-[#cfdff7] border-blue-200"

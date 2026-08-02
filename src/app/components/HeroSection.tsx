@@ -259,10 +259,6 @@ export default function HeroSection() {
             Portfolio Case Study
           </span>
           <div className="w-6 sm:w-8 h-px bg-[#3B82F6]" />
-          <span className="hud-anim hud-font-mono flex items-center gap-1.5 ml-auto text-[8px] sm:text-[10px] uppercase tracking-widest text-[#FF9E2C]/80" style={{ animation: 'hud-flicker 4s infinite' }}>
-            <span className="w-1.5 h-1.5 rounded-full bg-[#FF9E2C]" />
-            Live System
-          </span>
         </div>
 
         {/* Split layout */}
@@ -271,7 +267,7 @@ export default function HeroSection() {
           <div ref={leftRef} className="relative z-20">
             <div className="flex items-center gap-2 mb-3 sm:mb-4">
               <span className="hud-font-mono text-[10px] sm:text-xs text-[#E8EDF4]/50 border border-[#3B82F6]/25 px-2 py-0.5 rounded">
-                Airbus
+                AIRBUS
               </span>
               <span className="hud-font-mono text-[10px] sm:text-xs text-[#E8EDF4]/30">/ 2026</span>
             </div>
@@ -339,9 +335,9 @@ export default function HeroSection() {
           <div ref={rightRef} className="relative z-20" style={{ minHeight: '300px', height: '100%' }}>
 
             {/* Radar blip */}
-            <div className="absolute top-2 right-2 flex items-center gap-1.5 z-20">
+            <div className="absolute top-2 right-2 flex items-center gap-1.5 z-20 border p-2 rounded-full">
               <span className="hud-anim w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-[#FF9E2C]" style={{ animation: 'hud-blip 1.8s ease-in-out infinite' }} />
-              <span className="hud-font-mono text-[8px] sm:text-[10px] text-[#FF9E2C]/90 uppercase tracking-widest">Rec</span>
+              <span className="hud-font-mono text-[8px] sm:text-[10px] text-[#FF9E2C]/90 uppercase tracking-widest">121 tokens</span>
             </div>
 
             {/* Live telemetry */}

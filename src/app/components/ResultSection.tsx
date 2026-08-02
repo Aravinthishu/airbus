@@ -207,7 +207,7 @@ export default function ResultsSection() {
             Thank you for watching this case study.
           </p>
           
-          <a 
+          {/* <a 
             href="#" 
             className="inline-flex items-center gap-3 px-8 py-4 rounded-full transition-all duration-300 hover:scale-105 hover:shadow-lg"
             style={{ 
@@ -234,7 +234,7 @@ export default function ResultsSection() {
               <path d="M5 12h14" />
               <path d="M12 5l7 7-7 7" />
             </svg>
-          </a>
+          </a> */}
         </div>
       </div>
     </section>
