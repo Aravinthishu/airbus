@@ -18,15 +18,17 @@ function PropChip({
       type="button"
       onClick={onClick}
       style={{
-        padding: '6px 12px',
+        padding: '4px 10px',
         borderRadius: 6,
-        fontSize: 12,
+        fontSize: 10,
         fontWeight: 600,
         border: `1px solid ${active ? '#0B1F4D' : '#D8D4CC'}`,
         background: active ? '#0B1F4D' : '#FFFFFF',
         color: active ? '#FFFFFF' : '#4B5563',
         cursor: 'pointer',
         fontFamily: "'DM Sans', sans-serif",
+        whiteSpace: 'nowrap',
+        transition: 'all 150ms',
       }}
     >
       {children}
@@ -36,7 +38,14 @@ function PropChip({
 
 function SpecBadge({ label }: { label: string }) {
   return (
-    <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, color: '#8089A0', marginBottom: 12, fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ 
+      fontSize: 10, 
+      fontWeight: 700, 
+      letterSpacing: 1, 
+      color: '#8089A0', 
+      marginBottom: 10, 
+      fontFamily: "'DM Sans', sans-serif" 
+    }}>
       {label.toUpperCase()}
     </div>
   );
@@ -50,8 +59,14 @@ function SpecBlock({
   children: React.ReactNode;
 }) {
   return (
-    <div style={{ marginBottom: 40 }}>
-      <div style={{ fontSize: 14, fontWeight: 700, color: '#151A24', marginBottom: 16, fontFamily: "'DM Sans', sans-serif" }}>{title}</div>
+    <div style={{ marginBottom: 28 }}>
+      <div style={{ 
+        fontSize: 13, 
+        fontWeight: 700, 
+        color: '#151A24', 
+        marginBottom: 12, 
+        fontFamily: "'DM Sans', sans-serif" 
+      }}>{title}</div>
       {children}
     </div>
   );
@@ -163,7 +178,7 @@ function ScrollContainer({ children, className = '' }: { children: React.ReactNo
 /* ============================================================
    SETTINGS ICON — gear glyph, used everywhere
 ============================================================ */
-function SettingsIcon({ size = 16 }: { size?: number }) {
+function SettingsIcon({ size = 14 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
@@ -224,14 +239,21 @@ function ButtonGroupButton({
 }) {
   const getSizeStyle = () => {
     switch (size) {
-      case 'l': return { padding: iconOnly ? '12px 20px' : '12px 24px', fontSize: 16 };
-      case 'm': return { padding: iconOnly ? '10px 16px' : '10px 18px', fontSize: 14 };
-      case 's': return { padding: iconOnly ? '8px 12px' : '8px 14px', fontSize: 12 };
-      default: return { padding: '10px 18px', fontSize: 14 };
+      case 'l': return { padding: iconOnly ? '8px 12px' : '8px 14px', fontSize: 12 };
+      case 'm': return { padding: iconOnly ? '6px 10px' : '6px 12px', fontSize: 11 };
+      case 's': return { padding: iconOnly ? '4px 8px' : '4px 10px', fontSize: 10 };
+      default: return { padding: '6px 12px', fontSize: 11 };
     }
   };
 
-  const getIconSize = () => (size === 'l' ? 18 : size === 'm' ? 16 : 14);
+  const getIconSize = () => {
+    switch (size) {
+      case 'l': return 14;
+      case 'm': return 12;
+      case 's': return 10;
+      default: return 12;
+    }
+  };
 
   const styles = BUTTON_GROUP_STYLES[state] || BUTTON_GROUP_STYLES.default;
   const sizeStyle = getSizeStyle();
@@ -245,7 +267,7 @@ function ButtonGroupButton({
         display: 'inline-flex',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: showIcon && !iconOnly ? 8 : 0,
+        gap: showIcon && !iconOnly ? 4 : 0,
         whiteSpace: 'nowrap',
         fontWeight: 600,
         outline: 'none',
@@ -257,6 +279,7 @@ function ButtonGroupButton({
         ...sizeStyle,
         position: 'relative',
         margin: '2px',
+        minWidth: iconOnly ? 'auto' : '32px',
       }}
     >
       {showIcon && <SettingsIcon size={getIconSize()} />}
@@ -292,6 +315,8 @@ function ButtonGroup({
         overflow: 'hidden',
         boxShadow: state === 'focus' ? '0 0 0 2px #FFFFFF, 0 0 0 4px #053E9F' : 'none',
         background: '#FFFFFF',
+        flexWrap: 'nowrap',
+        maxWidth: '100%',
       }}
     >
       {Array.from({ length: itemCount }).map((_, index) => (
@@ -301,7 +326,7 @@ function ButtonGroup({
               style={{
                 width: 1.5,
                 alignSelf: 'stretch',
-                margin: '8px 0',
+                margin: '4px 0',
                 flexShrink: 0,
                 backgroundColor: styles.border,
               }}
@@ -338,20 +363,27 @@ export function ButtonGroupDemo() {
       <div
         style={{
           flex: '1 1 0',
-          minHeight: 260,
+          minHeight: 180,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          padding: 32,
+          padding: '16px 12px',
           backgroundImage: `
             linear-gradient(rgba(200, 200, 200, 0.15) 1px, transparent 1px),
             linear-gradient(90deg, rgba(200, 200, 200, 0.15) 1px, transparent 1px)
           `,
           backgroundSize: '40px 40px',
           backgroundColor: '#FFFFFF',
+          overflow: 'auto',
         }}
       >
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
+        <div style={{ 
+          display: 'flex', 
+          flexDirection: 'column', 
+          alignItems: 'center', 
+          gap: 10,
+          maxWidth: '100%',
+        }}>
           <ButtonGroup
             itemCount={itemCount}
             state={status}
@@ -359,16 +391,38 @@ export function ButtonGroupDemo() {
             showIcon={hasIcon}
             iconOnly={iconOnly}
           />
-          <span style={{ fontSize: 12, fontFamily: 'monospace', color: '#8089A0', background: '#FFFFFF', padding: '4px 12px', borderRadius: 4, border: '1px solid #E5E5E5' }}>
+          <span style={{ 
+            fontSize: 9, 
+            fontFamily: 'monospace', 
+            color: '#8089A0', 
+            background: '#FFFFFF', 
+            padding: '2px 8px', 
+            borderRadius: 4, 
+            border: '1px solid #E5E5E5',
+            textAlign: 'center',
+          }}>
             {status.charAt(0).toUpperCase() + status.slice(1)} • {size.toUpperCase()} • {itemCount} items
           </span>
         </div>
       </div>
 
-      <div style={{ padding: 20, borderTop: '1px solid #EFEDE8', overflowY: 'auto', background: '#FFFFFF' }}>
-        <div style={{ marginBottom: 16 }}>
-          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, color: '#8089A0', marginBottom: 8, fontFamily: "'DM Sans', sans-serif" }}>STATUS</div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+      <div style={{ 
+        padding: '10px 12px', 
+        borderTop: '1px solid #EFEDE8', 
+        overflowY: 'auto', 
+        background: '#FFFFFF',
+        maxHeight: '55%',
+      }}>
+        <div style={{ marginBottom: 10 }}>
+          <div style={{ 
+            fontSize: 8, 
+            fontWeight: 700, 
+            letterSpacing: 1, 
+            color: '#8089A0', 
+            marginBottom: 5, 
+            fontFamily: "'DM Sans', sans-serif" 
+          }}>STATUS</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
             {statusOptions.map((s, index) => (
               <PropChip key={s} active={status === s} onClick={() => setStatus(s)}>
                 {statusLabels[index]}
@@ -376,9 +430,16 @@ export function ButtonGroupDemo() {
             ))}
           </div>
         </div>
-        <div style={{ marginBottom: 16 }}>
-          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, color: '#8089A0', marginBottom: 8, fontFamily: "'DM Sans', sans-serif" }}>SIZE</div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+        <div style={{ marginBottom: 10 }}>
+          <div style={{ 
+            fontSize: 8, 
+            fontWeight: 700, 
+            letterSpacing: 1, 
+            color: '#8089A0', 
+            marginBottom: 5, 
+            fontFamily: "'DM Sans', sans-serif" 
+          }}>SIZE</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
             {(['s', 'm', 'l'] as ButtonSize[]).map((s) => (
               <PropChip key={s} active={size === s} onClick={() => setSize(s)}>
                 {s.toUpperCase()}
@@ -386,9 +447,16 @@ export function ButtonGroupDemo() {
             ))}
           </div>
         </div>
-        <div style={{ marginBottom: 16 }}>
-          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, color: '#8089A0', marginBottom: 8, fontFamily: "'DM Sans', sans-serif" }}>ITEM COUNT</div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+        <div style={{ marginBottom: 10 }}>
+          <div style={{ 
+            fontSize: 8, 
+            fontWeight: 700, 
+            letterSpacing: 1, 
+            color: '#8089A0', 
+            marginBottom: 5, 
+            fontFamily: "'DM Sans', sans-serif" 
+          }}>ITEM COUNT</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
             {[1, 2, 3, 4].map((count) => (
               <PropChip key={count} active={itemCount === count} onClick={() => setItemCount(count)}>
                 {count} items
@@ -397,8 +465,15 @@ export function ButtonGroupDemo() {
           </div>
         </div>
         <div>
-          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, color: '#8089A0', marginBottom: 8, fontFamily: "'DM Sans', sans-serif" }}>ICON</div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+          <div style={{ 
+            fontSize: 8, 
+            fontWeight: 700, 
+            letterSpacing: 1, 
+            color: '#8089A0', 
+            marginBottom: 5, 
+            fontFamily: "'DM Sans', sans-serif" 
+          }}>ICON</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
             <PropChip active={!hasIcon} onClick={() => { setHasIcon(false); setIconOnly(false); }}>No Icon</PropChip>
             <PropChip active={hasIcon && !iconOnly} onClick={() => { setHasIcon(true); setIconOnly(false); }}>Icon + Label</PropChip>
             <PropChip active={hasIcon && iconOnly} onClick={() => { setHasIcon(true); setIconOnly(true); }}>Icon Only</PropChip>
@@ -427,32 +502,44 @@ export function ButtonGroupSpec() {
     <div
       style={{
         width: 'fit-content',
-        minWidth: '300px',
+        minWidth: '200px',
         border: '2px dashed #C084FC',
         borderRadius: 8,
-        padding: 20,
+        padding: 14,
         background: '#FFFFFF',
       }}
     >
       <div style={{
-        fontSize: 12,
+        fontSize: 10,
         fontWeight: 600,
         color: '#7C3AED',
-        marginBottom: 16,
+        marginBottom: 10,
         fontFamily: "'DM Sans', sans-serif",
         letterSpacing: '0.5px',
       }}>
         {title}
       </div>
       {sizes.map((size, sizeIndex) => (
-        <div key={size} style={{ marginBottom: sizeIndex < sizes.length - 1 ? 32 : 0 }}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: '#0B1F4D', marginBottom: 16 }}>
+        <div key={size} style={{ marginBottom: sizeIndex < sizes.length - 1 ? 20 : 0 }}>
+          <div style={{ 
+            fontSize: 11, 
+            fontWeight: 700, 
+            color: '#0B1F4D', 
+            marginBottom: 10,
+            fontFamily: "'DM Sans', sans-serif",
+          }}>
             Size {sizeLabels[size]}
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             {itemCounts.map((count) => (
               <div key={`${size}-${count}`}>
-                <div style={{ fontSize: 12, fontWeight: 500, color: '#6B7280', marginBottom: 10 }}>
+                <div style={{ 
+                  fontSize: 10, 
+                  fontWeight: 500, 
+                  color: '#6B7280', 
+                  marginBottom: 6,
+                  fontFamily: "'DM Sans', sans-serif",
+                }}>
                   {count} Items
                 </div>
                 <ButtonGroup
@@ -473,7 +560,7 @@ export function ButtonGroupSpec() {
   return (
     <div
       style={{
-        padding: 24,
+        padding: '14px 10px',
         overflowY: 'auto',
         height: '100%',
         fontFamily: "'DM Sans', sans-serif",
@@ -499,27 +586,33 @@ export function ButtonGroupSpec() {
           <div
             style={{
               width: 'fit-content',
-              minWidth: '300px',
+              minWidth: '200px',
               border: '2px dashed #C084FC',
               borderRadius: 8,
-              padding: 20,
+              padding: 14,
               background: '#FFFFFF',
             }}
           >
             <div style={{
-              fontSize: 12,
+              fontSize: 10,
               fontWeight: 600,
               color: '#7C3AED',
-              marginBottom: 16,
+              marginBottom: 10,
               fontFamily: "'DM Sans', sans-serif",
               letterSpacing: '0.5px',
             }}>
               Item Count Examples
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               {[2, 3, 4].map((count) => (
                 <div key={count}>
-                  <div style={{ fontSize: 12, fontWeight: 500, color: '#6B7280', marginBottom: 10 }}>
+                  <div style={{ 
+                    fontSize: 10, 
+                    fontWeight: 500, 
+                    color: '#6B7280', 
+                    marginBottom: 6,
+                    fontFamily: "'DM Sans', sans-serif",
+                  }}>
                     {count} Items
                   </div>
                   <ButtonGroup itemCount={count} state="default" size="m" showIcon={true} iconOnly={false} />
@@ -539,7 +632,8 @@ export function ButtonGroupSpec() {
 const CARD_STYLE: React.CSSProperties = {
   width: '100%',
   maxWidth: 1100,
-  height: 560,
+  height: 'auto',
+  minHeight: 400,
   border: '1px solid #EFEDE8',
   borderRadius: 12,
   background: '#FFFFFF',
@@ -549,10 +643,22 @@ const CARD_STYLE: React.CSSProperties = {
 
 export default function ButtonGroupPage() {
   return (
-    <div style={{ padding: 32, background: '#F9FAFB', minHeight: '100vh', fontFamily: "'DM Sans', sans-serif" }}>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 32, alignItems: 'center' }}>
+    <div style={{ 
+      padding: '14px 10px', 
+      background: '#F9FAFB', 
+      minHeight: '100vh', 
+      fontFamily: "'DM Sans', sans-serif" 
+    }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 20, alignItems: 'center' }}>
         <div style={{ width: '100%', maxWidth: 1100 }}>
-          <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1, color: '#8089A0', marginBottom: 8, fontFamily: "'DM Sans', sans-serif" }}>
+          <div style={{ 
+            fontSize: 10, 
+            fontWeight: 700, 
+            letterSpacing: 1, 
+            color: '#8089A0', 
+            marginBottom: 5, 
+            fontFamily: "'DM Sans', sans-serif" 
+          }}>
             LIVE PREVIEW
           </div>
           <div style={CARD_STYLE}>
@@ -561,7 +667,14 @@ export default function ButtonGroupPage() {
         </div>
 
         <div style={{ width: '100%', maxWidth: 1100 }}>
-          <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1, color: '#8089A0', marginBottom: 8, fontFamily: "'DM Sans', sans-serif" }}>
+          <div style={{ 
+            fontSize: 10, 
+            fontWeight: 700, 
+            letterSpacing: 1, 
+            color: '#8089A0', 
+            marginBottom: 5, 
+            fontFamily: "'DM Sans', sans-serif" 
+          }}>
             REFERENCE SPEC
           </div>
           <div style={CARD_STYLE}>

@@ -39,6 +39,7 @@ function SpecBadge({ label }) {
 function FigmaFrame({ children, style }) {
   return (
     <div
+      className="figma-frame"
       style={{
         border: '2px dashed #C084FC',
         borderRadius: 8,
@@ -156,6 +157,7 @@ function AccordionItem({
         background: styles.bg,
         opacity: styles.opacity,
         transition: 'all 0.15s ease',
+        minHeight: isFirst && (state === 'active' || state === 'active-hover') && isOpen && showContent ? '110px' : 'auto',
       }}
     >
       <button
@@ -329,25 +331,21 @@ export function AccordionDemo() {
 
 /* ============================================================
    REFERENCE SPEC
+   Fix: each state label now lives in the SAME flex row as its
+   accordion, so the label always points at the correct item
+   regardless of how tall that item's open/active content is.
+   Previously the labels and accordions were two independent
+   columns kept in sync only by hand-tuned min-heights, which
+   drifted out of alignment whenever a row's real height
+   differed from the guessed min-height.
 ============================================================ */
 export function AccordionSpec() {
   const stateOptions = ['default', 'hover', 'active', 'active-hover', 'disabled'];
   const stateLabels = ['Default', 'Hover', 'Active', 'Active Hover', 'Disabled'];
 
-  const items = [
-    { id: '1', title: 'Item' },
-    { id: '2', title: 'Item' },
-    { id: '3', title: 'Item' },
-  ];
-
-  // For accord-open.png - 7 items without avatars
-  const sevenItems = Array.from({ length: 7 }, (_, i) => ({ 
-    id: String(i + 1), 
-    title: 'Item'
-  }));
-
   return (
     <div
+      className="accordion-spec"
       style={{
         padding: 20,
         overflowY: 'auto',
@@ -361,44 +359,9 @@ export function AccordionSpec() {
     >
       <SpecBadge label="Accordion" />
 
-      {/* Accordion - Open State */}
-      {/* <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 6,
-          marginBottom: 24,
-        }}
-      >
-        <div
-          style={{
-            fontSize: 13,
-            fontWeight: 600,
-            color: '#3D4759',
-            fontFamily: "'DM Sans', sans-serif",
-            marginBottom: 4,
-          }}
-        >
-          Accordion — Open
-        </div>
-        <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start' }}>
-          <div style={{ width: 50, flexShrink: 0, paddingTop: 10 }}>
-            <div style={{ fontSize: 12, color: '#151A24' }}>Item</div>
-          </div>
-          <FigmaFrame>
-            <Accordion 
-              items={sevenItems} 
-              openIds={['1', '2', '3', '4', '5', '6', '7']} 
-              onToggle={() => {}} 
-              state="default"
-              showContent={false}
-            />
-          </FigmaFrame>
-        </div>
-      </div> */}
-
       {/* Accordion - States */}
       <div
+        className="accordion-states"
         style={{
           display: 'flex',
           flexDirection: 'column',
@@ -416,50 +379,129 @@ export function AccordionSpec() {
         >
           Accordion — States
         </div>
-        <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start' }}>
-          <div style={{ 
-            width: 50,
-            flexShrink: 0, 
-            display: 'flex', 
-            flexDirection: 'column', 
-            justifyContent: 'space-between',
-          }}>
-            {stateLabels.map((label, index) => (
-              <div 
-                key={label}
-                style={{ 
-                  fontSize: 12,
-                  fontWeight: 600, 
-                  color: '#6B7280', 
-                  fontFamily: "'DM Sans', sans-serif",
-                  paddingTop: 10,
-                  marginBottom: index < stateLabels.length - 1 ? 16 : 0,
-                  minHeight: (stateOptions[index] === 'active' || stateOptions[index] === 'active-hover') ? 80 : 0,
+
+        <FigmaFrame style={{ width: '100%', display: 'block' }}>
+          <div
+            className="accordion-rows"
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 16,
+            }}
+          >
+            {stateOptions.map((state, index) => (
+              <div
+                key={state}
+                className="accordion-row"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 16,
                 }}
               >
-                {label}
+                <div
+                  className="accordion-label"
+                  style={{
+                    width: 90,
+                    flexShrink: 0,
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color: '#6B7280',
+                    fontFamily: "'DM Sans', sans-serif",
+                  }}
+                >
+                  {stateLabels[index]}
+                </div>
+                <div className="accordion-row-item" style={{ flex: '1 1 auto', minWidth: 0 }}>
+                  <Accordion
+                    items={[{ id: '1', title: 'Item' }]}
+                    openIds={['1']}
+                    onToggle={() => {}}
+                    state={state}
+                    showContent={true}
+                  />
+                </div>
               </div>
             ))}
           </div>
-          <FigmaFrame>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              {stateOptions.map((state) => (
-                <Accordion 
-                  key={state}
-                  items={[{ 
-                    id: '1', 
-                    title: 'Item'
-                  }]} 
-                  openIds={['1']} 
-                  onToggle={() => {}} 
-                  state={state}
-                  showContent={true}
-                />
-              ))}
-            </div>
-          </FigmaFrame>
-        </div>
+        </FigmaFrame>
       </div>
+
+      <style>{`
+        /* ONLY Mobile and Tablet - stack label above item, allow scroll */
+        @media (max-width: 1024px) {
+          .accordion-spec {
+            padding: 16px !important;
+            justify-content: flex-start !important;
+          }
+          .figma-frame {
+            padding: 10px 12px !important;
+            width: 100% !important;
+            box-sizing: border-box;
+          }
+          .accordion-rows {
+            gap: 14px !important;
+          }
+        }
+
+        @media (max-width: 768px) {
+          .accordion-spec {
+            padding: 14px !important;
+          }
+          .figma-frame {
+            padding: 8px 10px !important;
+          }
+          .accordion-row {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 4px !important;
+          }
+          .accordion-label {
+            width: auto !important;
+            font-size: 10px !important;
+            font-weight: 700 !important;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            color: #8089A0 !important;
+          }
+          .accordion-row-item {
+            width: 100% !important;
+          }
+        }
+
+        @media (max-width: 400px) {
+          .accordion-spec {
+            padding: 10px !important;
+          }
+          .figma-frame {
+            padding: 6px 8px !important;
+          }
+          .accordion-rows {
+            gap: 12px !important;
+          }
+          .accordion-label {
+            font-size: 9px !important;
+          }
+        }
+
+        /* Desktop/Laptop */
+        @media (min-width: 1025px) {
+          .accordion-spec {
+            justify-content: center !important;
+          }
+          .figma-frame {
+            padding: 12px 16px !important;
+          }
+          .accordion-row {
+            flex-direction: row !important;
+            align-items: center !important;
+          }
+          .accordion-label {
+            width: 90px !important;
+            font-size: 12px !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }
@@ -481,12 +523,34 @@ const CARD_STYLE = {
 export default function AccordionPage() {
   return (
     <div style={{ padding: 24, background: '#F9FAFB', minHeight: '100vh', fontFamily: "'DM Sans', sans-serif" }}>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 24, alignItems: 'center' }}>
+      <style>{`
+        @media (max-width: 1024px) {
+          .accordion-page-wrap { gap: 20px !important; }
+          .accordion-card { height: 460px !important; }
+        }
+        @media (max-width: 768px) {
+          .accordion-page-wrap { gap: 16px !important; }
+          .accordion-card { height: 560px !important; }
+        }
+        @media (max-width: 600px) {
+          .accordion-page-wrap { gap: 14px !important; }
+          .accordion-card { height: 600px !important; }
+        }
+        @media (max-width: 400px) {
+          .accordion-page-wrap { gap: 12px !important; }
+          .accordion-card { height: 600px !important; }
+        }
+        @media (min-width: 1025px) {
+          .accordion-page-wrap { gap: 24px !important; }
+          .accordion-card { height: 480px !important; }
+        }
+      `}</style>
+      <div className="accordion-page-wrap" style={{ display: 'flex', flexDirection: 'column', gap: 24, alignItems: 'center' }}>
         <div style={{ width: '100%', maxWidth: 1000 }}>
           <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, color: '#8089A0', marginBottom: 6, fontFamily: "'DM Sans', sans-serif" }}>
             LIVE PREVIEW
           </div>
-          <div style={CARD_STYLE}>
+          <div style={{ ...CARD_STYLE }} className="accordion-card">
             <AccordionDemo />
           </div>
         </div>
@@ -495,7 +559,7 @@ export default function AccordionPage() {
           <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, color: '#8089A0', marginBottom: 6, fontFamily: "'DM Sans', sans-serif" }}>
             REFERENCE SPEC
           </div>
-          <div style={CARD_STYLE}>
+          <div style={{ ...CARD_STYLE }} className="accordion-card">
             <AccordionSpec />
           </div>
         </div>

@@ -17,15 +17,17 @@ function PropChip({
       type="button"
       onClick={onClick}
       style={{
-        padding: "6px 12px",
+        padding: "4px 10px",
         borderRadius: 6,
-        fontSize: 12,
+        fontSize: 10,
         fontWeight: 600,
         border: `1px solid ${active ? "#0B1F4D" : "#D8D4CC"}`,
         background: active ? "#0B1F4D" : "#FFFFFF",
         color: active ? "#FFFFFF" : "#4B5563",
         cursor: "pointer",
         fontFamily: "'DM Sans', sans-serif",
+        whiteSpace: "nowrap",
+        transition: "all 150ms",
       }}
     >
       {children}
@@ -60,6 +62,7 @@ function FigmaFrame({ children, style }: { children: React.ReactNode; style?: Re
         borderRadius: 8,
         background: "#FFFFFF",
         padding: 20,
+        overflow: "auto",
         ...style,
       }}
     >
@@ -210,7 +213,6 @@ function Fab({
   const stateStyles = getStateStyles();
   const isDisabled = state === "disabled" || disabled;
 
-  // Calculate focus ring styles with proper gap
   const getFocusStyles = () => {
     if (state === "focus") {
       return {
@@ -247,7 +249,6 @@ function Fab({
           gap: gap,
         }}
       >
-        {/* Action buttons */}
         {actions.map((action, index) => (
           <div
             key={index}
@@ -284,7 +285,6 @@ function Fab({
           </div>
         ))}
 
-        {/* Main FAB button */}
         <button
           onClick={onToggle}
           disabled={isDisabled}
@@ -423,8 +423,6 @@ export function FabDemo() {
    fab-open-all.png (no external image assets)
 ============================================================ */
 
-// Color / icon tokens per state — drives BOTH the filled ("M") and
-// outline ("S") visual styles used throughout the states & sizes grid.
 const FAB_STATE_TOKENS: Record<
   FabState,
   {
@@ -562,7 +560,7 @@ function FabPill({ variant, state, size }: { variant: "fill" | "outline"; state:
   );
 }
 
-// Matches fab-all.png — States × (Size M circle / Size S circle / Size M pill / Size S pill)
+// States & Sizes Grid with horizontal scroll on mobile
 function FabStatesSizesGrid() {
   const states: { key: FabState; label: string }[] = [
     { key: "default", label: "Default" },
@@ -573,8 +571,8 @@ function FabStatesSizesGrid() {
   ];
 
   return (
-    <div style={{ maxWidth: 420 }}>
-      <div style={{ display: "flex", marginBottom: 8 }}>
+    <div style={{ maxWidth: '100%', overflow: 'auto' }}>
+      <div style={{ display: "flex", marginBottom: 8, minWidth: 420 }}>
         <div style={{ width: 60, flexShrink: 0 }} />
         {["Size M", "Size S", "Size M", "Size S"].map((l, i) => (
           <div key={i} style={{ flex: 1, textAlign: "center", fontSize: 10, color: "#6B7280", fontFamily: "'DM Sans', sans-serif" }}>
@@ -582,7 +580,8 @@ function FabStatesSizesGrid() {
           </div>
         ))}
       </div>
-      <div style={{ display: "flex", alignItems: "flex-start" }}>
+      
+      <div style={{ display: "flex", alignItems: "flex-start", minWidth: 420 }}>
         <div style={{ width: 60, flexShrink: 0, display: "flex", flexDirection: "column" }}>
           {states.map((s) => (
             <div
@@ -602,7 +601,7 @@ function FabStatesSizesGrid() {
             </div>
           ))}
         </div>
-        <FigmaFrame style={{ flex: 1, padding: "10px 6px" }}>
+        <FigmaFrame style={{ flex: 1, padding: "10px 6px", minWidth: 340 }}>
           <div style={{ display: "flex", flexDirection: "column" }}>
             {states.map((s) => (
               <div key={s.key} style={{ display: "flex", alignItems: "center", height: 44 }}>
@@ -668,7 +667,7 @@ function FabMiniButton({ icon, size = 24 }: { icon: React.ReactNode; size?: numb
   );
 }
 
-// Matches fab-open-all.png — Horizontal / Vertical Up / Vertical Down
+// Open States with horizontal scroll on mobile
 function FabOpenStates() {
   const actionIcons = [
     <IconPrint key="print" color="#0B1F4D" size={11} />,
@@ -678,46 +677,49 @@ function FabOpenStates() {
   ];
 
   return (
-    <div style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
-      <div style={{ width: 72, flexShrink: 0, display: "flex", flexDirection: "column", justifyContent: "space-between", paddingTop: 10, minHeight: 360 }}>
-        <div style={{ fontSize: 10, color: "#6B7280", fontFamily: "'DM Sans', sans-serif" }}>Horizontal</div>
-        <div style={{ fontSize: 10, color: "#6B7280", fontFamily: "'DM Sans', sans-serif" }}>Vertical Up</div>
-        <div style={{ fontSize: 10, color: "#6B7280", fontFamily: "'DM Sans', sans-serif" }}>Vertical Down</div>
-      </div>
-      <FigmaFrame style={{ padding: 12, maxWidth: 260 }}>
-        <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-          {/* Horizontal — closed trigger, then open trigger + actions in a row */}
-          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-            <FabTriggerCircle bg="#0B1F4D" size={32} />
-            <FabTriggerCircle bg="#1E56B0" size={32} />
-            {actionIcons.map((icon, i) => (
-              <FabMiniButton key={i} icon={icon} size={24} />
-            ))}
-          </div>
-
-          {/* Vertical Up — closed trigger beside a stack where actions sit above the open trigger */}
-          <div style={{ display: "flex", alignItems: "flex-start", gap: 16 }}>
-            <FabTriggerCircle bg="#0B1F4D" size={32} />
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
-              {actionIcons.map((icon, i) => (
-                <FabMiniButton key={i} icon={icon} size={24} />
-              ))}
-              <FabTriggerCircle bg="#1E56B0" size={32} />
-            </div>
-          </div>
-
-          {/* Vertical Down — closed trigger beside a stack where actions sit below the open trigger */}
-          <div style={{ display: "flex", alignItems: "flex-start", gap: 16 }}>
-            <FabTriggerCircle bg="#0B1F4D" size={32} />
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
-              <FabTriggerCircle bg="#1E56B0" size={32} />
-              {actionIcons.map((icon, i) => (
-                <FabMiniButton key={i} icon={icon} size={24} />
-              ))}
-            </div>
-          </div>
+    <div style={{ maxWidth: '100%', overflow: 'auto' }}>
+      <div style={{ display: "flex", gap: 16, alignItems: "flex-start", minWidth: 320 }}>
+        <div style={{ width: 72, flexShrink: 0, display: "flex", flexDirection: "column", justifyContent: "space-between", paddingTop: 10, minHeight: 360 }}>
+          <div style={{ fontSize: 10, color: "#6B7280", fontFamily: "'DM Sans', sans-serif" }}>Horizontal</div>
+          <div style={{ fontSize: 10, color: "#6B7280", fontFamily: "'DM Sans', sans-serif" }}>Vertical Up</div>
+          <div style={{ fontSize: 10, color: "#6B7280", fontFamily: "'DM Sans', sans-serif" }}>Vertical Down</div>
         </div>
-      </FigmaFrame>
+        
+        <FigmaFrame style={{ padding: 12, maxWidth: 260 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+            {/* Horizontal */}
+            <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+              <FabTriggerCircle bg="#0B1F4D" size={32} />
+              <FabTriggerCircle bg="#1E56B0" size={32} />
+              {actionIcons.map((icon, i) => (
+                <FabMiniButton key={i} icon={icon} size={24} />
+              ))}
+            </div>
+
+            {/* Vertical Up */}
+            <div style={{ display: "flex", alignItems: "flex-start", gap: 16 }}>
+              <FabTriggerCircle bg="#0B1F4D" size={32} />
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
+                {actionIcons.map((icon, i) => (
+                  <FabMiniButton key={i} icon={icon} size={24} />
+                ))}
+                <FabTriggerCircle bg="#1E56B0" size={32} />
+              </div>
+            </div>
+
+            {/* Vertical Down */}
+            <div style={{ display: "flex", alignItems: "flex-start", gap: 16 }}>
+              <FabTriggerCircle bg="#0B1F4D" size={32} />
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
+                <FabTriggerCircle bg="#1E56B0" size={32} />
+                {actionIcons.map((icon, i) => (
+                  <FabMiniButton key={i} icon={icon} size={24} />
+                ))}
+              </div>
+            </div>
+          </div>
+        </FigmaFrame>
+      </div>
     </div>
   );
 }
@@ -814,7 +816,7 @@ export default function FabPage() {
           >
             DESIGN REFERENCE
           </div>
-          <div style={{ ...CARD_STYLE, height: 960 }}>
+          <div style={{ ...CARD_STYLE, height: 'auto', minHeight: 960 }}>
             <FabSpec />
           </div>
         </div>

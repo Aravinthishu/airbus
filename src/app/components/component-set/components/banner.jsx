@@ -176,12 +176,9 @@ function Banner({ variant = 'info', message, actionText, onAction, onClose, show
           font-weight: 700;
           line-height: 1.4;
           min-width: 0;
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
           overflow: hidden;
           text-overflow: ellipsis;
-          max-height: 3em;
+          white-space: nowrap;
         }
         .banner-controls {
           flex: 0 0 auto;
@@ -223,31 +220,30 @@ function Banner({ variant = 'info', message, actionText, onAction, onClose, show
         /* Small Tablet (600px - 768px) */
         @media (max-width: 768px) {
           .banner-root { padding: 12px 18px; gap: 10px; }
-          .banner-message { font-size: 12.5px; max-height: 2.8em; }
+          .banner-message { font-size: 12.5px; }
           .banner-controls { gap: 14px; }
           .banner-action { font-size: 12.5px; }
           .banner-icon { width: 20px; height: 20px; }
         }
 
-        /* Mobile (320px - 600px) — stack message above the action row */
+        /* Mobile (320px - 600px) */
         @media (max-width: 600px) {
           .banner-root {
-            flex-wrap: wrap;
             padding: 12px 14px;
-            gap: 6px;
+            gap: 8px;
           }
           .banner-message {
-            flex-basis: calc(100% - 32px);
             font-size: 12px;
-            line-height: 1.3;
-            max-height: 2.6em;
+            white-space: normal;
+            display: -webkit-box;
             -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
           }
           .banner-controls {
-            flex-basis: 100%;
-            justify-content: flex-end;
-            margin-top: 2px;
             gap: 12px;
+            flex-shrink: 1;
           }
           .banner-action {
             font-size: 12px;
@@ -265,10 +261,10 @@ function Banner({ variant = 'info', message, actionText, onAction, onClose, show
         @media (max-width: 400px) {
           .banner-root {
             padding: 10px 12px;
+            gap: 6px;
           }
           .banner-message {
             font-size: 11px;
-            max-height: 2.4em;
           }
           .banner-action {
             font-size: 11px;
@@ -363,8 +359,7 @@ export function BannerDemo() {
 }
 
 /* ============================================================
-   REFERENCE SPEC — all four variants stacked with labels,
-   laid out exactly like the uploaded reference image
+   REFERENCE SPEC — all four variants stacked with labels
 ============================================================ */
 function SpecBadge({ label }) {
   return (
@@ -382,6 +377,7 @@ export function BannerSpec() {
     <div style={{ padding: 24, overflowY: 'auto', height: '100%', fontFamily: FONT, background: '#FFFFFF' }}>
       <SpecBadge label="Banner" />
       <div
+        className="spec-container"
         style={{
           border: '2px dashed #C084FC',
           borderRadius: 8,
@@ -390,8 +386,9 @@ export function BannerSpec() {
         }}
       >
         {variants.map((v, i) => (
-          <div key={v} style={{ position: 'relative', marginBottom: i === variants.length - 1 ? 0 : 14 }}>
+          <div key={v} className="spec-item" style={{ position: 'relative', marginBottom: i === variants.length - 1 ? 0 : 14 }}>
             <span
+              className="spec-label"
               style={{
                 position: 'absolute',
                 left: -70,
@@ -409,13 +406,74 @@ export function BannerSpec() {
           </div>
         ))}
       </div>
+      <style>{`
+        /* ONLY Mobile and Tablet - overflow with scroll */
+        @media (max-width: 1024px) {
+          .spec-container {
+            overflow: auto !important;
+            padding: 16px 16px 16px 75px !important;
+          }
+          .spec-label {
+            left: -60px !important;
+            font-size: 12px !important;
+            width: 50px !important;
+          }
+          .spec-item {
+            margin-bottom: 12px !important;
+            min-width: 300px !important;
+          }
+        }
+
+        @media (max-width: 768px) {
+          .spec-container {
+            padding: 14px 14px 14px 65px !important;
+          }
+          .spec-label {
+            left: -52px !important;
+            font-size: 11.5px !important;
+            width: 45px !important;
+          }
+          .spec-item {
+            min-width: 280px !important;
+          }
+        }
+
+        @media (max-width: 600px) {
+          .spec-container {
+            padding: 12px 12px 12px 55px !important;
+          }
+          .spec-label {
+            left: -45px !important;
+            font-size: 11px !important;
+            width: 40px !important;
+          }
+          .spec-item {
+            min-width: 250px !important;
+            margin-bottom: 10px !important;
+          }
+        }
+
+        @media (max-width: 400px) {
+          .spec-container {
+            padding: 10px 10px 10px 45px !important;
+          }
+          .spec-label {
+            left: -38px !important;
+            font-size: 10px !important;
+            width: 35px !important;
+          }
+          .spec-item {
+            min-width: 220px !important;
+            margin-bottom: 8px !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }
 
 /* ============================================================
-   PAGE — live preview + reference spec, equal-size cards,
-   themselves responsive across breakpoints
+   PAGE — live preview + reference spec, equal-size cards
 ============================================================ */
 const cardStyle = {
   width: '100%',
@@ -435,14 +493,22 @@ export default function BannerPage() {
         .banner-live-card { height: 460px; }
         .banner-spec-card { height: 420px; }
 
+        /* Desktop/Laptop - NO overflow */
+        @media (min-width: 1025px) {
+          .banner-live-card { height: 460px; }
+          .banner-spec-card { height: 420px; }
+          .banner-page-wrap { gap: 32px; }
+        }
+
         @media (max-width: 1024px) {
           .banner-live-card { height: 440px; }
-          .banner-spec-card { height: 400px; }
+          .banner-spec-card { height: 440px; }
+          .banner-page-wrap { gap: 28px; }
         }
 
         @media (max-width: 768px) {
-          .banner-live-card { height: 420px; }
-          .banner-spec-card { height: 380px; }
+          .banner-live-card { height: 400px; }
+          .banner-spec-card { height: 460px; }
           .banner-page-wrap { gap: 24px; }
         }
 
@@ -454,7 +520,7 @@ export default function BannerPage() {
 
         @media (max-width: 400px) {
           .banner-live-card { height: 360px; }
-          .banner-spec-card { height: 440px; }
+          .banner-spec-card { height: 460px; }
           .banner-page-wrap { gap: 16px; }
         }
       `}</style>
