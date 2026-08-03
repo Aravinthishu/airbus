@@ -2,7 +2,7 @@
 import React from "react";
 import { CategoryDef, ComponentId } from "../types";
 import { SubAccordionItem } from "./sub-accordion-item";
-import { scrollUnderNavbar  } from "./scroll-utils";
+import { scrollUnderNavbar } from "./scroll-utils";
 
 /* Height of your sticky top navbar in px. Adjust this to match the real
    navbar height so opened cards land flush underneath it instead of
@@ -28,15 +28,15 @@ export function CategoryAccordion({
 }) {
   const containerRef = React.useRef<HTMLDivElement>(null);
 
-const handleToggle = () => {
-  onToggleCat();
-  scrollUnderNavbar(() => containerRef.current);
-};
+  const handleToggle = () => {
+    onToggleCat();
+    scrollUnderNavbar(() => containerRef.current);
+  };
 
   return (
     <div
       ref={containerRef}
-      className="rounded-3xl border overflow-hidden mb-4 transition-shadow"
+      className="rounded-2xl sm:rounded-3xl border overflow-hidden mb-3 sm:mb-4 transition-shadow"
       style={{
         borderColor: isOpen ? "rgba(10,103,232,0.25)" : "#E8E5DF",
         background: "#FFFFFF",
@@ -46,21 +46,21 @@ const handleToggle = () => {
     >
       <div
         onClick={handleToggle}
-        className="px-7 py-6 flex items-center justify-between gap-5 cursor-pointer"
+        className="px-4 sm:px-7 py-4 sm:py-6 flex items-center justify-between gap-3 sm:gap-5 cursor-pointer"
       >
-        <div className="flex items-center gap-4 min-w-0">
+        <div className="flex items-center gap-3 sm:gap-4 min-w-0">
           <div
-            className="w-12 h-12 rounded-2xl flex-shrink-0 flex items-center justify-center text-white text-lg font-bold"
+            className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex-shrink-0 flex items-center justify-center text-white text-base sm:text-lg font-bold"
             style={{
               background: cat.color,
-              boxShadow: `0 10px 22px ${cat.tint}`,
+              boxShadow: `0 8px 18px sm:0 10px 22px ${cat.tint}`,
             }}
           >
             {cat.icon}
           </div>
           <div className="min-w-0">
             <div
-              className="text-lg font-extrabold truncate"
+              className="text-base sm:text-lg font-extrabold truncate"
               style={{
                 fontFamily: "'DM Sans', sans-serif",
                 color: "#0D0D0D",
@@ -70,16 +70,16 @@ const handleToggle = () => {
               {cat.name}
             </div>
             <div
-              className="text-xs mt-0.5 truncate"
+              className="text-[10px] sm:text-xs mt-0.5 truncate"
               style={{ color: "#6B6B6B", fontFamily: "'DM Sans', sans-serif" }}
             >
               {cat.desc}
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-4 flex-shrink-0">
+        <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
           <span
-            className="text-[11px] font-bold px-3.5 py-1.5 rounded-lg whitespace-nowrap hidden sm:inline-block"
+            className="text-[10px] sm:text-[11px] font-bold px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-lg whitespace-nowrap hidden xs:inline-block"
             style={{
               color: cat.color,
               background: cat.tint,
@@ -91,7 +91,7 @@ const handleToggle = () => {
               : "coming soon"}
           </span>
           <div
-            className="w-8 h-8 rounded-full flex items-center justify-center transition-transform"
+            className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-transform flex-shrink-0"
             style={{
               background: "#EBF8FF",
               transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
@@ -102,7 +102,7 @@ const handleToggle = () => {
               fill="none"
               stroke="currentColor"
               strokeWidth={2.4}
-              className="w-4 h-4"
+              className="w-3.5 h-3.5 sm:w-4 sm:h-4"
               style={{ color: "#6B6B6B" }}
             >
               <path d="m6 9 6 6 6-6" />
@@ -116,17 +116,17 @@ const handleToggle = () => {
         style={{ gridTemplateRows: isOpen ? "1fr" : "0fr" }}
       >
         <div className="overflow-hidden">
-          <div className="px-7 pb-7">
+          <div className="px-4 sm:px-7 pb-4 sm:pb-7">
             {cat.items.length === 0 ? (
               <div
-                className="rounded-2xl px-8 py-11 text-center"
+                className="rounded-xl sm:rounded-2xl px-5 sm:px-8 py-8 sm:py-11 text-center"
                 style={{
                   border: "1.5px dashed #D8D4CC",
                   background: "#FBFAF8",
                 }}
               >
                 <h5
-                  className="text-sm font-bold mb-1.5"
+                  className="text-xs sm:text-sm font-bold mb-1.5"
                   style={{
                     color: "#151A24",
                     fontFamily: "'DM Sans', sans-serif",
@@ -135,7 +135,7 @@ const handleToggle = () => {
                   Case study coming soon
                 </h5>
                 <p
-                  className="text-xs max-w-sm mx-auto leading-relaxed"
+                  className="text-[11px] sm:text-xs max-w-sm mx-auto leading-relaxed px-2"
                   style={{
                     color: "#8089A0",
                     fontFamily: "'DM Sans', sans-serif",
@@ -147,7 +147,7 @@ const handleToggle = () => {
               </div>
             ) : (
               <div
-                className="rounded-2xl border overflow-hidden"
+                className="rounded-xl sm:rounded-2xl border overflow-hidden"
                 style={{ borderColor: "#EFEDE8" }}
               >
                 {cat.items.map((itemId, i) => (

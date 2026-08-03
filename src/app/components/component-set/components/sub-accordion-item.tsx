@@ -249,8 +249,12 @@ export function SubAccordionItem({
   // visibility (not by mount/open state), it never scrolls the page on its
   // own — it only ever reacts to scrolling YOU already did — and it
   // naturally re-shows every time you scroll back to an unfinished tour.
+  // The tour only exists for the Button component — every other accordion
+  // item never shows one at all.
+  const TOUR_ENABLED = id === "button";
+
   React.useEffect(() => {
-    if (!isOpen || activeTab !== "props") {
+    if (!TOUR_ENABLED || !isOpen || activeTab !== "props") {
       setTourActive(false);
       return;
     }
@@ -279,7 +283,7 @@ export function SubAccordionItem({
       observer.disconnect();
       if (delayTimer) clearTimeout(delayTimer);
     };
-  }, [isOpen, activeTab, id]);
+  }, [TOUR_ENABLED, isOpen, activeTab, id]);
 
   const endTour = React.useCallback(() => {
     setTourActive(false);
