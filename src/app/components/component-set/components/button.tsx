@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 /* ============================================================
    Minimal stand-ins for your ui-helpers (PropChip, SpecBadge)
@@ -200,220 +200,10 @@ function RenderButton({ variant, size, state }: { variant: Variant; size: Button
 }
 
 /* ============================================================
-   COMPONENT-SCOPED GUIDED TOUR (2 steps only)
-
-   - Fires once, first time ButtonDemo's own container scrolls
-     into view (IntersectionObserver).
-   - NO portal, NO position:fixed. The overlay is a plain child
-     of the wrapper (which is position:relative), sized with
-     position:absolute inset:0 + overflow:hidden — so the dim +
-     blur can ONLY ever cover this component, never the rest of
-     the page, and never leaks into other ButtonDemo instances.
-   - Spotlight rect is measured relative to the wrapper, not the
-     viewport, so it stays correct however the component sits
-     inside the page.
-   - Step 1: Preview box.
-   - Step 2: The whole controls panel (variant + size + state)
-     as ONE indicator, not three.
-============================================================ */
-const TOUR_STORAGE_KEY = 'buttonPreviewTourSeen_v2';
-
-type TourPlacement = 'top' | 'bottom';
-
-interface TourStep {
-  targetRef: React.RefObject<HTMLElement | null>;
-  title: string;
-  text: string;
-  placement: TourPlacement;
-}
-
-interface RelativeRect {
-  top: number;
-  left: number;
-  width: number;
-  height: number;
-  wrapperWidth: number;
-  wrapperHeight: number;
-}
-
-function useRelativeRect(
-  targetRef: React.RefObject<HTMLElement | null>,
-  wrapperRef: React.RefObject<HTMLElement | null>,
-  active: boolean
-) {
-  const [rect, setRect] = useState<RelativeRect | null>(null);
-
-  useEffect(() => {
-    if (!active) return;
-    const target = targetRef.current;
-    const wrapper = wrapperRef.current;
-    if (!target || !wrapper) return;
-
-    const measure = () => {
-      const t = target.getBoundingClientRect();
-      const w = wrapper.getBoundingClientRect();
-      setRect({
-        top: t.top - w.top,
-        left: t.left - w.left,
-        width: t.width,
-        height: t.height,
-        wrapperWidth: w.width,
-        wrapperHeight: w.height,
-      });
-    };
-
-    measure();
-    window.addEventListener('resize', measure);
-    window.addEventListener('scroll', measure, true);
-    return () => {
-      window.removeEventListener('resize', measure);
-      window.removeEventListener('scroll', measure, true);
-    };
-  }, [active, targetRef, wrapperRef]);
-
-  return rect;
-}
-
-function TourOverlay({
-  step,
-  stepIndex,
-  totalSteps,
-  wrapperRef,
-  onNext,
-  onSkip,
-}: {
-  step: TourStep;
-  stepIndex: number;
-  totalSteps: number;
-  wrapperRef: React.RefObject<HTMLElement | null>;
-  onNext: () => void;
-  onSkip: () => void;
-}) {
-  const rect = useRelativeRect(step.targetRef, wrapperRef, true);
-
-  useEffect(() => {
-    step.targetRef.current?.scrollIntoView({ block: 'center', behavior: 'smooth' });
-  }, [step.targetRef]);
-
-  if (!rect) return null;
-
-  const PAD = 8;
-  const ww = rect.wrapperWidth;
-  const wh = rect.wrapperHeight;
-
-  const spot = {
-    top: Math.max(0, rect.top - PAD),
-    left: Math.max(0, rect.left - PAD),
-    width: Math.min(rect.width + PAD * 2, ww),
-    height: Math.min(rect.height + PAD * 2, wh),
-  };
-
-  const isBottom = step.placement === 'bottom';
-  const dimPanel: React.CSSProperties = {
-    position: 'absolute',
-    background: 'rgba(10,14,24,0.6)',
-    backdropFilter: 'blur(5px)',
-    WebkitBackdropFilter: 'blur(5px)',
-  };
-
-  // Responsive tooltip: never wider than the component itself (mobile-safe)
-  const tooltipWidth = Math.max(180, Math.min(270, ww - 24));
-  const tooltipLeft = Math.max(12, Math.min(spot.left + spot.width / 2 - tooltipWidth / 2, ww - tooltipWidth - 12));
-  const arrowLeft = Math.max(16, Math.min(spot.left + spot.width / 2 - tooltipLeft, tooltipWidth - 16)) - 6;
-
-  return (
-    <div
-      style={{
-        position: 'absolute',
-        inset: 0,
-        overflow: 'hidden',
-        borderRadius: 8,
-        zIndex: 50,
-        pointerEvents: 'auto',
-      }}
-    >
-      {/* 4 dimmed + blurred panels framing the spotlight hole — clipped to this component only */}
-      <div style={{ ...dimPanel, top: 0, left: 0, right: 0, height: spot.top }} />
-      <div style={{ ...dimPanel, top: spot.top + spot.height, left: 0, right: 0, bottom: 0 }} />
-      <div style={{ ...dimPanel, top: spot.top, left: 0, width: spot.left, height: spot.height }} />
-      <div style={{ ...dimPanel, top: spot.top, left: spot.left + spot.width, right: 0, height: spot.height }} />
-
-      {/* glowing spotlight border around the target */}
-      <div
-        style={{
-          position: 'absolute',
-          top: spot.top,
-          left: spot.left,
-          width: spot.width,
-          height: spot.height,
-          borderRadius: 10,
-          border: '2px solid #C084FC',
-          boxShadow: '0 0 0 4px rgba(192,132,252,0.25), 0 0 20px rgba(192,132,252,0.55)',
-          pointerEvents: 'none',
-          transition: 'all 250ms ease',
-        }}
-      />
-
-      {/* tooltip */}
-      <div
-        style={{
-          position: 'absolute',
-          left: tooltipLeft,
-          width: tooltipWidth,
-          maxWidth: `calc(100% - 24px)`,
-          top: isBottom ? Math.min(spot.top + spot.height + 14, wh - 150) : undefined,
-          bottom: !isBottom ? Math.max(wh - spot.top + 14, 12) : undefined,
-          background: '#0B1F4D',
-          color: '#FFFFFF',
-          borderRadius: 10,
-          padding: '14px 16px',
-          boxShadow: '0 8px 24px rgba(0,0,0,0.35)',
-          fontFamily: "'DM Sans', sans-serif",
-          boxSizing: 'border-box',
-        }}
-      >
-        <div
-          style={{
-            position: 'absolute',
-            left: arrowLeft,
-            width: 12,
-            height: 12,
-            background: '#0B1F4D',
-            transform: 'rotate(45deg)',
-            ...(isBottom ? { top: -6 } : { bottom: -6 }),
-          }}
-        />
-        <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 4 }}>{step.title}</div>
-        <div style={{ fontSize: 12, lineHeight: 1.5, color: 'rgba(255,255,255,0.85)', marginBottom: 12 }}>
-          {step.text}
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)' }}>{stepIndex + 1} / {totalSteps}</span>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <button
-              type="button"
-              onClick={onSkip}
-              style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.7)', background: 'transparent', border: 'none', cursor: 'pointer' }}
-            >
-              Skip
-            </button>
-            <button
-              type="button"
-              onClick={onNext}
-              style={{ fontSize: 12, fontWeight: 700, color: '#0B1F4D', background: '#C084FC', border: 'none', borderRadius: 6, padding: '6px 14px', cursor: 'pointer' }}
-            >
-              {stepIndex + 1 === totalSteps ? 'Got it' : 'Next'}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ============================================================
-   LIVE DEMO — interactive preview + scroll-triggered first-time
-   guided tour, scoped to this component only (2 indicators).
+   LIVE DEMO — interactive preview + controls only. No tour
+   logic in here: the tour is owned by SubAccordionItem, which
+   wraps this whole thing (plus SpecSheet) in the two boxes it
+   already renders ("Live Preview" / "Design Reference").
 ============================================================ */
 export function ButtonDemo() {
   const [variant, setVariant] = useState<Variant>('primary');
@@ -421,58 +211,9 @@ export function ButtonDemo() {
   const [state, setState] = useState<ButtonState>('default');
   const isGhostNegative = variant === 'ghostNegative';
 
-  const wrapperRef = useRef<HTMLDivElement | null>(null);
-  const previewRef = useRef<HTMLDivElement | null>(null);
-  const controlsRef = useRef<HTMLDivElement | null>(null);
-
-  const [tourActive, setTourActive] = useState(false);
-  const [tourStep, setTourStep] = useState(0);
-
-  // Fires once, only when this component actually scrolls into view.
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    if (localStorage.getItem(TOUR_STORAGE_KEY)) return;
-    const node = wrapperRef.current;
-    if (!node) return;
-
-    let delayTimer: ReturnType<typeof setTimeout> | null = null;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          delayTimer = setTimeout(() => setTourActive(true), 400);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.4 }
-    );
-
-    observer.observe(node);
-    return () => {
-      observer.disconnect();
-      if (delayTimer) clearTimeout(delayTimer);
-    };
-  }, []);
-
-  const endTour = useCallback(() => {
-    setTourActive(false);
-    localStorage.setItem(TOUR_STORAGE_KEY, 'true');
-  }, []);
-
-  // Only 2 steps: preview, and the whole controls panel as one target.
-  const tourSteps: TourStep[] = [
-    { targetRef: previewRef, title: 'Live Preview', text: 'This box always shows the button exactly as configured below.', placement: 'bottom' },
-    { targetRef: controlsRef, title: 'Button Controls', text: 'Use this panel to change the variant, size, and state.', placement: 'top' },
-  ];
-
-  const handleNext = () => {
-    if (tourStep + 1 >= tourSteps.length) endTour();
-    else setTourStep((s) => s + 1);
-  };
-
   return (
-    <div ref={wrapperRef} style={{ position: 'relative', display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', height: '100%' }}>
       <div
-        ref={previewRef}
         style={{
           flex: '1 1 0',
           minHeight: 300,
@@ -505,10 +246,7 @@ export function ButtonDemo() {
         </div>
       </div>
 
-      <div
-        ref={controlsRef}
-        style={{ padding: '16px 20px', borderTop: '1px solid #EFEDE8', overflowY: 'auto', background: '#FFFFFF' }}
-      >
+      <div style={{ padding: '16px 20px', borderTop: '1px solid #EFEDE8', overflowY: 'auto', background: '#FFFFFF' }}>
         <div style={{ marginBottom: 16 }}>
           <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, color: '#8089A0', marginBottom: 8 }}>VARIANT</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -535,20 +273,10 @@ export function ButtonDemo() {
           </div>
         </div>
       </div>
-
-      {tourActive && (
-        <TourOverlay
-          step={tourSteps[tourStep]}
-          stepIndex={tourStep}
-          totalSteps={tourSteps.length}
-          wrapperRef={wrapperRef}
-          onNext={handleNext}
-          onSkip={endTour}
-        />
-      )}
     </div>
   );
 }
+
 
 /* ============================================================
    REFERENCE SPEC — violet dashed border wraps ONLY the button
